@@ -3,7 +3,6 @@ Project : Paint
 paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그리는 기능
 clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
-
 """
 
 from tkinter import *
@@ -45,7 +44,7 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
     x1, y1 = x2, y2
 
 """
@@ -84,7 +83,12 @@ def change_brush_size(new_size):
     global brush_size
     brush_size = int(new_size)
 
-#all clear 기능 추가
+# 지우개 크기를 변경하는 함수
+def change_eraser_size(new_size):
+    global eraser_size
+    eraser_size = int(new_size)
+
+# all clear 기능 추가
 def clear_paint():
     canvas.delete("all")
     global last_x, last_y
@@ -115,8 +119,8 @@ def flip_horizontal():
 def erase(event):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
-    x1, y1 = ( event.x-3 ), ( event.y-3 )
-    x2, y2 = ( event.x+3 ), ( event.y+3 )
+    x1, y1 = ( event.x-eraser_size ), ( event.y-eraser_size )
+    x2, y2 = ( event.x+eraser_size ), ( event.y+eraser_size )
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
 
 def change_bg_color():
@@ -134,12 +138,21 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 화면 확대 및 축소 기능 추가
+def zoom(event):
+    scale = 1.0
+    if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
+        scale = 1.1
+    elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
+        scale = 0.9
+    canvas.scale("all", event.x, event.y, scale, scale)
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
 
 brush_size = 1  # 초기 브러시 크기
+eraser_size = 3  # 초기 지우개 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
 window.geometry("640x400+200+200")
@@ -167,6 +180,11 @@ button_clear.pack(side=LEFT)
 brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
 brush_size_slider.pack(side=LEFT)
+
+# 지우개 크기를 조절할 수 있는 슬라이더 추가
+eraser_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Eraser Size", command=change_eraser_size)
+eraser_size_slider.set(eraser_size)  # 슬라이더 초기값 설정
+eraser_size_slider.pack(side=LEFT)
 
 button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
 button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
@@ -201,6 +219,6 @@ button_bg_color.pack(side=LEFT)
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
 
-set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
+canvas.bind("<MouseWheel>", zoom)
 
 window.mainloop()
