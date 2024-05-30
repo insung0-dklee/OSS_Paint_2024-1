@@ -18,7 +18,12 @@ def clear_paint():
     canvas.delete("all")
 
 window = Tk()
-canvas = Canvas(window)
+"""
+ bg : 그림판은 배경 색 추가
+ width : 그림판 윈도우의 넓이 추가
+ height : 그림판 윈도우의 높이 추가
+"""
+canvas = Canvas(window, bg="white", width=800, height=600)
 canvas.pack()
 canvas.bind("<B1-Motion>", paint)
 
