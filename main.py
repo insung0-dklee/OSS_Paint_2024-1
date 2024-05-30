@@ -3,6 +3,7 @@ Project : Paint
 paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그리는 기능
 clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
+label: 캔버스에 영역을 구분함
 
 """
 
@@ -18,7 +19,13 @@ def clear_paint():
     canvas.delete("all")
 
 window = Tk()
-canvas = Canvas(window)
+
+#캔버스 영역 구분
+label = Label (window, text="캔버스 그림판", font=("나눔바른펜",30,"bold"))
+label.pack(pady=30)
+
+canvas = Canvas(window, width=500, height=500, bg="pink",
+                relief="ridge", bd=5)
 canvas.pack()
 canvas.bind("<B1-Motion>", paint)
 
@@ -26,3 +33,4 @@ button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
 
 window.mainloop()
+
