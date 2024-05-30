@@ -227,9 +227,6 @@ dot_distance = IntVar()
 dot_distance.set(10)
 
 # 버튼 프레임 생성
-frame_size = Frame(window)
-frame_size.pack(side=RIGHT)
-
 frame_distance = Frame(window)
 frame_distance.pack(side=RIGHT)
 
