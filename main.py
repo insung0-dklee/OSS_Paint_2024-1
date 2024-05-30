@@ -14,9 +14,9 @@ color_red : 색상 빨간색으로 변경
 color_black : 색상 검정색으로 변경
 color_blue : 색상 파란색으로 변경
 
-button_color_red = button_color_red의 버튼
-button_color_black = button_color_black의 버튼
-button_color_blue = button_color_blue의 버튼
+button_color_red = color_red의 버튼
+button_color_black = color_black의 버튼
+button_color_blue = color_blue의 버튼
 
 mycolor :색상을 저장하기 위한 변수(default : black)
 """
