@@ -134,6 +134,10 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 획 되돌리기
+def undo_paint():
+    if canvas.find_all(): # Canvas에 아이템이 있는지 확인
+        canvas.delete(canvas.find_all()[-1]) # Canvas에 그려진 아이템 중 가장 최근에 그린 아이템을 삭제
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -179,6 +183,9 @@ button_paint.pack(side=RIGHT)
 
 button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
+
+button_undo = Button(window, text="Undo", command=undo_paint)
+button_undo.pack(side=LEFT)
 
 text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
