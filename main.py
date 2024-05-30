@@ -26,3 +26,7 @@ button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
 
 window.mainloop()
+
+#펜 선택 버튼 추가
+penButton = Button(window, text='펜', command=use_pen)
+penButton.grid(row=0, column=0, sticky=W+E)
