@@ -7,14 +7,18 @@ button_delete : clear_paint의 버튼
 """
 
 """
-선을 그릴 때 원하는 색상으로 변경하는 기능
+[기능 추가]
+원하는 색상으로 변경하는 기능
 
-button_red : 색상 빨간색으로 변경
-button_black : 색상 검정색으로 변경
-button_blue : 색상 파란색으로 변경
+color_red : 색상 빨간색으로 변경
+color_black : 색상 검정색으로 변경
+color_blue : 색상 파란색으로 변경
+
+button_color_red = color_red의 버튼
+button_color_black = color_black의 버튼
+button_color_blue = color_blue의 버튼
 
 mycolor :색상을 저장하기 위한 변수(default : black)
-
 """
 
 from tkinter import *
