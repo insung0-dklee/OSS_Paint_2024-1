@@ -6,6 +6,7 @@ button_delete : clear_paint의 버튼
 
 """
 
+from PIL import ImageGrab
 from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
@@ -134,6 +135,20 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def save():
+    x = window.winfo_rootx()
+    y = window.winfo_rootx()
+    w = window.winfo_width() + x
+    h = window.winfo_height() + y
+
+    box = (x, y, w, h)
+    img=ImageGrab.grab(box) #창의 크기만큼만 이미지저장
+    saveas='capture.png'
+    img.save(saveas) # 이미지를 파일로 저장
+
+
+
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +215,8 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_save = Button(window, text="save", command=save).pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
