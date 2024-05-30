@@ -26,3 +26,29 @@ button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
 
 window.mainloop()
+
+import pyautogui
+from PIL import Image, ImageDraw
+
+pyautogui.press('win')
+pyautogui.write('그림판')
+pyautogui.press('enter')
+
+pyautogui.sleep(1)
+
+pyautogui.alert("도형을 그린 후 확인 버튼을 눌러주세요.")
+screenshot = pyautogui.screenshot()
+
+screenshot.save("screenshot.png")
+
+image = Image.open("screenshot.png")
+
+selected_shape = (100, 100, 200, 200)
+
+draw = ImageDraw.Draw(image)
+draw.rectangle(selected_shape, fill="white")  
+
+image.save("filled_screenshot.png")
+
+image.show()
+
