@@ -20,6 +20,7 @@ from tkinter import *
     create_oval()에서 create_line()으로 변경함에 따라, 매개 변수 변경
     기존 원의 바깥선에 해당하는 매개변수 outline 제거
     선의 두께를 설정하는 매개변수 width 추가
+    지우개 모드를 위한 조건문 추가
 
  @함수추가
     reset : 그림을 그리는 동안 마지막으로 사용된 좌표값을 초기화하는 함수
@@ -29,12 +30,26 @@ def paint(event):
     global last_x, last_y
     x, y = event.x, event.y
     if last_x is not None and last_y is not None:
-        canvas.create_line(last_x, last_y, x, y, fill="black", width=2)
+        if eraser_mode:
+            canvas.create_oval(last_x, last_y, x, y, fill="white", outline="white", width=10)
+        else:
+            canvas.create_line(last_x, last_y, x, y, fill="black", width=2)
     last_x, last_y = x, y
 
 def reset(event):
     global last_x, last_y
     last_x, last_y = None, None
+
+"""
+ 지우개 모드 함수
+ 
+ @변수
+    eraser_mode : 지우개 모드를 판변하여, 지우개 모드이면 버튼에 pen을 표시하고, 그리기 모드이면, 버튼에 eraser 표시
+"""
+def toggle_eraser():
+    global eraser_mode
+    eraser_mode = not eraser_mode
+    eraser_button.config(text="eraser" if eraser_mode else "pen")
 
 #all clear 기능 추가
 def clear_paint():
@@ -51,11 +66,20 @@ canvas.pack()
 canvas.bind("<B1-Motion>", paint)
 canvas.bind("<ButtonRelease-1>", reset)
 
-
 button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
 
+"""
+ @변수추가
+    eraser_button : 지우개 모드 또는 그리기 모드로 전환하는 토글 버튼
+"""
+eraser_button = Button(window, text="pen", command=toggle_eraser)
+eraser_button.pack()
+
 # 마우스 좌표 값을 초기화
 last_x, last_y = None, None
+
+# 지우개 모드 초기화
+eraser_mode = False
 
 window.mainloop()
