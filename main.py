@@ -30,3 +30,8 @@ window.mainloop()
 #펜 선택 버튼 추가
 penButton = Button(window, text='펜', command=use_pen)
 penButton.grid(row=0, column=0, sticky=W+E)
+
+#폰트 설정 기능 추가
+def update_text():
+    selected_font = font_family.get()
+    text_example.config(font=(selected_font, font_size.get()))
