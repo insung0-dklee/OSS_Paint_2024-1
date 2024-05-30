@@ -4,12 +4,17 @@ paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그�
 clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
 
+set_paint_mode_airbrush : 에어브러쉬 그리기 모드로 전환하는 기능
+paint_airbrush : 마우스를 누르고 있는 만큼 점이 점점 굵어지는 원을 이용해 그림을 그리는 기능
+dot_size : 에어브러쉬의 원의 크기를 저장하기 위한 변수
+dot_distance : 에어브러쉬의 원들 간의 거리를 저장하기 위한 변수
 """
 
 from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+import random #random 모듈
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -17,6 +22,40 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+
+def paint_airbrush(event):
+    for _ in range(dot_count.get()):  # 에어브러쉬 효과를 위해 여러 개의 작은 점을 그림
+        radius = random.randint(1, brush_size)  # 점의 크기를 무작위로 선택
+        angle = random.uniform(0, 2 * math.pi)  # 점의 방향을 무작위로 선택
+        distance = random.uniform(0, dot_distance.get())  # 점의 거리를 무작위로 선택
+        x = event.x + distance * math.cos(angle)
+        y = event.y + distance * math.sin(angle)
+        canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill=brush_color, outline=brush_color)
+
+# 에어브러쉬 속성을 조정하는 함수
+def increase_dot_count():
+    dot_count.set(dot_count.get() + 1)
+
+def decrease_dot_count():
+    dot_count.set(max(dot_count.get() - 1, 1))  # 최소값 1 설정
+
+def increase_dot_size():
+    dot_size.set(dot_size.get() + 1)
+
+def decrease_dot_size():
+    dot_size.set(max(dot_size.get() - 1, 1))  # 최소값 1 설정
+
+def increase_dot_distance():
+    dot_distance.set(dot_distance.get() + 1)
+
+def decrease_dot_distance():
+    dot_distance.set(max(dot_distance.get() - 1, 0))  # 최소값 0 설정
+
+def set_paint_mode_normal(): #기본 그리기 모드로 전환하는 기능 
+    canvas.bind("<B1-Motion>", paint)
+
+def set_paint_mode_airbrush(): #에어브러쉬 그리기 모드로 전환하는 기능
+    canvas.bind("<B1-Motion>", paint_airbrush)
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -178,6 +217,37 @@ button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기
 button_paint.pack(side=RIGHT)
 
 button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
+button_paint.pack(side=RIGHT)
+
+# 에어브러쉬 속성 변수 생성
+dot_count = IntVar()
+dot_count.set(10)
+
+dot_distance = IntVar()
+dot_distance.set(10)
+
+# 버튼 프레임 생성
+frame_size = Frame(window)
+frame_size.pack(side=RIGHT)
+
+frame_distance = Frame(window)
+frame_distance.pack(side=RIGHT)
+
+frame_count = Frame(window)
+frame_count.pack(side=RIGHT)
+
+# 에어브러쉬 속성 조절 버튼 추가
+Button(frame_distance, text="+", command=increase_dot_distance).pack(side=RIGHT)
+Label(frame_distance, text="Distance").pack(side=RIGHT)
+Label(frame_distance, textvariable=dot_distance).pack(side=RIGHT)  # 거리 표시
+Button(frame_distance, text="-", command=decrease_dot_distance).pack(side=RIGHT)
+
+Button(frame_count, text="+", command=increase_dot_count).pack(side=RIGHT)
+Label(frame_count, text="Count").pack(side=RIGHT)
+Label(frame_count, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
+Button(frame_count, text="-", command=decrease_dot_count).pack(side=RIGHT)
+
+button_paint = Button(window, text="airbrush", command=set_paint_mode_airbrush) #에어브러쉬 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
 text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
