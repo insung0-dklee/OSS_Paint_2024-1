@@ -8,37 +8,45 @@ button_delete : clear_paint의 버튼
 
 from tkinter import *
 
+# 그림을 그리는 함수
 def paint(event):
     x1, y1 = (event.x - brush_size), (event.y - brush_size)
     x2, y2 = (event.x + brush_size), (event.y + brush_size)
-    canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
+    if eraser_mode:
+        # 지우개 모드일 때 하얀색 사각형을 그려서 지움
+        canvas.create_rectangle(x1, y1, x2, y2, fill="white", outline="white")
+    else:
+        # 브러시 모드일 때 검은색 원을 그림
+        canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
 
-def clear_paint():
-    canvas.delete("all")
+# 지우개 모드를 토글하는 함수
+def toggle_eraser_mode():
+    global eraser_mode
+    # 지우개 모드 활성화/비활성화 전환
+    eraser_mode = not eraser_mode
+    if eraser_mode:
+        # 지우개 모드 활성화 시 버튼 텍스트 변경
+        button_eraser.config(text="브러시 모드로 전환")
+    else:
+        # 브러시 모드 활성화 시 버튼 텍스트 변경
+        button_eraser.config(text="지우개 모드로 전환")
 
-# 슬라이더를 통해 펜 굵기를 변경하는 함수
-def change_brush_size(new_size):
-    global brush_size
-    brush_size = int(new_size)
-
+# 메인 윈도우 설정
 window = Tk()
 window.title("그림판")
 
-brush_size = 1  # 초기 브러시 크기
+# 초기 브러시 크기와 지우개 모드 설정
+brush_size = 5
+eraser_mode = False
 
+# 캔버스 설정
 canvas = Canvas(window, bg="white")
-canvas.pack(fill=BOTH, expand=True)
+canvas.pack(expand=True, fill=BOTH)
 canvas.bind("<B1-Motion>", paint)
 
-button_frame = Frame(window)
-button_frame.pack(fill=X)
+# 지우개/브러시 전환 버튼
+button_eraser = Button(window, text="지우개 모드로 전환", command=toggle_eraser_mode)
+button_eraser.pack(side=LEFT)
 
-button_clear = Button(button_frame, text="All Clear", command=clear_paint)
-button_clear.pack(side=LEFT)
-
-# 펜 굵기를 조절할 수 있는 슬라이더 추가
-brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
-brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
-brush_size_slider.pack(side=LEFT)
-
+# 메인 루프 시작
 window.mainloop()
