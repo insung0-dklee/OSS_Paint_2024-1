@@ -19,7 +19,14 @@ def clear_paint():
 
 window = Tk()
 canvas = Canvas(window)
-canvas.pack()
+window.geometry("640x400+200+200")
+#윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
+#윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
+window.resizable(True,True)
+#윈도우이름.resizeable(상하, 좌우)을 이용하여
+#윈도우 창의 창 크기 조절 가능 여부를 설정
+canvas.pack(fill="both",expand=True)
+#캔버스를 창 너비에 맞춰 동적으로 크기 조절
 canvas.bind("<B1-Motion>", paint)
 
 button_delete = Button(window, text="all clear", command=clear_paint)
