@@ -7,11 +7,23 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
+import math
 
 def paint(event):
     x1, y1 = ( event.x-1 ), ( event.y-1 )
     x2, y2 = ( event.x+1 ), ( event.y+1 )
     canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
+
+# 6각형 브러쉬 추가
+def paint_hexagon(event):
+    x, y = event.x, event.y
+    radius = 20
+    points = []
+    for i in range(6):
+        angle = 2 * math.pi * i / 6
+        points.append(x + radius * math.cos(angle))
+        points.append(y + radius * math.sin(angle))
+    canvas.create_polygon(points, fill="blue", outline="black")
 
 #all clear 기능 추가
 def clear_paint():
