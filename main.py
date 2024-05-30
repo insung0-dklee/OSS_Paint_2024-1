@@ -17,6 +17,13 @@ def paint(event):
 def clear_paint():
     canvas.delete("all")
 
+# 새 창 열기 생성
+def create_new_window():
+    new_window = Tk()  #새로운 Tk 인스턴스 생성
+    new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
+    new_canvas.pack() #캔버스가 새로운 창에 배치
+    new_window.mainloop()
+
 window = Tk()
 canvas = Canvas(window)
 canvas.pack()
@@ -24,5 +31,9 @@ canvas.bind("<B1-Motion>", paint)
 
 button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
+
+#새 창 열기 버튼
+button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
+button_new_window.pack() # "새 창 열기"버튼을 윈도우에 배치
 
 window.mainloop()
