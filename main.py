@@ -16,6 +16,11 @@ def paint(event):
 #all clear 기능 추가
 def clear_paint():
     canvas.delete("all")
+    
+def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
+    
+    text = text_box.get()
+    canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
 
 window = Tk()
 canvas = Canvas(window)
@@ -24,5 +29,9 @@ canvas.bind("<B1-Motion>", paint)
 
 button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
+
+text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
+text_box.pack(side=LEFT)
+canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 
 window.mainloop()
