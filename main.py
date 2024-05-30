@@ -7,22 +7,33 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
+from tkinter.colorchooser import askcolor
 
 def paint(event):
     x1, y1 = ( event.x-1 ), ( event.y-1 )
     x2, y2 = ( event.x+1 ), ( event.y+1 )
-    canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
+    canvas.create_oval(x1, y1, x2, y2, fill=color, outline=color)
 
-#all clear 기능 추가
 def clear_paint():
     canvas.delete("all")
 
+def choose_color():
+    global color
+    color = askcolor(color=color)[1]
+
 window = Tk()
+
+color = "black"
+
 canvas = Canvas(window)
 canvas.pack()
-canvas.bind("<B1-Motion>", paint)
 
 button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
+
+button_color = Button(window, text="Choose Color", command=choose_color)
+button_color.pack()
+
+canvas.bind("<B1-Motion>", paint)
 
 window.mainloop()
