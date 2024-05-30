@@ -35,3 +35,9 @@ penButton.grid(row=0, column=0, sticky=W+E)
 def update_text():
     selected_font = font_family.get()
     text_example.config(font=(selected_font, font_size.get()))
+
+#색상 채우기 기능 추가
+def fill_shape():
+    color = colorchooser.askcolor()[1] 
+    if color:
+        canvas.itemconfig(shape_id, fill=color) 
