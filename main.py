@@ -40,7 +40,6 @@ btn_zoom_in.pack(side=LEFT)
 btn_zoom_out = Button(window, text="축소", command=zoom_out)
 btn_zoom_out.pack(side=LEFT)
 
-# 마우스 휠 이벤트에 확대 / 축소 함수 바인딩
-canvas.bind("<MouseWheel>", lambda event: zoom(canvas, event.delta))
+
 
 window.mainloop()
