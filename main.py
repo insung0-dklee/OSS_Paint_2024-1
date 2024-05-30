@@ -7,11 +7,13 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
+from tkinter.colorchooser import askcolor #라이브러리에서 색상 선택 대화상자 기능을 제공하는 askcolor 함수를 가져오는 구문 /색깔을 선택함
 
 def paint(event):
     x1, y1 = ( event.x-1 ), ( event.y-1 )
     x2, y2 = ( event.x+1 ), ( event.y+1 )
     canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
+    
 
 #all clear 기능 추가
 def clear_paint():
