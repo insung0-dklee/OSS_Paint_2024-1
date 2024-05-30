@@ -134,6 +134,28 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 그라데이션 브러시 기능 추가
+def paint_gradient(event):
+    global x1, y1
+    x2, y2 = event.x, event.y
+    line_length = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+    step_count = int(line_length / 10) + 1
+    color_step = 255 // step_count
+    for step in range(step_count):
+        ratio = step / step_count
+        r = int(brush_color[1:3], 16)
+        g = int(brush_color[3:5], 16)
+        b = int(brush_color[5:7], 16)
+        new_r = int(r * (1 - ratio) + 255 * ratio)
+        new_g = int(g * (1 - ratio) + 255 * ratio)
+        new_b = int(b * (1 - ratio) + 255 * ratio)
+        color = f'#{new_r:02x}{new_g:02x}{new_b:02x}'
+        canvas.create_line(x1, y1, x2, y2, fill=color, width=brush_size)
+    x1, y1 = x2, y2
+
+def set_paint_mode_gradient():
+    canvas.bind("<Button-1>", paint_start)
+    canvas.bind("<B1-Motion>", paint_gradient)
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -174,6 +196,9 @@ button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
 button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
 button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
 
+button_gradient = Button(window, text="Gradient Brush", command=set_paint_mode_gradient) # 버튼을 누르면 그라데이션 모드로 바꾼다
+button_gradient.pack() # 그라데이션 브러쉬 버튼을 윈도우에 배치
+
 button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
@@ -185,7 +210,7 @@ text_box.pack(side=LEFT)
 canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
 
-button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
+button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦
 button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배치
 
 button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
