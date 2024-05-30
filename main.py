@@ -10,10 +10,13 @@ window = Tk()
 canvas = Canvas(window)
 canvas.pack(fill=BOTH, expand=True)
 
-brush_size = Scale(window, from_=1, to=20, orient=HORIZONTAL, label="Brush Size") # 1부터 20까지 크기 조정
-brush_size.set(5)  # 기본 브러시 크기 설정
-brush_size.pack() # 슬라이더 추가
+brush_size = Scale(window, from_=1, to=20, orient=HORIZONTAL, label="Brush Size") 
+brush_size.set(5)  
+brush_size.pack() 
 
-canvas.bind("<B1-Motion>", paint)
+'''
+scale      : 변수 1~20까지 조정
+set         : 기본값
+pack        : 크기를 조정하는 툴바
 
-window.mainloop()
+'''
