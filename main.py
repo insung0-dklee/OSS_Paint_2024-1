@@ -7,6 +7,7 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
+from PIL import Image, ImageTk
 
 def paint(event):
     x1, y1 = ( event.x-1 ), ( event.y-1 )
@@ -26,3 +27,24 @@ button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
 
 window.mainloop()
+
+
+def open_image():
+    file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")])
+    if file_path:
+        image = Image.open(file_path)
+        tk_image = ImageTk.PhotoImage(image)
+        canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+        canvas.image = tk_image
+
+root = tk.Tk()
+root.title("이미지 불러오기")
+root.geometry("800x600")
+
+canvas = tk.Canvas(root, bg="white", width=800, height=600)
+canvas.pack(fill=tk.BOTH, expand=True)
+
+open_button = tk.Button(root, text="이미지 불러오기", command=open_image)
+open_button.pack()
+
+root.mainloop()
