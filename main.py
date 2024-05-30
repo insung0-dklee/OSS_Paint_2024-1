@@ -7,15 +7,24 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
+from tkinter import filedialog
 
 def paint(event):
-    x1, y1 = ( event.x-1 ), ( event.y-1 )
-    x2, y2 = ( event.x+1 ), ( event.y+1 )
+    x1, y1 = (event.x - 1), (event.y - 1)
+    x2, y2 = (event.x + 1), (event.y + 1)
     canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
 
 #all clear 기능 추가
 def clear_paint():
     canvas.delete("all")
+
+#사진첨부 기능 추가
+def load_image():
+    file_path = filedialog.askopenfilename(filetypes=[("GIF files", "*.gif")])
+    if file_path:
+        image = PhotoImage(file=file_path)
+        canvas.image = image  
+        canvas.create_image(0, 0, anchor=NW, image=image)
 
 window = Tk()
 canvas = Canvas(window)
