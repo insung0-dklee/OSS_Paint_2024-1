@@ -17,6 +17,8 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+selected_area = None  # 선택된 영역을 저장할 변수
+selected_coords = [] # 선택된 객체의 좌표를 저장할 리스트
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -134,6 +136,88 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def start_select(event):
+    """
+    선택 영역을 시작하는 함수
+    마우스 클릭 위치를 기준으로 선택 영역을 초기화하고, 
+    마우스 드래그 시 영역이 확장되도록 이벤트를 바인딩한다
+    """
+    global start_x, start_y, selected_area
+    start_x, start_y = event.x, event.y
+    selected_area = canvas.create_rectangle(start_x, start_y, start_x, start_y, dash=(2, 2), outline="blue") # 선택 영역을 표시하기 위해 점선 사각형 그리기
+    canvas.bind("<B1-Motion>", update_select) # 마우스 왼쪽 버튼으로 드래그 시 update_select 함수 호출
+    canvas.bind("<ButtonRelease-1>", end_select) # 마우스 왼쪽 버튼 떼면 end_select 함수 호출
+
+def update_select(event):
+    """
+    선택 영역을 업데이트하는 함수
+    마우스 드래그에 따라 선택 영역의 크기와 위치를 조정한다
+    """
+    global selected_area
+    canvas.coords(selected_area, start_x, start_y, event.x, event.y) # 선택 영역을 현재 마우스 위치까지 확장
+
+def end_select(event):
+    """
+    선택 영역을 종료하는 함수
+    선택된 영역 내의 객체들을 찾고, 해당 객체들의 좌표를 저장한다
+    """
+    global selected_area, selected_objects, selected_coords
+    x1, y1, x2, y2 = canvas.coords(selected_area)
+    selected_objects = canvas.find_enclosed(x1, y1, x2, y2) # 선택된 영역 내의 객체들을 찾음
+    selected_coords = [(canvas.coords(obj), obj) for obj in selected_objects]  # 선택된 객체들의 좌표를 저장
+    canvas.delete(selected_area) # 선택 영역 표시 지움
+    # 언바인딩 
+    canvas.unbind("<B1-Motion>")  
+    canvas.unbind("<ButtonRelease-1>")
+
+def start_drag(event):
+    """
+    선택된 객체들을 드래그 시작하는 함수
+    마우스 우클릭 위치를 기준으로 드래그를 초기화하고, 
+    드래그 중 및 드래그 종료 시 호출할 이벤트를 바인딩한다
+    """
+    global offset_x, offset_y, initial_coords
+    offset_x, offset_y = event.x, event.y
+    initial_coords = [(canvas.coords(obj), obj) for obj in selected_objects] # 선택된 객체들의 초기 좌표를 저장
+    canvas.bind("<B3-Motion>", drag_selected) # 우클릭으로 드래그 시 drag_selected 함수 호출
+    canvas.bind("<ButtonRelease-3>", release_selected) # 우클릭 버튼 떼면 release_selected 함수 호출
+
+def drag_selected(event):
+    """
+    선택된 객체들을 드래그하여 이동하는 함수
+    마우스 이동 거리를 계산하여 선택된 객체들을 이동시킨다
+    """
+    global offset_x, offset_y, initial_coords
+    dx = event.x - offset_x
+    dy = event.y - offset_y
+
+    # 선택된 객체들을 마우스 이동 거리만큼 이동
+    for initial, obj in initial_coords:
+        new_coords = [coord + dx if i % 2 == 0 else coord + dy for i, coord in enumerate(initial)]
+        canvas.coords(obj, *new_coords)
+
+def release_selected(event):
+    """
+    드래그 종료 시 호출되는 함수
+    드래그 관련 이벤트 바인딩을 해제한다
+    """
+    canvas.unbind("<B3-Motion>")
+    canvas.unbind("<ButtonRelease-3>")
+
+def toggle_select_mode():
+    """
+    선택 모드를 토글하는 함수
+    선택 모드를 활성화/비활성화하여 선택 모드와 그리기 모드를 전환한다
+    """
+    if canvas.cget("cursor") == "cross": # 선택 모드 해제
+        canvas.config(cursor="")
+        canvas.bind("<Button-1>", paint_start)
+        canvas.bind("<B1-Motion>", paint)
+        canvas.unbind("<Button-3>")
+    else: # 선택 모드 활성화
+        canvas.config(cursor="cross")
+        canvas.bind("<Button-1>", start_select)
+        canvas.bind("<Button-3>", start_drag)
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +284,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_select = Button(window, text="Select", command=toggle_select_mode) # 버튼을 누르면 선택 모드가 활성화되고 한번 더 누르면 선택 모드가 비활성화된다
+button_select.pack(side=LEFT) # 선택 버튼을 윈도우에 배치
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
