@@ -134,6 +134,21 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 원 그리기 함수
+def draw_circle(event):
+    canvas.create_oval(event.x-20, event.y-20, event.x+20, event.y+20, outline="black", width=2)
+
+# 삼각형 그리기 함수
+def draw_triangle(event):
+    x1, y1 = event.x, event.y - 20
+    x2, y2 = event.x - 20, event.y + 20
+    x3, y3 = event.x + 20, event.y + 20
+    canvas.create_polygon(x1, y1, x2, y2, x3, y3, outline="black", width=2)
+
+# 사각형 그리기 함수
+def draw_rectangle(event):
+    canvas.create_rectangle(event.x-20, event.y-20, event.x+20, event.y+20, outline="black", width=2)
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -179,6 +194,15 @@ button_paint.pack(side=RIGHT)
 
 button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
+
+button_circle = Button(window, text="원 그리기", command=lambda: canvas.bind("<Button-1>", draw_circle))
+button_circle.pack(side=LEFT)
+
+button_triangle = Button(window, text="삼각형 그리기", command=lambda: canvas.bind("<Button-1>", draw_triangle))
+button_triangle.pack(side=LEFT)
+
+button_rectangle = Button(window, text="사각형 그리기", command=lambda: canvas.bind("<Button-1>", draw_rectangle))
+button_rectangle.pack(side=LEFT)
 
 text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
