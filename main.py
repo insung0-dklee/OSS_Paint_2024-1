@@ -132,6 +132,26 @@ def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
 
+def draw_arrow(canvas, x1, y1, x2, y2, arrow_type='last', color='black', width=5):    
+    arrow_option = tk.LAST
+    if arrow_type == 'first':
+        arrow_option = tk.FIRST
+    elif arrow_type == 'both':
+        arrow_option = tk.BOTH
+    
+    canvas.create_line(x1, y1, x2, y2, arrow=arrow_option, fill=color, width=width)
+
+# 화살표 그리기 함수
+def draw_shape(event):
+    global start_x, start_y
+    if selected_shape == "arrow":
+        draw_arrow(canvas, start_x, start_y, event.x, event.y, arrow_type='last', color=current_color, width=5)
+
+# 화살표 버튼 클릭 시의 동작 설정
+def set_shape_mode(shape):
+    global selected_shape
+    selected_shape = shape
+
 # 새 창 열기 생성
 def create_new_window():
     new_window = Tk()  #새로운 Tk 인스턴스 생성
@@ -217,6 +237,13 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+canvas.bind("<ButtonPress-1>", on_button_press)
+canvas.bind("<ButtonRelease-1>", on_button_release)
+canvas.bind("<B1-Motion>", draw_shape)
+
+button_arrow = Button(window, text="Draw Arrow", command=lambda: set_shape_mode("arrow"))
+button_arrow.pack(side=LEFT) #화살표 그리기 버튼 추가
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
