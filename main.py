@@ -244,16 +244,21 @@ polygon_drawer = PolygonDrawer(canvas)
 button_draw_polygon = Button(window, text="Draw Polygon", command=polygon_drawer.enable_polygon_mode)
 button_draw_polygon.pack(side=LEFT)
 
-num_sides_entry = Entry(window)
+num_sides_var = StringVar()
+num_sides_var.set("3")  # 기본값은 삼각형
+
+def update_num_sides(*args):
+    try:
+        num_sides = int(num_sides_var.get())
+        if num_sides >= 3:  # 최소한 삼각형이 되도록 제한
+            polygon_drawer.set_num_sides(num_sides)
+    except ValueError:
+        pass  # 유효하지 않은 숫자가 입력된 경우 무시
+
+num_sides_var.trace_add("write", update_num_sides)  # Entry가 업데이트될 때마다 update_num_sides를 호출
+
+num_sides_entry = Entry(window, textvariable=num_sides_var)
 num_sides_entry.pack(side=LEFT)
-num_sides_entry.insert(0, "3")  # 기본값은 삼각형
-
-def update_num_sides():
-    num_sides = int(num_sides_entry.get())
-    polygon_drawer.set_num_sides(num_sides)
-
-button_set_sides = Button(window, text="Set Sides", command=update_num_sides)
-button_set_sides.pack(side=LEFT)
 
 set_paint_mode_normal()  # 프로그램 시작 시 기본 그리기 모드 설정
 
