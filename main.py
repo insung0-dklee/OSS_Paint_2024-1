@@ -6,30 +6,7 @@ button_delete : clear_paint의 버튼
 
 """
 
-"""
-[기능 추가]
-원하는 색상으로 변경하는 기능
-
-color_red : 색상 빨간색으로 변경
-color_black : 색상 검정색으로 변경
-color_blue : 색상 파란색으로 변경
-
-button_color_red = color_red의 버튼
-button_color_black = color_black의 버튼
-button_color_blue = color_blue의 버튼
-
-mycolor :색상을 저장하기 위한 변수(default : black)
-"""
-
 from tkinter import *
-<<<<<<< HEAD
-mycolor="black"
-
-def paint(event):
-    x1, y1 = ( event.x-1 ), ( event.y-1 )
-    x2, y2 = ( event.x+1 ), ( event.y+1 )
-    canvas.create_oval(x1, y1, x2, y2, fill=mycolor, outline=mycolor)
-=======
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
@@ -68,7 +45,7 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size) # 굵기가 적용이 안되는 부분 버그 수정
     x1, y1 = x2, y2
 
 """
@@ -84,9 +61,9 @@ def dotted_paint(event): # 점선 브러쉬 함수
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
+            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black", width=brush_size) # 굵기가 적용이 안되는 부분 수정
             last_x, last_y = event.x, event.y
-    else:
+        else:
         last_x, last_y = event.x, event.y
 
 """
@@ -106,7 +83,6 @@ def set_brush_mode(mode): # 브러쉬 모드를 변경하는 함수
 def change_brush_size(new_size):
     global brush_size
     brush_size = int(new_size)
->>>>>>> e771eda4168ec792f141316aaaca222e8e616a07
 
 #all clear 기능 추가
 def clear_paint():
@@ -159,22 +135,6 @@ def create_new_window():
     new_window.mainloop()
 
 
-#색상 red으로 바꾸는 기능 추가
-def color_red():
-     global mycolor
-     mycolor="red"
-     
-#색상 black으로 바꾸는 기능 추가    
-def color_black():
-     global mycolor
-     mycolor="black"
-
-#색상 blue으로 바꾸는 기능 추가
-def color_blue():
-     global mycolor
-     mycolor="blue"
-
-
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
@@ -207,6 +167,7 @@ button_clear.pack(side=LEFT)
 brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
 brush_size_slider.pack(side=LEFT)
+
 
 button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
 button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
@@ -242,16 +203,5 @@ button_brush_color = Button(window, text="Change Brush Color", command=change_br
 button_brush_color.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
-
-button_color_red = Button(window, text="red", command=color_red)
-button_color_red.place(x=85,y=265)
-
-button_color_black = Button(window, text="black", command=color_black)
-button_color_black.place(x=45,y=265)
-
-button_color_blue = Button(window, text="blue", command=color_blue)
-button_color_blue.place(x=10,y=265)
-
-
 
 window.mainloop()
