@@ -145,6 +145,12 @@ def update_timer():
 def stop_timer():
     timer.stop()
 
+#타이머 리셋
+def reset_timer():
+    timer.reset()
+    if not timer.running:
+        timer.start()
+
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
@@ -180,6 +186,10 @@ timer_label.pack(side=RIGHT)
 # 타이머 멈춤 버튼
 button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
 button_stop_timer.pack(side=RIGHT)
+#타이머 리셋 버튼
+button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
+button_reset_timer.pack(side=RIGHT)
+
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 # 펜 굵기를 조절할 수 있는 슬라이더 추가

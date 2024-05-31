@@ -24,6 +24,10 @@ class Timer:
             self.elapsed_time = time.time() - self.start_time
             self.running = False
 
+    def reset(self):
+        self.start_time = None
+        self.elapsed_time = 0
+        self.running = False
 """
 class timer 
 @fun
@@ -32,5 +36,6 @@ class timer
             그렇지 않은 경우 경과된 시간을 고려하여 시간 조정
     get_elapsed_time(): 현재 시간에서 시작시간을 뺀 경과시간 반환
     stop(): 타이머를 중지 
+    reset(): 타이머를 0초로 초기화 
 
 """
