@@ -17,6 +17,28 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+gradient_mode = False # 그라데이션 모드는 기본적으로 비활성화
+
+def choose_gradient_colors(): # 그라데이션할 색을 선택하는 함수
+    global start_color, end_color, gradient_mode
+    start_color = askcolor(title="Choose Start Color")[0] # 첫번째 색 선택
+    end_color = askcolor(title="Choose End Color")[0] # 두번째 색 선택
+    if start_color and end_color: # 두가지 색을 골랐다면 
+        gradient_mode = True # 그라데이션 모드 
+    else: # 아니면
+        gradient_mode = False # 그라데이션 모드 아님
+
+def set_gradient_mode(enable): # 그라데이션 모드 활성화/비활성화 함수
+    global gradient_mode
+    gradient_mode = enable
+    
+def toggle_gradient_mode(): # 그라데이션 모드 토글 함수
+    if not gradient_mode: # 비활성화 상태에서 토글 함수가 호출됐다면 
+        choose_gradient_colors() # 그라데이션할 색을 선택하는 함수 호출
+    else: # 아니면(활성화 상태에서 토글 함수가 호출됐다면)
+        set_gradient_mode(False) # 그라데이션 모드를 False로 설정
+
+
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -45,8 +67,24 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    if gradient_mode: # 그라데이션 모드인 경우
+        num_steps = int(math.hypot(x2 - x1, y2 - y1) / 2) # 두 점 사이의 거리에 따른 단계 수 계산
+        for step in range(num_steps):
+            ratio = step / num_steps # 현재 단계의 비율 계산
+            r = int(start_color[0] + ratio * (end_color[0] - start_color[0])) # R 값 계산
+            g = int(start_color[1] + ratio * (end_color[1] - start_color[1])) # G 값 계산
+            b = int(start_color[2] + ratio * (end_color[2] - start_color[2])) # B 값 계산
+            gradient_color = f'#{r:02x}{g:02x}{b:02x}' # 그라데이션 색상 설정
+            step_x = x1 + ratio * (x2 - x1) # 현재 단계의 x 좌표 계산
+            step_y = y1 + ratio * (y2 - y1) # 현재 단계의 y 좌표 계산
+            next_ratio = (step + 1) / num_steps # 다음 단계의 비율 계산
+            next_step_x = x1 + next_ratio * (x2 - x1) # 다음 단계의 x 좌표 계산
+            next_step_y = y1 + next_ratio * (y2 - y1) # 다음 단계의 y 좌표 계산
+            canvas.create_line(step_x, step_y, next_step_x, next_step_y, fill=gradient_color, width=2) # 그라데이션 선 그리기
+    else: # 그라데이션 모드가 아니면
+        canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2) # 일반 선 그리기
     x1, y1 = x2, y2
+
 
 """
 dotted_paint: 점선 브러쉬 함수
@@ -200,6 +238,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_gradient = Button(button_frame, text="Toggle Gradient", command=toggle_gradient_mode)
+button_gradient.pack(side=LEFT) # 그라데이션 모드 토글 버튼을 윈도우에 배치
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
