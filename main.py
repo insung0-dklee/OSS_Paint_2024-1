@@ -20,7 +20,7 @@ last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 �
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
-    canvas.bind("<B1-Motion>", paint_stroke)
+    canvas.bind("<B1-Motion>", paint)
 
 def set_paint_mode_pressure():
     canvas.bind("<Button-1>", start_paint_pressure)  # 마우스 클릭시작시
@@ -38,6 +38,15 @@ def paint_pressure(event):
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
+def paint_start(event):
+    global x1, y1
+    x1, y1 = (event.x - brush_size), (event.y - brush_size)
+
+def paint(event):
+    global x1, y1
+    x2, y2 = event.x, event.y
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    x1, y1 = x2, y2
 
 """
 dotted_paint: 점선 브러쉬 함수
@@ -117,46 +126,6 @@ def change_bg_color():
 def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
-"""
-그림그리는 것을 획 단위로 그리도록 개선, 획 단위로 지우는 지우개 기능 추가, 지웠던 획을 다시 되돌리는 기능 추가
-그림그리는 것을 획 단위로 그리도록 개선하였으며, 마우스 클릭 후 놓을 때 까지를 한 획으로 보았다.
-이를 최근에 그린 획을 지우는 기능을 추가하였으며, 지웠던 획을 다시 되돌리도록 하는 기능을 구현하였다.
-지웠던 획들 다시 되돌리는 것은 획 지우기 기능을 이용해 지웠던 경우에만 한함
-"""
-strokes = [] #획을 담아 둠
-current_stroke = []
-redo_strokes = []
-
-def paint_start(event): #획 시작
-    global x1, y1, current_stroke
-    x1, y1 = event.x, event.y
-    current_stroke = []
-
-def paint_stroke(event): #획 그림
-    global x1, y1, current_stroke
-    x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
-    current_stroke.append((x1, y1, x2, y2))
-    x1, y1 = x2, y2
-
-def paint_end(event): #획 끝
-    global current_stroke
-    strokes.append(list(current_stroke))
-    current_stroke.clear()
-
-def erase_last_stroke(): #마지막으로 그린 획을 지움
-    if strokes:
-        last_stroke = strokes.pop()
-        redo_strokes.append(last_stroke)
-        for line in last_stroke:
-            canvas.create_line(*line, fill="white", width=2)
-
-def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
-    if redo_strokes:
-        last_redo_stroke = redo_strokes.pop()
-        strokes.append(last_redo_stroke)
-        for line in last_redo_stroke:
-            canvas.create_line(*line, fill=brush_color, width=2)
 
 # 새 창 열기 생성
 def create_new_window():
@@ -173,7 +142,7 @@ window.title("그림판")
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("900x400+200+200")
+window.geometry("640x400+200+200")
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
 #윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
 window.resizable(True,True)
@@ -185,13 +154,8 @@ canvas.pack(fill="both",expand=True)
 last_x, last_y = None, None # 마지막 좌표 초기화
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 canvas.bind("<Button-1>", paint_start)
-canvas.bind("<B1-Motion>", paint_stroke)
+canvas.bind("<B1-Motion>", paint)
 # 캔버스에 마우스 왼쪽 버튼을 누르고 움직일 때마다 paint 함수를 호출하도록 바인딩
-
-# 마우스 버튼을 누르는 이벤트와 놓는 이벤트에 핸들러 설정
-canvas.bind("<Button-1>", paint_start)
-canvas.bind("<B1-Motion>", paint_stroke)
-canvas.bind("<ButtonRelease-1>", paint_end)
 
 button_frame = Frame(window)
 button_frame.pack(fill=X)
@@ -236,13 +200,6 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
-
-button_erase_last_stroke = Button(window, text="Erase Last Stroke", command=erase_last_stroke)
-button_erase_last_stroke.pack(side=LEFT)
-
-button_redo_last_stroke = Button(window, text="Rewrite Last Stroke", command=rewrite_last_stroke)
-button_redo_last_stroke.pack(side=LEFT)
-
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
