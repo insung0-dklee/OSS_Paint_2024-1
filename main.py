@@ -142,10 +142,9 @@ def change_erase_size(event):
     global erase_size
     if event.keysym == 'plus' and event.state & 0x4:
         erase_size = min(erase_size + 1, Max_erase_size)
-        print("Eraser size increased to", erase_size)
     elif event.keysym == 'minus' and event.state & 0x4:
         erase_size = max(erase_size - 1, Min_erase_size)
-        print("Eraser size decreased to", erase_size)
+
 
 
 def erase(event):
