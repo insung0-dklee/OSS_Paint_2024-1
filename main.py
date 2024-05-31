@@ -17,6 +17,7 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+text_size = 12 # 초기 텍스트 크기
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -93,8 +94,11 @@ def clear_paint():
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
     text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
+    canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', text_size))
    
+def change_text_size(new_size):
+    global text_size
+    text_size = int(new_size)
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -179,6 +183,10 @@ button_paint.pack(side=RIGHT)
 
 button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
+
+text_size_slider = Scale(button_frame, from_=8, to=80, orient=HORIZONTAL, label="Text Size", command=change_text_size)
+text_size_slider.set(text_size)  # 슬라이더 초기값 설정
+text_size_slider.pack(side=LEFT)
 
 text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
