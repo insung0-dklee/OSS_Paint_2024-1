@@ -171,6 +171,16 @@ def create_new_window():
     new_canvas.pack()  # 캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+"""
+마우스 좌표를 실시간으로 알려주는 기능
+마우스가 이동할 때마다 label로 마우스의 위치를 업데이트
+"""
+def update_mouse_position(event):
+    x, y = event.x, event.y
+    label.config(text=f"{x}, {y}px")
+
+
+
 window = Tk()
 # Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
@@ -239,6 +249,10 @@ erase_size = 5
 Min_erase_size = 1
 Max_erase_size = 20
 
+
+label = Label(window, text="0, 0px", relief="sunken") # relief : 가시성 증가를 위한 label 테두리 추가
+label.pack(side=BOTTOM)
+canvas.bind('<Motion>', update_mouse_position) # 마우스가 이동할 때마다 update_mouse_position 함수 호출
 
 brush_color = "black"
 
