@@ -17,6 +17,7 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 actions = []  # Undo를 위한 액션 스택
+redo_actions = []  # Redo를 위한 액션 스택
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -37,7 +38,8 @@ def paint_pressure(event):
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     action = canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
-    actions.append(action)  # 작업 기록 저장
+    actions.append((action, "oval", (x1, y1, x2, y2, brush_color)))  # 작업 기록 저장
+    redo_actions.clear()  # Redo 스택 초기화
 
 def paint_start(event):
     global x1, y1
@@ -46,8 +48,9 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    action = canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
-    actions.append(action)  # 작업 기록 저장
+    action = canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
+    actions.append((action, "line", (x1, y1, x2, y2, brush_color, brush_size)))  # 작업 기록 저장
+    redo_actions.clear()  # Redo 스택 초기화
     x1, y1 = x2, y2
 
 """
@@ -64,7 +67,8 @@ def dotted_paint(event): # 점선 브러쉬 함수
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
             action = canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
-            actions.append(action)  # 작업 기록 저장
+            actions.append((action, "oval", (event.x-1, event.y-1, event.x+1, event.y+1, "black")))  # 작업 기록 저장
+            redo_actions.clear()  # Redo 스택 초기화
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
@@ -93,11 +97,13 @@ def clear_paint():
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
     actions.clear()  # 작업 기록 초기화
+    redo_actions.clear()  # Redo 스택 초기화
 
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
     text = text_box.get()
     action = canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-    actions.append(action)  # 작업 기록 저장
+    actions.append((action, "text", (event.x, event.y, text, "black", 'Arial', 12)))  # 작업 기록 저장
+    redo_actions.clear()  # Redo 스택 초기화
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -121,7 +127,8 @@ def erase(event):
     x1, y1 = ( event.x-3 ), ( event.y-3 )
     x2, y2 = ( event.x+3 ), ( event.y+3 )
     action = canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
-    actions.append(action)  # 작업 기록 저장
+    actions.append((action, "oval", (x1, y1, x2, y2, bg_color)))  # 작업 기록 저장
+    redo_actions.clear()  # Redo 스택 초기화
 
 def change_bg_color():
     bg_color = askcolor()
@@ -141,8 +148,24 @@ def create_new_window():
 # Undo 기능 추가
 def undo_action():
     if actions:
-        action = actions.pop()  # 마지막 작업을 스택에서 꺼냄
+        action, action_type, params = actions.pop()  # 마지막 작업을 스택에서 꺼냄
         canvas.delete(action)  # 캔버스에서 해당 작업 삭제
+        redo_actions.append((action, action_type, params))  # Redo 스택에 추가
+
+# Redo 기능 추가
+def redo_action():
+    if redo_actions:
+        _, action_type, params = redo_actions.pop()  # Redo 스택에서 작업을 꺼냄
+        if action_type == "oval":
+            x1, y1, x2, y2, color = params
+            action = canvas.create_oval(x1, y1, x2, y2, fill=color, outline=color)
+        elif action_type == "line":
+            x1, y1, x2, y2, color, width = params
+            action = canvas.create_line(x1, y1, x2, y2, fill=color, width=width)
+        elif action_type == "text":
+            x, y, text, color, font_family, font_size = params
+            action = canvas.create_text(x, y, text=text, fill=color, font=(font_family, font_size))
+        actions.append((action, action_type, params))  # Undo 스택에 다시 추가
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -213,6 +236,10 @@ button_brush_color.pack(side=LEFT)
 # Undo 버튼 추가
 button_undo = Button(window, text="Undo", command=undo_action)
 button_undo.pack(side=LEFT)
+
+# Redo 버튼 추가
+button_redo = Button(window, text="Redo", command=redo_action)
+button_redo.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
