@@ -18,6 +18,11 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 
+#배경색 변경 함수
+def change_bg_color():
+    bg_color = askcolor()  # 사용자에게 색상 선택 대화 상자를 띄워 배경색을 선택하도록 함
+    canvas.config(bg=bg_color[1])  # 선택한 색상으로 배경색 변경
+
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
     canvas.bind("<B1-Motion>", paint)
@@ -138,7 +143,9 @@ def create_new_window():
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
-
+# 배경색 변경 버튼 생성
+button_bg_color = Button(window, text="Change Background Color", command=change_bg_color)
+button_bg_color.pack(side=LEFT)
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
