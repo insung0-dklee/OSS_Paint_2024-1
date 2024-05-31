@@ -134,6 +134,9 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+#네모 도형 생성하기
+def create_rectangle():
+    canvas.create_rectangle(50, 50, 150, 150, outline="black", fill="white")
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +203,10 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+#네모 모형 그려주는 버튼 생성 
+button_create_rectangle = Button(window, text="Create rectangle", command=create_rectangle)
+button_create_rectangle.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
