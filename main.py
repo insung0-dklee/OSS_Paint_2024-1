@@ -20,6 +20,8 @@ last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 �
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
+    canvas.bind("<Button-1>", paint_start)  # 마우스 클릭시작시
+    # 캔버스에 마우스 왼쪽 버튼을 누르고 움직일 때마다 paint 함수를 호출하도록 바인딩
     canvas.bind("<B1-Motion>", paint)
 
 def set_paint_mode_pressure():
@@ -45,7 +47,7 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
     x1, y1 = x2, y2
 
 """
@@ -153,9 +155,6 @@ canvas.pack(fill="both",expand=True)
 
 last_x, last_y = None, None # 마지막 좌표 초기화
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-canvas.bind("<Button-1>", paint_start)
-canvas.bind("<B1-Motion>", paint)
-# 캔버스에 마우스 왼쪽 버튼을 누르고 움직일 때마다 paint 함수를 호출하도록 바인딩
 
 button_frame = Frame(window)
 button_frame.pack(fill=X)
