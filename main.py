@@ -10,6 +10,7 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+from auto_save import auto_save, manual_save
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -201,6 +202,11 @@ button_bg_color.pack(side=LEFT)
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
 
+# Auto-save 버튼 추가
+button_manual_save = Button(window, text="Auto Save Now", command=lambda: manual_save(canvas, window))
+button_manual_save.pack(side=LEFT)
+
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
+auto_save(canvas, window, file_path="autosave.png", interval=30)
 window.mainloop()
