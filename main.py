@@ -78,6 +78,8 @@ def set_brush_mode(mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", paint) # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted": # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", dotted_paint) # 점선 브러쉬로 변경
+    elif brush_mode == "square":  # 네모 모양 브러쉬로 변경
+        canvas.bind("<B1-Motion>", square_brush)
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -133,6 +135,34 @@ def create_new_window():
     new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
+
+
+
+
+def square_brush(event):
+    global last_x, last_y  # 전역 변수로 마지막으로 그린 점의 위치를 저장할 변수를 가져온다.
+    spacing = 20  # 도트 사이의 거리를 멀게 설정한다.
+    brush_size = 3  # 네모 브러시의 크기를 작게 설정한다.
+
+    # 마지막으로 그린 점의 위치가 있는지 확인한다.
+    if last_x is not None and last_y is not None:
+        dx = event.x - last_x  # 현재 마우스 위치와 마지막으로 그린 점의 x 좌표의 차이를 계산한다.
+        dy = event.y - last_y  # 현재 마우스 위치와 마지막으로 그린 점의 y 좌표의 차이를 계산한다.
+        distance = (dx ** 2 + dy ** 2) ** 0.5  # 두 점 사이의 거리를 계산한다.
+
+        # 도트 사이의 거리(spacing)보다 더 멀리 이동한 경우에만 네모를 그린다.
+        if distance >= spacing:
+            canvas.create_rectangle(
+                event.x - brush_size, event.y - brush_size,  # 네모의 좌상단 좌표
+                event.x + brush_size, event.y + brush_size,  # 네모의 우하단 좌표
+                fill=brush_color, outline=brush_color  # 채우기 색상과 테두리 색상을 설정한다.
+            )  # 네모를 그린다.
+            last_x, last_y = event.x, event.y  # 마지막으로 그린 점의 위치를 업데이트한다.
+    else:
+        last_x, last_y = event.x, event.y  # 첫 번째 점을 그릴 때의 위치를 저장한다.
+
+
+
 
 
 window = Tk()
@@ -200,6 +230,11 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_square_brush = Button(window, text="Square Brush", command=lambda: set_brush_mode("square"))
+button_square_brush.pack(side=LEFT)
+
+
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
