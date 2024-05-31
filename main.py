@@ -29,14 +29,17 @@ def set_paint_mode_pressure():
 def start_paint_pressure(event):
     global start_time
     start_time = time.time() #마우스를 클릭한 시간을 변수에 저장
+    global x1, y1
+    x1, y1 = (event.x - brush_size), (event.y - brush_size)
 
 def paint_pressure(event):
     global start_time
     elapsed_time = time.time() - start_time  # 마우스를 클릭한 시간부터 지금까지의 시간을 계산
     radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
-    x1, y1 = ( event.x - radius ), ( event.y - radius )
-    x2, y2 = ( event.x + radius ), ( event.y + radius )
-    canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+    global x1, y1
+    x2, y2 = event.x, event.y
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width = radius)
+    x1, y1 = x2, y2
 
 def paint_start(event):
     global x1, y1
