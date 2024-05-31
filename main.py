@@ -218,6 +218,46 @@ def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
 
+# 색 반전 계산 함수
+def invert_color(color):
+    try:
+        r = int(color[1:3], 16)
+        g = int(color[3:5], 16)
+        b = int(color[5:7], 16)
+        inverted_r = 255 - r
+        inverted_g = 255 - g
+        inverted_b = 255 - b
+        return "#{:02x}{:02x}{:02x}".format(inverted_r, inverted_g, inverted_b)
+    except ValueError:
+        return color  # 유효하지 않은 색상은 그대로 반환
+
+# 그림판 색 반전 함수
+def invert_colors():
+    # 그린 객체들 반전
+    objects = canvas.find_all()
+    for obj in objects:
+        current_color = canvas.itemcget(obj, "fill")
+        # 색이 black, white라는 문자열일 수 있으므로 예외처리
+        if current_color == 'black':
+            current_color = "#000000"
+        if current_color == 'white':
+            current_color = "#ffffff"
+        if current_color and current_color != "":
+            inverted_color = invert_color(current_color)
+            canvas.itemconfig(obj, fill=inverted_color)
+
+    # 배경색 반전
+    current_bg_color = canvas.cget("bg")
+    if current_bg_color == 'black':
+        current_bg_color = "#000000"
+    if current_bg_color == 'white':
+        current_bg_color = "#ffffff"
+    if current_bg_color and current_bg_color != "":
+        inverted_bg_color = invert_color(current_bg_color)
+        canvas.config(bg=inverted_bg_color)
+
+
+
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
@@ -385,6 +425,10 @@ def setup_paint_app(window):
 
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
+
+    # 색 반전 버튼
+    button_invert_colors = Button(button_frame, text="색 반전", command=invert_colors)
+    button_invert_colors.pack(side=LEFT)
 
 # 새 창 열기 생성
 def create_new_window():
