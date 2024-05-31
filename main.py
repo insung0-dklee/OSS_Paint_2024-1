@@ -134,6 +134,10 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 현재 시간을 출력하는 함수
+def show_time():
+    current_time = time.strftime("%Y-%m-%d %H:%M:%S")
+    canvas.create_text(100, 10, text=current_time, fill="black", font=('Arial', 12))
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +204,10 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+# 시간 버튼 추가
+button_time = Button(window, text="Show Time", command=show_time)
+button_time.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
