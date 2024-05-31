@@ -94,7 +94,7 @@ def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위�
 
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
+
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -133,6 +133,12 @@ def create_new_window():
     new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
+
+# 그림판의 크기를 업데이트하는 함
+def update_canvas_size(event):
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+    size_label.config(text=f"Canvas Size: {width}x{height}")
 
 
 window = Tk()
@@ -200,6 +206,13 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+# 캔버스 크기 표시를 위한 라벨 추가
+size_label = Label(window, text="Canvas Size: 640x400")
+size_label.pack()
+
+# 윈도우 크기가 변경될 때마다 update_canvas_size 함수 호출
+window.bind('<Configure>', update_canvas_size)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
