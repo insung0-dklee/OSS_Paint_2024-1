@@ -10,31 +10,26 @@ current_color = "black"
 eraser_mode = False
 spacing = 10
 last_x, last_y = None, None
+selected_item = None  # 선택된 도형
 
 def set_paint_mode_normal():
     global selected_tool
     selected_tool = "brush"
-    canvas.unbind("<Button-1>")
-    canvas.unbind("<B1-Motion>")
-    canvas.unbind("<ButtonRelease-1>")
+    clear_bindings()
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint)
 
 def set_paint_mode_pressure():
     global selected_tool
     selected_tool = "pressure_brush"
-    canvas.unbind("<Button-1>")
-    canvas.unbind("<B1-Motion>")
-    canvas.unbind("<ButtonRelease-1>")
+    clear_bindings()
     canvas.bind("<Button-1>", start_paint_pressure)
     canvas.bind("<B1-Motion>", paint_pressure)
 
-# 감압 브러시 그리기를 시작하는 함수
 def start_paint_pressure(event):
     global start_time
     start_time = time.time()
 
-# 감압 브러시로 그림을 그리는 함수
 def paint_pressure(event):
     global start_time
     elapsed_time = time.time() - start_time
@@ -44,12 +39,10 @@ def paint_pressure(event):
     action = canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
     actions.append(action)
 
-# 그림 그리기를 시작하는 함수
 def paint_start(event):
     global x1, y1
     x1, y1 = event.x, event.y
 
-# 그림을 그리는 함수
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
@@ -57,7 +50,6 @@ def paint(event):
     actions.append(action)
     x1, y1 = x2, y2
 
-# 점선 브러시로 그림을 그리는 함수
 def dotted_paint(event):
     global last_x, last_y
     spacing = 10
@@ -72,43 +64,35 @@ def dotted_paint(event):
     else:
         last_x, last_y = event.x, event.y
 
-# 브러시 모드를 변경하는 함수
 def set_brush_mode(mode):
     global brush_mode, selected_tool
     brush_mode = mode
     selected_tool = "brush"
-    canvas.unbind("<Button-1>")
-    canvas.unbind("<B1-Motion>")
-    canvas.unbind("<ButtonRelease-1>")
+    clear_bindings()
     canvas.bind("<Button-1>", paint_start)
     if brush_mode == "solid":
         canvas.bind("<B1-Motion>", paint)
     elif brush_mode == "dotted":
         canvas.bind("<B1-Motion>", dotted_paint)
 
-# 슬라이더를 통해 브러시 크기를 변경하는 함수
 def change_brush_size(new_size):
     global brush_size
     brush_size = int(new_size)
 
-# 캔버스를 지우는 함수
 def clear_paint():
     canvas.delete("all")
     global last_x, last_y
     last_x, last_y = None, None
 
-# 텍스트를 추가하는 함수
 def add_text(event):
     text = text_box.get()
     action = canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
     actions.append(action)
 
-# 전체 화면 모드를 토글하는 함수
 def toggle_fullscreen(event):
     window.state = not window.state
     window.attributes("-fullscreen", window.state)
 
-# 좌우 반전 기능을 수행하는 함수
 def flip_horizontal():
     objects = canvas.find_all()
     canvas.update()
@@ -120,7 +104,6 @@ def flip_horizontal():
                 coords[i] = canvas_width - coords[i]
         canvas.coords(obj, *coords)
 
-# 지우개 기능을 수행하는 함수
 def erase(event):
     bg_color = canvas.cget("bg")
     x1, y1 = ( event.x-3 ), ( event.y-3 )
@@ -128,44 +111,37 @@ def erase(event):
     action = canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
     actions.append(action)
 
-# 배경 색상을 변경하는 함수
 def change_bg_color():
     bg_color = askcolor()
     canvas.config(bg=bg_color[1])
 
-# 브러시 색상을 변경하는 함수
 def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
 
-# 새 창을 여는 함수
 def create_new_window():
     new_window = Tk()
     new_canvas = Canvas(new_window)
     new_canvas.pack()
     new_window.mainloop()
 
-# 작업을 되돌리는 함수 (Undo 기능)
 def undo_action():
     if len(actions) > 0:
         action = actions.pop()
         undo_actions.append(action)
         canvas.itemconfigure(action, state='hidden')
 
-# 작업을 다시 실행하는 함수 (Redo 기능)
 def redo_action():
     if len(undo_actions) > 0:
         action = undo_actions.pop()
         actions.append(action)
         canvas.itemconfigure(action, state='normal')
 
-# 도형 그리기를 시작하는 함수
 def shape_start(event):
     global start_x, start_y, shape_obj
     start_x, start_y = event.x, event.y
     shape_obj = None
 
-# 도형을 그리는 함수
 def draw_shape(event):
     global shape_obj
     end_x, end_y = event.x, event.y
@@ -178,7 +154,6 @@ def draw_shape(event):
     elif selected_shape == "triangle":
         shape_obj = canvas.create_polygon(start_x, start_y, end_x, end_y, (start_x+end_x)/2, start_y - (end_y-start_y), outline=brush_color, fill='', width=brush_size)
 
-# 도형을 확정짓는 함수
 def finalize_shape(event):
     global shape_obj
     end_x, end_y = event.x, event.y
@@ -193,17 +168,44 @@ def finalize_shape(event):
     actions.append(shape_obj)
     shape_obj = None
 
-# 도형 모드를 설정하는 함수
 def set_shape_mode(shape):
     global selected_tool, selected_shape
     selected_tool = "shape"
     selected_shape = shape
-    canvas.unbind("<Button-1>")
-    canvas.unbind("<B1-Motion>")
-    canvas.unbind("<ButtonRelease-1>")
+    clear_bindings()
     canvas.bind("<Button-1>", shape_start)
     canvas.bind("<B1-Motion>", draw_shape)
     canvas.bind("<ButtonRelease-1>", finalize_shape)
+
+def clear_bindings():
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def select_item(event):
+    global selected_item, start_x, start_y
+    clear_bindings()
+    canvas.bind("<B1-Motion>", move_item)
+    canvas.bind("<ButtonRelease-1>", finalize_move)
+    selected_item = canvas.find_closest(event.x, event.y)[0]
+    start_x, start_y = event.x, event.y
+
+def move_item(event):
+    global start_x, start_y
+    if selected_item:
+        dx, dy = event.x - start_x, event.y - start_y
+        canvas.move(selected_item, dx, dy)
+        start_x, start_y = event.x, event.y
+
+def finalize_move(event):
+    global selected_item
+    selected_item = None
+
+def set_select_mode():
+    global selected_tool
+    selected_tool = "select"
+    clear_bindings()
+    canvas.bind("<Button-1>", select_item)
 
 # 메인 윈도우 설정
 window = Tk()
@@ -219,6 +221,7 @@ canvas.pack(fill="both", expand=True)
 actions = []
 undo_actions = []
 shape_obj = None
+selected_item = None
 
 # 캔버스에 그림 그리기 및 텍스트 추가 기능 바인딩
 canvas.bind("<Button-1>", paint_start)
@@ -281,6 +284,10 @@ button_oval.pack(side=LEFT)
 
 button_triangle = Button(window, text="Triangle", command=lambda: set_shape_mode("triangle"))
 button_triangle.pack(side=LEFT)
+
+# 선택 모드 버튼 설정
+button_select = Button(window, text="Select & Move", command=set_select_mode)
+button_select.pack(side=LEFT)
 
 # 기본 그리기 모드 설정
 set_paint_mode_normal()
