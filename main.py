@@ -49,9 +49,16 @@ def paint_start(event):
 def paint(event, canvas):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
-    x1, y1 = x2, y2
+    
+    # 선을 그리면서 빈틈을 방지하기 위해 작은 원을 그리는 방식으로 수정
+    distance = ((x2 - x1)**2 + (y2 - y1)**2)**0.5
+    steps = int(distance // (brush_size/2)) + 1
+    for i in range(steps):
+        x = x1 + (x2 - x1) * i / steps
+        y = y1 + (y2 - y1) * i / steps
+        canvas.create_oval(x - brush_size // 2, y - brush_size // 2, x + brush_size // 2, y + brush_size // 2, fill=brush_color, outline=brush_color)#브러쉬 사이즈 조절 오류 해결 
 
+    x1, y1 = x2, y2
 def dotted_paint(event, canvas):
     global last_x, last_y
     spacing = 10  # 점 사이의 간격을 설정
@@ -60,7 +67,7 @@ def dotted_paint(event, canvas):
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x - 1, event.y - 1, event.x + 1, event.y + 1, fill="black", outline="black")
+            canvas.create_oval(event.x - 1, event.y - 1, event.x + 1, event.y + 1, fill=brush_color, outline=brush_color)#브러쉬 컬러 변경 에러 수정
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
