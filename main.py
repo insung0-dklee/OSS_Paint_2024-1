@@ -10,6 +10,7 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+from PIL import Image, ImageTk  # Pillow 라이브러리를 사용하여 이미지를 불러오고 Tkinter에서 사용할 수 있도록 변환
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -133,6 +134,21 @@ def create_new_window():
     new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
+
+# 이미지를 추가하는 함수
+def add_image():
+    file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")])
+    if file_path:
+        img = Image.open(file_path)
+        img = img.resize((100, 100), Image.ANTIALIAS)  # 이미지를 리사이즈
+        img_tk = ImageTk.PhotoImage(img)
+        canvas.create_image(50, 50, anchor=NW, image=img_tk)
+        canvas.image = img_tk  # 이미지가 가비지 컬렉션되지 않도록 참조를 저장
+
+# "Add Image" 버튼 추가
+button_add_image = Button(window, text="Add Image", command=add_image)
+button_add_image.pack(side=LEFT)
+
 
 
 window = Tk()
