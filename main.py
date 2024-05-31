@@ -41,30 +41,42 @@ def paint_pressure(event):
 def paint_start(event):
     global x1, y1
     x1, y1 = (event.x - brush_size), (event.y - brush_size)
-
+"""
+(hotfix 2024/05/31) 
+brush가 십자모양인것을 원모양으로 그려지도록 radius변수로 수정함
+또한 width의 값이 2로 고정된 것을 brush_size에 따라 달라지는 radius 변수로 해결함
+"""
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    radius = brush_size // 2
+    canvas.create_oval(x1 - radius, y1 - radius, x1 + radius, y1 + radius, fill=brush_color, outline=brush_color)
     x1, y1 = x2, y2
+
 
 """
 dotted_paint: 점선 브러쉬 함수
 이벤트가 발생한 위치에 검은색 원을 일정한 간격으로 그린다.
 매개변수: event - 마우스 이벤트 객체로, 마우스의 현재 좌표를 포함
+
+(hotfix 2024/05/31) 
+brush_size에 따라 정해지는 radius 변수를 추가해
+dot brush에도 크기를 조정할 수 있게 만듦
 """
 def dotted_paint(event): # 점선 브러쉬 함수
     global last_x, last_y
     spacing = 10  # 점 사이의 간격을 설정
+    radius = brush_size // 2 # radius 변수 추가
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
-            last_x, last_y = event.x, event.y
+            canvas.create_oval(event.x - radius, event.y - radius, event.x + radius, event.y + radius, fill=brush_color, outline=brush_color)
+            last_x, last_y = event.x, event.y #radius 값에 따라 크기가 달라짐
     else:
         last_x, last_y = event.x, event.y
+
 
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
