@@ -204,3 +204,22 @@ button_brush_color.pack(side=LEFT)
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
+
+def draw_rectangle(event):
+    x1, y1 = (event.x - 50), (event.y - 50)  # 마우스 클릭 위치의 왼쪽 상단 좌표를 계산함
+    x2, y2 = (event.x + 50), (event.y + 50)  # 마우스 클릭 위치의 오른쪽 하단 좌표 계산함
+    canvas.create_rectangle(x1, y1, x2, y2, fill=brush_color, outline=brush_color)  # 계산된 좌표를 사용하여 캔버스에 직사각형을 그림
+
+def draw_circle(event):
+    x1, y1 = (event.x - 50), (event.y - 50)   # 마우스 클릭 위치의 왼쪽 상단 좌표를 계산함
+    x2, y2 = (event.x + 50), (event.y + 50)  # 마우스 클릭 위치의 오른쪽 하단 좌표 계산함
+    canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color) # 계산된 좌표를 사용하여 캔버스에 원을 그림
+
+def draw_triangle(event):
+    x1, y1 = event.x, event.y - 50  #삼각형의 꼭대기 좌표 계산함
+    x2, y2 = event.x - 50, event.y + 50  # 삼각형의 밑 변을 이루는 두 꼭짓점 중 하나의 좌표 계산
+    x3, y3 = event.x + 50, event.y + 50   # 삼각형의 밑 변을 이루는 두 꼭짓점 중 다른 하나의 좌표 계산
+    canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill=brush_color, outline=brush_color)  # 계산된 좌표를 사용하여 캔버스에 삼각형을 그림
+
+
+
