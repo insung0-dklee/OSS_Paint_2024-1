@@ -17,6 +17,7 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+line_mode = False  # 직선 그리기 모드를 나타내는 변수 ###########################
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -74,7 +75,7 @@ set_brush_mode: 브러쉬 모드를 변경하는 함수
 def set_brush_mode(mode): # 브러쉬 모드를 변경하는 함수
     global brush_mode
     brush_mode = mode
-    if brush_mode == "solid": # 브러쉬 모드가 solid면 
+    if brush_mode == "solid": # 브러쉬 모드가 solid면
         canvas.bind("<B1-Motion>", paint) # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted": # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", dotted_paint) # 점선 브러쉬로 변경
@@ -134,6 +135,47 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def set_paint_mode_line():
+    global line_mode
+    line_mode = not line_mode
+    if line_mode:
+        line_mode = True
+        button_line.config(bg="green")  # 활성화될 때 버튼 색상 변경
+        # 다른 브러시 모드 비활성화
+        button_solid.config(state=DISABLED)
+        button_dotted.config(state=DISABLED)
+        canvas.bind("<Button-1>", start_draw_line)  # 직선 그리기 시작
+    else:
+        line_mode = False
+        button_line.config(bg="SystemButtonFace")  # 비활성화될 때 버튼 색상 변경
+        # 다른 브러시 모드 활성화
+        button_solid.config(state=NORMAL)
+        button_dotted.config(state=NORMAL)
+        # 다시 기본 그리기 모드로 변경
+        set_paint_mode_normal()
+        # 직선 그리기 모드가 해제되면서 바인딩된 이벤트 핸들러를 언바인딩
+        canvas.unbind("<Button-1>")
+        canvas.unbind("<B1-Motion>")
+        canvas.unbind("<ButtonRelease-1>")
+
+
+def draw_line(event):
+    global start_x, start_y
+    canvas.delete("temp_line")  # 이전에 그린 임시 직선 삭제
+    canvas.create_line(start_x, start_y, event.x, event.y, fill=brush_color, width=2, tags="temp_line")  # 임시 직선 그리기
+
+def end_draw_line(event):
+    global start_x, start_y
+    canvas.create_line(start_x, start_y, event.x, event.y, fill=brush_color, width=2)  # 실제 직선 그리기
+    canvas.delete("temp_line")  # 마지막으로 그린 임시 직선 삭제
+    canvas.unbind("<B1-Motion>")  # 마우스 움직임 이벤트 핸들러 언바인딩
+
+def start_draw_line(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", draw_line)  # 마우스 움직임 이벤트 핸들러 연결
+    canvas.bind("<ButtonRelease-1>", end_draw_line)  # 마우스 버튼 놓기 이벤트 핸들러 연결
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -185,7 +227,7 @@ text_box.pack(side=LEFT)
 canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
 
-button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
+button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦
 button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배치
 
 button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
@@ -200,6 +242,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_line = Button(button_frame, text="직선", command=set_paint_mode_line)
+button_line.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
