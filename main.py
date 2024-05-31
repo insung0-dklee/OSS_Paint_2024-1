@@ -47,7 +47,10 @@ def paint(event):
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
     x1, y1 = x2, y2
+def enable_keyboard_paint():
+    window.bind("<KeyPress>", keyboard_paint)
 
+     
 """
 dotted_paint: 점선 브러쉬 함수
 이벤트가 발생한 위치에 검은색 원을 일정한 간격으로 그린다.
@@ -134,7 +137,27 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def paint_rectangle():
+    global x1, y1, x2, y2
+    canvas.bind("<Button-1>", start_rectangle)
+    canvas.bind("<B1-Motion>", draw_rectangle)
 
+def start_rectangle(event):
+    global x1, y1
+    x1, y1 = event.x, event.y
+
+def draw_rectangle(event):
+    global x1, y1, x2, y2
+    x2, y2 = event.x, event.y
+    canvas.delete("rect")
+    canvas.create_rectangle(x1, y1, x2, y2, outline=brush_color, width=2, tag="rect")
+"""
+사각형의 좌표를 저장하기 위한 전역변수를 선언후 왼쪽 마우스 버튼 클릭 이벤트에 start_rectangle, 이동 이벤트에draw_rectangle를 설정한다
+시작좌표를 저장하기 위해 전역변수를 선언, 마우스 클릭 이벤트에 x와 y좌표를 저장한다
+사각형의 좌표를 저장히기 위해 전역 변수를 선언하고 마우스 이동 이벤트의 x와 y좌표를 업데이트한다.
+"rect" 태그가 있는 기존 사각형을 삭제하여 여러 개의 사각형이 그려지는 것을 방지한다.
+"""
+    
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
@@ -168,6 +191,7 @@ brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
 brush_size_slider.pack(side=LEFT)
 
+
 button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
 button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
 
@@ -175,9 +199,6 @@ button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mo
 button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
 
 button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
-button_paint.pack(side=RIGHT)
-
-button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
 text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
@@ -201,6 +222,14 @@ button_bg_color.pack(side=LEFT)
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
 
+button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
+button_paint.pack(side=LEFT)
+
+button_paintrectangle = Button(window, text="rectangle", command=paint_rectangle)
+button_paintrectangle.pack(side=LEFT)
+
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
+
+
