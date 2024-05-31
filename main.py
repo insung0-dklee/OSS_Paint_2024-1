@@ -12,6 +12,12 @@ from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가�
 import math  # 수학 모듈을 가져옴
 import turtle #turtle 그래픽 모듈
 
+# 터틀의 선 색상을 변경하는 함수
+def change_turtle_color():
+    color = askcolor()[1]
+    if color:
+        turtle_obj.pencolor(color) #turtle 객체의 색상 변경
+
 # 터틀을 회전시키는 함수
 def rotate_turtle():
     turtle_obj.right(90)
@@ -40,6 +46,9 @@ def run_turtle():
 
     button_forward = Button(turtle_screen._root, text="Move Forward", command=move_forward) # turtle 직진
     button_forward.pack(side=LEFT)
+
+    button_change_color = Button(turtle_screen._root, text="Change Color", command=change_turtle_color) # 색상 변경 버튼
+    button_change_color.pack(side=LEFT)
 
     turtle_screen.mainloop()
 
