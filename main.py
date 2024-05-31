@@ -77,11 +77,11 @@ def circle_brush(event):
     x, y = event.x, event.y
     brush_radius = brush_size // 2
     inner_radius = brush_radius - 2
-
+    #내부원 설정
     canvas.create_oval(x - inner_radius, y - inner_radius,
                        x + inner_radius, y + inner_radius,
                        fill=canvas.cget("bg"), outline="")
-
+    #외부원 설정
     canvas.create_oval(x - brush_radius, y - brush_radius,
                        x + brush_radius, y + brush_radius,
                        outline=brush_color, width=2)
