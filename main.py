@@ -10,6 +10,8 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+from tkinter import filedialog  # 파일 다이얼로그를 가져옴
+from PIL import ImageGrab  # Pillow의 ImageGrab을 가져옴
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -17,6 +19,16 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+
+def save_canvas_to_image(): # 캔버스의 내용을 이미지로 저장하는 함수
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", 
+                                             filetypes=[("PNG files", "*.png"), ("All files", "*.*")]) # 파일의 경로와 이름을 지정할 수 있는 파일 다이얼로그를 연다
+    if file_path:
+        x = window.winfo_rootx() + canvas.winfo_x() # 창의 루트 x 좌표에 캔버스의 x 좌표를 더하여 캔버스의 x좌표를 계산
+        y = window.winfo_rooty() + canvas.winfo_y() # 창의 루트 y 좌표에 캔버스의 y 좌표를 더하여 캔버스의 y 좌표를 계산
+        x1 = x + canvas.winfo_width() # 캔버스의 너비를 더하여 우하단 x 좌표를 계산
+        y1 = y + canvas.winfo_height() # 캔버스의 높이를 더하여 우하단 y 좌표를 계산
+        ImageGrab.grab().crop((x, y, x1, y1)).save(file_path) # 계산된 좌표를 사용해 캔버스 영역의 스크린샷을 캡처하고 지정된 경로에 이미지 파일로 저장
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -200,6 +212,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_save = Button(window, text="Save Image", command=save_canvas_to_image)
+button_save.pack(side=LEFT) # 이미지로 저장하기 버튼을 윈도우에 배치
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
