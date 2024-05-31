@@ -218,6 +218,41 @@ def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
 
+# 흑백 변환 기능 추가
+def to_grayscale(color):
+    try:
+        r = int(color[1:3], 16)
+        g = int(color[3:5], 16)
+        b = int(color[5:7], 16)
+        gray = int((r + g + b) / 3)
+        return "#{:02x}{:02x}{:02x}".format(gray, gray, gray)
+    except ValueError:
+        return color  # 유효하지 않은 색상은 그대로 반환
+
+def grayscale_colors():
+    # 그린 객체들 흑백화
+    objects = canvas.find_all()
+    for obj in objects:
+        current_color = canvas.itemcget(obj, "fill")
+        # 색이 black, white라는 문자열일 수 있으므로 예외처리
+        if current_color == 'black':
+            current_color = "#000000"
+        if current_color == 'white':
+            current_color = "#ffffff"
+        if current_color and current_color != "":
+            inverted_color = to_grayscale(current_color)
+            canvas.itemconfig(obj, fill=inverted_color)
+
+    # 배경색 흑백화
+    current_bg_color = canvas.cget("bg")
+    if current_bg_color == 'black':
+        current_bg_color = "#000000"
+    if current_bg_color == 'white':
+        current_bg_color = "#ffffff"
+    if current_bg_color and current_bg_color != "":
+        inverted_bg_color = to_grayscale(current_bg_color)
+        canvas.config(bg=inverted_bg_color)
+
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
@@ -386,6 +421,9 @@ def setup_paint_app(window):
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
 
+    # 흑백화 버튼
+    button_grayscale = Button(button_frame, text="흑백 변환", command=grayscale_colors)
+    button_grayscale.pack(side=LEFT)
 # 새 창 열기 생성
 def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
