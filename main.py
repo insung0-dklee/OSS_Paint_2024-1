@@ -134,6 +134,17 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def flip_vertical():
+    objects = canvas.find_all()
+    canvas.update()
+    canvas_height = canvas.winfo_height()
+    for obj in objects:
+        coords = canvas.coords(obj)
+        for i in range(len(coords)):
+            if i % 2 != 0:  # y 좌표를 반전시킵니다.
+                coords[i] = canvas_height - coords[i]
+        canvas.coords(obj, *coords)
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +211,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_flip_vertical = Button(window, text="Flip Vertical", command=flip_vertical)
+button_flip_vertical.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
