@@ -3,10 +3,9 @@ Project : Paint
 paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그리는 기능
 clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
-
 """
 
-from tkinter import *
+from tkinter import * # tkinter 모듈 임포트
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
@@ -37,10 +36,18 @@ def paint_pressure(event):
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+from tkinter.colorchooser import askcolor
+from tkinter import filedialog
 
 def paint_start(event):
     global x1, y1
     x1, y1 = (event.x - brush_size), (event.y - brush_size)
+# 초기 설정 값
+brush_color = "black"
+brush_size = 2
+last_x, last_y = None, None
+shape_start_x, shape_start_y = None, None
+current_shape = None
 
 def paint(event):
     global x1, y1
@@ -54,15 +61,15 @@ dotted_paint: 점선 브러쉬 함수
 매개변수: event - 마우스 이벤트 객체로, 마우스의 현재 좌표를 포함
 """
 def dotted_paint(event): # 점선 브러쉬 함수
+# 점선 브러시 함수
+def dotted_paint(event):
     global last_x, last_y
     spacing = 10  # 점 사이의 간격을 설정
+    spacing = 10
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
-        distance = (dx ** 2 + dy ** 2) ** 0.5
-        if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
-            last_x, last_y = event.x, event.y
+@@ -66,141 +23,129 @@ def dotted_paint(event): # 점선 브러쉬 함수
     else:
         last_x, last_y = event.x, event.y
 
@@ -72,12 +79,18 @@ set_brush_mode: 브러쉬 모드를 변경하는 함수
 매개변수: mode - 브러쉬 모드를 나타내는 문자열 ("solid" 또는 "dotted")
 """
 def set_brush_mode(mode): # 브러쉬 모드를 변경하는 함수
+# 브러시 모드 설정 함수
+def set_brush_mode(mode):
     global brush_mode
     brush_mode = mode
     if brush_mode == "solid": # 브러쉬 모드가 solid면 
         canvas.bind("<B1-Motion>", paint) # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted": # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", dotted_paint) # 점선 브러쉬로 변경
+    if brush_mode == "solid":
+        canvas.bind("<B1-Motion>", paint)
+    elif brush_mode == "dotted":
+        canvas.bind("<B1-Motion>", dotted_paint)
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -85,6 +98,7 @@ def change_brush_size(new_size):
     brush_size = int(new_size)
 
 #all clear 기능 추가
+# 캔버스 초기화 함수
 def clear_paint():
     canvas.delete("all")
     global last_x, last_y
@@ -94,7 +108,7 @@ def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위�
 
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
+
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -122,7 +136,21 @@ def erase(event):
 def change_bg_color():
     bg_color = askcolor()
     canvas.config(bg=bg_color[1])
+    last_x, last_y = None, None
 
+# 실선 브러시 페인트 함수
+def paint(event):
+    global last_x, last_y
+    x2, y2 = event.x, event.y
+    canvas.create_line(last_x, last_y, x2, y2, fill=brush_color, width=brush_size)
+    last_x, last_y = x2, y2
+
+# 페인트 시작 함수
+def paint_start(event):
+    global last_x, last_y
+    last_x, last_y = event.x, event.y
+
+# 브러시 색상 변경 함수
 def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
@@ -135,11 +163,62 @@ def create_new_window():
     new_window.mainloop()
 
 
+# 도형 그리기 시작 함수
+def start_shape(event):
+    global shape_start_x, shape_start_y
+    shape_start_x, shape_start_y = event.x, event.y
+
+# 도형 그리기 함수
+def draw_shape(event):
+    global current_shape
+    if current_shape:
+        canvas.delete(current_shape)
+    x1, y1 = shape_start_x, shape_start_y
+    x2, y2 = event.x, event.y
+    if shape_mode == "rectangle":
+        current_shape = canvas.create_rectangle(x1, y1, x2, y2, outline=brush_color)
+    elif shape_mode == "oval":
+        current_shape = canvas.create_oval(x1, y1, x2, y2, outline=brush_color)
+    elif shape_mode == "line":
+        current_shape = canvas.create_line(x1, y1, x2, y2, fill=brush_color)
+
+# 도형 그리기 완료 함수
+def finish_shape(event):
+    global current_shape
+    current_shape = None
+
+# 도형 모드 설정 함수
+def set_shape_mode(mode):
+    global shape_mode
+    shape_mode = mode
+    canvas.bind("<Button-1>", start_shape)
+    canvas.bind("<B1-Motion>", draw_shape)
+    canvas.bind("<ButtonRelease-1>", finish_shape)
+
+# 캔버스 저장 함수
+def save_canvas():
+    file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
+    if file_path:
+        canvas.postscript(file=file_path)
+
+# 캔버스 불러오기 함수
+def load_canvas():
+    file_path = filedialog.askopenfilename(filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
+    if file_path:
+        with open(file_path, "r") as f:
+            ps_data = f.read()
+            canvas.delete("all")
+            canvas.create_text(0, 0, text=ps_data, anchor=NW)
+
+# 메인 윈도우 설정
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
+window.geometry("640x400")
+window.resizable(True, True)
 
 brush_size = 1  # 초기 브러시 크기
+# 캔버스 설정
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
 window.geometry("640x400+200+200")
@@ -153,10 +232,12 @@ canvas.pack(fill="both",expand=True)
 
 last_x, last_y = None, None # 마지막 좌표 초기화
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
+canvas.pack(fill="both", expand=True)
 canvas.bind("<Button-1>", paint_start)
 canvas.bind("<B1-Motion>", paint)
 # 캔버스에 마우스 왼쪽 버튼을 누르고 움직일 때마다 paint 함수를 호출하도록 바인딩
 
+# 버튼 설정
 button_frame = Frame(window)
 button_frame.pack(fill=X)
 
@@ -170,9 +251,13 @@ brush_size_slider.pack(side=LEFT)
 
 button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
 button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
+button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode("solid"))
+button_solid.pack(side=LEFT)
 
 button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
 button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
+button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode("dotted"))
+button_dotted.pack(side=LEFT)
 
 button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
@@ -187,20 +272,35 @@ window.bind("<F11>", toggle_fullscreen)
 
 button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
 button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배치
+button_brush_color = Button(button_frame, text="Change Brush Color", command=change_brush_color)
+button_brush_color.pack(side=LEFT)
 
 button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
 button_flip.pack(side=LEFT)
+button_rectangle = Button(button_frame, text="Rectangle", command=lambda: set_shape_mode("rectangle"))
+button_rectangle.pack(side=LEFT)
 
 canvas.bind("<B3-Motion>", erase)
+button_oval = Button(button_frame, text="Oval", command=lambda: set_shape_mode("oval"))
+button_oval.pack(side=LEFT)
 
 brush_color = "black"
+button_line = Button(button_frame, text="Line", command=lambda: set_shape_mode("line"))
+button_line.pack(side=LEFT)
 
 button_bg_color = Button(window, text="Change Background Color", command=change_bg_color)
 button_bg_color.pack(side=LEFT)
+button_save = Button(button_frame, text="Save", command=save_canvas)
+button_save.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+button_load = Button(button_frame, text="Load", command=load_canvas)
+button_load.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
+# 초기 브러시 모드
+set_brush_mode("solid")
 
+# 메인 루프 시작
 window.mainloop()
