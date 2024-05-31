@@ -5,11 +5,12 @@ clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
 
 """
-
+import tkinter as tk
 from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+import random
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -17,6 +18,10 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+
+def change_background_color(event): 
+    random_color = "#{:06x}".format(random.randint(0, 0xFFFFFF)) # 랜덤 색상 생성
+    canvas.config(bg=random_color)  # 캔버스 배경색 변경
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -134,6 +139,18 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+root = tk.Tk()
+root.title("랜덤 배경색 그림판")
+
+# 캔버스 생성
+canvas = tk.Canvas(root, width=800, height=600)
+canvas.pack()
+
+# 마우스 클릭할때마다 색상 변경 
+canvas.bind("<Button-1>", change_background_color)
+
+# 메인 루프 실행
+root.mainloop()
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
