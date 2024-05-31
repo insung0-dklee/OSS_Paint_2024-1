@@ -10,6 +10,7 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+import random # 곡선 각도 설정을 위한 랜덤 모듈
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -20,6 +21,26 @@ last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 �
 last_sym_x, last_sym_y = None, None  # 좌우 대칭된 마지막 위치를 저장할 변수 초기화
 last_vert_sym_x, last_vert_sym_y = None, None  # 상하 대칭된 마지막 위치를 저장할 변수 추가 초기화
 last_full_sym_x, last_full_sym_y = None, None  # 상하좌우 대칭된 마지막 위치를 저장할 변수 추가 초기화
+
+
+def draw_curvy_line(event):
+    global last_x, last_y
+    if last_x is not None and last_y is not None:
+        # 마우스의 현재 위치와 이전 위치 사이의 중간 지점을 계산
+        mid_x = (event.x + last_x) / 2
+        mid_y = (event.y + last_y) / 2
+
+        # 중간 지점에 약간의 무작위성을 추가하여 굴곡을 만듬
+        curve_x = mid_x + random.uniform(-30, 30)  
+        curve_y = mid_y + random.uniform(-30, 30)  
+
+        # 이전 위치에서 중간 굴곡 지점을 거쳐 현재 위치로 선을 그림
+        canvas.create_line(last_x, last_y, curve_x, curve_y, event.x, event.y, smooth=True, width=brush_size)
+
+    # 현재 마우스 위치를 마지막 위치로 업데이트
+    last_x = event.x
+    last_y = event.y
+
 
 
 # 마우스 움직임에 따라 도형을 그리는 함수
@@ -279,6 +300,9 @@ brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 canvas.bind("<Button-1>", paint_start)
 canvas.bind("<B1-Motion>", paint)
 # 캔버스에 마우스 왼쪽 버튼을 누르고 움직일 때마다 paint 함수를 호출하도록 바인딩
+
+# 오른쪽 마우스 드래그 이벤트에 draw_curvy_line 함수를 바인딩
+canvas.bind("<B2-Motion>", draw_curvy_line)
 
 button_frame = Frame(window)
 button_frame.pack(fill=X)
