@@ -3,11 +3,24 @@ Project : Paint
 paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그리는 기능
 clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
+save(): canvas의 내용을 png 파일로 저장하는 기능
+button_save : save()를 실행하는 버튼
 
 """
 
-from PIL import ImageGrab
+import sys #이미지를 처리하는 pillow[PIL] 라이브러리를 설치하기위해 pip를 호출
+import subprocess 
+
+try:
+    from PIL import ImageGrab #이미지를 처리하는 pillow[PIL] 라이브러리
+except:
+    subprocess.check_call([sys.executable,'-m','pip','install','--upgrade','pip'])
+    subprocess.check_call([sys.executable,'-m','pip','install','--upgrade','pillow']) # 설치되지 않았으면 해당 라이브러리 설치
+
+from PIL import ImageGrab #imageGrab을 사용하여 canvas의 내용을 이미지로 추출한다
+
 from tkinter import *
+from tkinter import filedialog # 저장 버튼을 누르면 파일다이얼로그의 저장 기능을 사용하도록 하기 위한 모듈
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
@@ -135,29 +148,27 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
-def save():
-    x = window.winfo_rootx()
-    y = window.winfo_rootx()
-    w = window.winfo_width() + x
-    h = window.winfo_height() + y
+def save(): # canvas 그림 저장
+    file_path = filedialog.asksaveasfilename(defaultextension='.png',filetypes=[("png file",".png")]) #파일 다이얼로그로 저장할 위치를 정하고 이름을 입력
+    #위의 파일 다이얼로그는 위치와 이름을 file_path에 반환
 
-    box = (x, y, w, h)
-    img=ImageGrab.grab(box) #창의 크기만큼만 이미지저장
-    saveas='capture.png'
-    img.save(saveas) # 이미지를 파일로 저장
-
-
-
-
+    x = window.winfo_rootx() # 그림판 창의 크기를 추출
+    y = window.winfo_rooty()
+    w = window.winfo_width()+x
+    h = window.winfo_height()+y
+    drawing = (x, y, w, h)
+    img=ImageGrab.grab(drawing) #창의 크기만큼만 이미지저장
+    img.save(file_path) # 위에서 정한 이름과 위치로 저장
 
 window = Tk()
+canvas = Canvas(window)
+canvas.pack()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
-
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("640x400+200+200")
+window.geometry("840x600+200+200")
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
 #윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
 window.resizable(True,True)
@@ -216,8 +227,11 @@ button_bg_color.pack(side=LEFT)
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
 
-button_save = Button(window, text="save", command=save).pack(side=LEFT)
+button_save = Button(window, text="저장하기", command=save)
+button_save.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
+
+
 
 window.mainloop()
