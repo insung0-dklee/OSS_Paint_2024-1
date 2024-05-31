@@ -45,7 +45,7 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size) # width가 2로 고정되어있던 부분을 brush_size로 수정
     x1, y1 = x2, y2
 
 """
