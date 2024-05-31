@@ -27,4 +27,22 @@ button_delete.pack()
 
 window.mainloop()
 
+#도형회전기능 추가
 
+def rotate_shapes():
+    angle = math.radians(45)  # 45도 회전
+    center_x = canvas.winfo_width() / 2
+    center_y = canvas.winfo_height() / 2
+
+    objects = canvas.find_all()
+    for obj in objects:
+        coords = canvas.coords(obj)
+        new_coords = []
+        for i in range(0, len(coords), 2):
+            x = coords[i]
+            y = coords[i + 1]
+            # 원점 기준 회전
+            new_x = center_x + (x - center_x) * math.cos(angle) - (y - center_y) * math.sin(angle)
+            new_y = center_y + (x - center_x) * math.sin(angle) + (y - center_y) * math.cos(angle)
+            new_coords.extend([new_x, new_y])
+        canvas.coords(obj, *new_coords)
