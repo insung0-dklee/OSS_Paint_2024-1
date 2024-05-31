@@ -90,6 +90,13 @@ def clear_paint():
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
 
+#undo(되돌리기) 기능 추가
+undo_stack = []
+
+def undo():
+        canvas.delete(canvas.find_all()[-1])
+
+
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
     text = text_box.get()
@@ -179,6 +186,9 @@ button_paint.pack(side=RIGHT)
 
 button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
+
+button_undo = Button(button_frame, text="Undo", command=undo)
+button_undo.pack(side=LEFT)
 
 text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
