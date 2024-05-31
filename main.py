@@ -90,8 +90,12 @@ def clear_paint():
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
 
-def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
+def add_text(event):
+    """
+    텍스트를 입력받고, 클릭한 위치에 해당 텍스트를 추가하는 함수입니다.
+    매개변수:
+        event: 마우스 이벤트 객체로, 클릭한 위치의 좌표를 포함합니다.
+    """
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
    
