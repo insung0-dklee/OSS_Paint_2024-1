@@ -17,6 +17,16 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+widgets_info = [] #위젯과 이에 해당하는 위젯의 정보를 저장하는 배열
+
+def toggle_widgets(event): #화면상 위젯들을 화면상에서 on/off시키는 기능
+    if event.char == 'u': #입력한 키가 "u"가 맞는 경우
+        for widget, info in widgets_info: # 배열에 저장된 위젯만큼 루프
+                if widget.winfo_viewable():  # 위젯이 보이는 경우
+                    widget.pack_forget()  # 위젯 표시 off
+                else: # 위젯이 보이지 않는 경우
+                 widget.pack(info)  # 위젯 표시 on
+
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -159,37 +169,48 @@ canvas.bind("<B1-Motion>", paint)
 
 button_frame = Frame(window)
 button_frame.pack(fill=X)
+widgets_info.append((button_frame, button_frame.pack_info())) #위젯의 정보를 배열에 저장 #위젯의 정보를 배열에 저장
 
 button_clear = Button(button_frame, text="All Clear", command=clear_paint)
 button_clear.pack(side=LEFT)
+widgets_info.append((button_clear, button_clear.pack_info())) #위젯의 정보를 배열에 저장
 
 # 펜 굵기를 조절할 수 있는 슬라이더 추가
 brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
 brush_size_slider.pack(side=LEFT)
+widgets_info.append((brush_size_slider, brush_size_slider.pack_info())) #위젯의 정보를 배열에 저장
 
 button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
 button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
+widgets_info.append((button_solid, button_solid.pack_info())) #위젯의 정보를 배열에 저장
 
 button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
 button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
+widgets_info.append((button_dotted, button_dotted.pack_info())) #위젯의 정보를 배열에 저장
 
-button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
-button_paint.pack(side=RIGHT)
+button_paint_normal = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
+button_paint_normal.pack(side=RIGHT)
+widgets_info.append((button_paint_normal, button_paint_normal.pack_info())) #위젯의 정보를 배열에 저장
 
-button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
-button_paint.pack(side=RIGHT)
+button_paint_pressure = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
+button_paint_pressure.pack(side=RIGHT)
+widgets_info.append((button_paint_pressure, button_paint_pressure.pack_info())) #위젯의 정보를 배열에 저장
 
 text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
+widgets_info.append((text_box, text_box.pack_info())) #위젯의 정보를 배열에 저장
+
 canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
 
 button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
 button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배치
+widgets_info.append((button_new_window, button_new_window.pack_info())) #위젯의 정보를 배열에 저장
 
 button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
 button_flip.pack(side=LEFT)
+widgets_info.append((button_flip, button_flip.pack_info())) #위젯의 정보를 배열에 저장
 
 canvas.bind("<B3-Motion>", erase)
 
@@ -197,10 +218,13 @@ brush_color = "black"
 
 button_bg_color = Button(window, text="Change Background Color", command=change_bg_color)
 button_bg_color.pack(side=LEFT)
+widgets_info.append((button_bg_color, button_bg_color.pack_info())) #위젯의 정보를 배열에 저장
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+widgets_info.append((button_brush_color, button_brush_color.pack_info())) #위젯의 정보를 배열에 저장
 
+window.bind("<KeyPress>", toggle_widgets) #입력된 키를 판별하여 toggle_widgets함수 실행
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
