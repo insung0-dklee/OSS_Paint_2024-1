@@ -3,7 +3,6 @@ Project : Paint
 paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그리는 기능
 clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
-
 """
 
 from tkinter import *
@@ -17,6 +16,7 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+actions = []  # Undo를 위한 액션 스택
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -33,10 +33,11 @@ def start_paint_pressure(event):
 def paint_pressure(event):
     global start_time
     elapsed_time = time.time() - start_time  # 마우스를 클릭한 시간부터 지금까지의 시간을 계산
-    radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
+    radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵기는 마우스 클릭 시간에 비례하여 최대 5까지 증가
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
-    canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+    action = canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+    actions.append(action)  # 작업 기록 저장
 
 def paint_start(event):
     global x1, y1
@@ -45,7 +46,8 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    action = canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    actions.append(action)  # 작업 기록 저장
     x1, y1 = x2, y2
 
 """
@@ -61,7 +63,8 @@ def dotted_paint(event): # 점선 브러쉬 함수
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
+            action = canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
+            actions.append(action)  # 작업 기록 저장
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
@@ -89,12 +92,12 @@ def clear_paint():
     canvas.delete("all")
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
+    actions.clear()  # 작업 기록 초기화
 
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
     text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
+    action = canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
+    actions.append(action)  # 작업 기록 저장
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -117,7 +120,8 @@ def erase(event):
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
     x1, y1 = ( event.x-3 ), ( event.y-3 )
     x2, y2 = ( event.x+3 ), ( event.y+3 )
-    canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
+    action = canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
+    actions.append(action)  # 작업 기록 저장
 
 def change_bg_color():
     bg_color = askcolor()
@@ -134,6 +138,11 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# Undo 기능 추가
+def undo_action():
+    if actions:
+        action = actions.pop()  # 마지막 작업을 스택에서 꺼냄
+        canvas.delete(action)  # 캔버스에서 해당 작업 삭제
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +209,10 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+# Undo 버튼 추가
+button_undo = Button(window, text="Undo", command=undo_action)
+button_undo.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
