@@ -10,6 +10,7 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+#사진 업로드를 위한 모듈 추가
 from tkinter import filedialog
 from tkinter import PhotoImage
 
@@ -136,7 +137,7 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
-
+#사진 업로드 코드
 def upload_image():
     path = filedialog.askopenfilename()
     if path:
