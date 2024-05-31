@@ -134,7 +134,28 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
-
+"""
+mix_colors: 두 가지 색상을 선택하여 혼합하는 함수
+사용자가 선택한 두 가지 색상을 혼합하여 새로운 색상을 생성한다.
+"""
+def mix_colors():
+    color1 = askcolor(title="Select First Color")[1]
+    color2 = askcolor(title="Select Second Color")[1]
+    
+    if color1 and color2:
+        r1, g1, b1 = window.winfo_rgb(color1)
+        r2, g2, b2 = window.winfo_rgb(color2)
+        
+        # 16-bit RGB 값을 8-bit로 변환 후 평균
+        r = (r1 // 256 + r2 // 256) // 2
+        g = (g1 // 256 + g2 // 256) // 2
+        b = (b1 // 256 + b2 // 256) // 2
+        
+        mixed_color = f'#{r:02x}{g:02x}{b:02x}'
+        global brush_color
+        brush_color = mixed_color
+        print(f"Mixed Color: {mixed_color}")
+    
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
@@ -142,7 +163,7 @@ window.title("그림판")
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("640x400+200+200")
+window.geometry("800x600+200+200")  # 초기 창 크기를 800x600으로 설정
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
 #윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
 window.resizable(True,True)
@@ -157,49 +178,54 @@ canvas.bind("<Button-1>", paint_start)
 canvas.bind("<B1-Motion>", paint)
 # 캔버스에 마우스 왼쪽 버튼을 누르고 움직일 때마다 paint 함수를 호출하도록 바인딩
 
+# 버튼 프레임 생성
 button_frame = Frame(window)
-button_frame.pack(fill=X)
+button_frame.pack(fill=X, side=BOTTOM)
 
 button_clear = Button(button_frame, text="All Clear", command=clear_paint)
-button_clear.pack(side=LEFT)
+button_clear.pack(side=LEFT, padx=5, pady=5)
 
 # 펜 굵기를 조절할 수 있는 슬라이더 추가
 brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
-brush_size_slider.pack(side=LEFT)
+brush_size_slider.pack(side=LEFT, padx=5, pady=5)
 
-button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
-button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
+button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
+button_solid.pack(side=LEFT, padx=5, pady=5) # 실선 브러쉬 버튼을 윈도우에 배치
 
-button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
-button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
+button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
+button_dotted.pack(side=LEFT, padx=5, pady=5) # 점선 브러쉬 버튼을 윈도우에 배치
 
-button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
-button_paint.pack(side=RIGHT)
+button_paint_normal = Button(button_frame, text="Normal Paint", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
+button_paint_normal.pack(side=LEFT, padx=5, pady=5)
 
-button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
-button_paint.pack(side=RIGHT)
+button_paint_pressure = Button(button_frame, text="Pressure Paint", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
+button_paint_pressure.pack(side=LEFT, padx=5, pady=5)
 
-text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
-text_box.pack(side=LEFT)
+text_box = Entry(button_frame) #텍스트를 입력할 공간을 생성합니다.
+text_box.pack(side=LEFT, padx=5, pady=5)
 canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
 
-button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
-button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배치
+button_new_window = Button(button_frame, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
+button_new_window.pack(side=LEFT, padx=5, pady=5) # "새 창 열기"버튼을 윈도우에 배치
 
-button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
-button_flip.pack(side=LEFT)
+button_flip = Button(button_frame, text="Flip Horizontal", command=flip_horizontal)
+button_flip.pack(side=LEFT, padx=5, pady=5)
 
 canvas.bind("<B3-Motion>", erase)
 
 brush_color = "black"
 
-button_bg_color = Button(window, text="Change Background Color", command=change_bg_color)
-button_bg_color.pack(side=LEFT)
+button_bg_color = Button(button_frame, text="Change Background Color", command=change_bg_color)
+button_bg_color.pack(side=LEFT, padx=5, pady=5)
 
-button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
-button_brush_color.pack(side=LEFT)
+button_brush_color = Button(button_frame, text="Change Brush Color", command=change_brush_color)
+button_brush_color.pack(side=LEFT, padx=5, pady=5)
+
+# 색상 혼합 버튼 추가
+button_mix_colors = Button(button_frame, text="Mix Colors", command=mix_colors)
+button_mix_colors.pack(side=LEFT, padx=5, pady=5)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
