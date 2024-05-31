@@ -10,13 +10,38 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+import turtle #turtle 그래픽 모듈
 
-# 초기 설정 값들
-selected_shape = "oval"  # 기본 도형은 타원형으로 설정
-current_color = "black"  # 기본 색상은 검은색으로 설정
-eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
-spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
-last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+# 터틀을 회전시키는 함수
+def rotate_turtle():
+    turtle_obj.right(90)
+
+# 터틀을 직진시키는 함수
+def move_forward():
+    turtle_obj.forward(100)
+
+def run_turtle():
+    global turtle_obj #turtle 객체
+    """
+    800*600 turtle graphics 생성
+    그 후, title 설정하고, turtle을 화면에 배치시킴
+    turtle의 속도와, 모양을 설정함
+    """
+    turtle_screen = turtle.Screen()
+    turtle_screen.title("Turtle Graphics")
+    turtle_screen.setup(width=800, height=600)
+    turtle_obj = turtle.Turtle()
+    turtle_obj.shape("turtle")
+    turtle_obj.speed(1)
+
+    # Turtle 화면 위에 Tkinter 버튼 추가
+    button_rotate = Button(turtle_screen._root, text="Rotate Turtle", command=rotate_turtle) # turtle 90도 회전
+    button_rotate.pack(side=LEFT)
+
+    button_forward = Button(turtle_screen._root, text="Move Forward", command=move_forward) # turtle 직진
+    button_forward.pack(side=LEFT)
+
+    turtle_screen.mainloop()
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -200,6 +225,11 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+
+button_turtle = Button(button_frame, text="Run Turtle", command=run_turtle)
+button_turtle.pack(side=LEFT)
+
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
