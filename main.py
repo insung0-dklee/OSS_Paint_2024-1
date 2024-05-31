@@ -17,6 +17,7 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+text_color = "black" # 기본 텍스트 색상은 검은색으로 설정
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -93,8 +94,13 @@ def clear_paint():
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
     text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
+    canvas.create_text(event.x, event.y, text=text, fill=text_color, font=('Arial', 12))
    
+def change_text_color():
+    global text_color
+    color = askcolor()[1]
+    if color:
+        text_color = color
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -200,6 +206,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_text_color = Button(window, text="Change Text Color", command=change_text_color)
+button_text_color.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
