@@ -17,6 +17,8 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+last_sym_x, last_sym_y = None, None  # 대칭된 마지막 위치를 저장할 변수 초기화
+
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -42,11 +44,25 @@ def paint_start(event):
     global x1, y1
     x1, y1 = (event.x - brush_size), (event.y - brush_size)
 
+
+"""""
+중앙선을 기준으로 대칭 그림을 그리는 버튼
+대칭 모드 버튼이 ON이면 그림을 그릴 때 중앙의 수직선을 기준으로 대칭된 선이 반대편에 그려진다.
+"""""
 def paint(event):
-    global x1, y1
-    x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
-    x1, y1 = x2, y2
+    global last_x, last_y, last_sym_x, last_sym_y
+    if last_x and last_y:
+        # 기존 선 그리기
+        canvas.create_line(last_x, last_y, event.x, event.y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
+        if symmetry_mode:  # 대칭 모드가 활성화되어 있다면
+            sym_x, sym_y = calculate_symmetrical_point(event.x, event.y)
+            if last_sym_x and last_sym_y:
+                # 대칭된 선 그리기
+                canvas.create_line(last_sym_x, last_sym_y, sym_x, sym_y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
+            last_sym_x, last_sym_y = sym_x, sym_y  # 대칭된 위치 업데이트
+    last_x, last_y = event.x, event.y
+
+
 
 """
 dotted_paint: 점선 브러쉬 함수
@@ -127,6 +143,28 @@ def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
 
+
+"""캔버스의 중앙선을 기준으로 대칭되는 점의 위치를 계산"""
+def calculate_symmetrical_point(x, y):
+    canvas_width = canvas.winfo_width()  # 캔버스의 너비를 가져오기
+    center_line = canvas_width / 2  # 캔버스의 중앙선 위치를 계산
+    distance_from_center = x - center_line  # 주어진 x 좌표와 중앙선 사이의 거리를 계산
+    symmetrical_x = center_line - distance_from_center  # 대칭되는 x 좌표를 계산
+    return symmetrical_x, y  # 대칭되는 위치의 x, y 좌표를 반환
+
+symmetry_mode = False  # 대칭 그리기 모드의 초기값을 False로 설정
+
+def toggle_symmetry_mode():
+    global symmetry_mode
+    symmetry_mode = not symmetry_mode  # 대칭 모드를 토글합니다.
+    if symmetry_mode:
+        button_symmetry.config(text="대칭 모드 ON")
+    else:
+        button_symmetry.config(text="대칭 모드 OFF")
+
+
+
+
 # 새 창 열기 생성
 def create_new_window():
     new_window = Tk()  #새로운 Tk 인스턴스 생성
@@ -202,5 +240,9 @@ button_brush_color = Button(window, text="Change Brush Color", command=change_br
 button_brush_color.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
+
+
+button_symmetry = Button(button_frame, text="대칭 모드 OFF", command=toggle_symmetry_mode)
+button_symmetry.pack()  # 대칭 모드 토글 버튼을 윈도우에 배치
 
 window.mainloop()
