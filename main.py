@@ -17,6 +17,9 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+current_shape = "oval"  # 기본 도형을 타원으로 설정
+shape_id = None  # 현재 그리는 도형의 ID
+
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -134,6 +137,32 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 도형 그리는 함수 추
+def draw_shape(event):
+    global start_x, start_y, current_shape, shape_id
+    if current_shape == "oval":
+        canvas.coords(shape_id, start_x, start_y, event.x, event.y)
+    elif current_shape == "rectangle":
+        canvas.coords(shape_id, start_x, start_y, event.x, event.y)
+    elif current_shape == "line":
+        canvas.coords(shape_id, start_x, start_y, event.x, event.y)
+
+def start_shape(event):
+    global start_x, start_y, shape_id
+    start_x, start_y = event.x, event.y
+    if current_shape == "oval":
+        shape_id = canvas.create_oval(start_x, start_y, event.x, event.y, outline=brush_color)
+    elif current_shape == "rectangle":
+        shape_id = canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=brush_color)
+    elif current_shape == "line":
+        shape_id = canvas.create_line(start_x, start_y, event.x, event.y, fill=brush_color)
+
+def set_shape_mode(shape):
+    global current_shape
+    current_shape = shape
+    canvas.bind("<Button-1>", start_shape)
+    canvas.bind("<B1-Motion>", draw_shape)
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +229,17 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+#도형 그리기 버튼 추
+button_oval = Button(window, text="Draw Oval", command=lambda: set_shape_mode("oval"))
+button_oval.pack(side=LEFT)
+
+button_rectangle = Button(window, text="Draw Rectangle", command=lambda: set_shape_mode("rectangle"))
+button_rectangle.pack(side=LEFT)
+
+button_line = Button(window, text="Draw Line", command=lambda: set_shape_mode("line"))
+button_line.pack(side=LEFT)
+
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
