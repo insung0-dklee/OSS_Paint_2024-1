@@ -74,7 +74,7 @@ set_brush_mode: 브러쉬 모드를 변경하는 함수
 def set_brush_mode(mode): # 브러쉬 모드를 변경하는 함수
     global brush_mode
     brush_mode = mode
-    if brush_mode == "solid": # 브러쉬 모드가 solid면 
+    if brush_mode == "solid": # 브러쉬 모드가 solid면
         canvas.bind("<B1-Motion>", paint) # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted": # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", dotted_paint) # 점선 브러쉬로 변경
@@ -134,6 +134,49 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def rotate_canvas():
+    angle_str = text_box.get()  # 사용자로부터 각도를 입력받음
+    try:
+        angle = float(angle_str)  # 입력된 문자열을 부동 소수점으로 변환
+        canvas.delete("rotation_text")  # 이미 존재하는 회전 정보 텍스트를 삭제
+        canvas.create_text(20, 20, anchor='nw', text=f"회전(시계방향) : {angle}도", fill="black", font=('Arial', 12), tag="rotation_text")  # 회전 정보 텍스트를 생성
+        canvas.update()  # 변경된 캔버스를 업데이트하여 화면에 표시
+        canvas.after(1000)  # 1초 후에 회전 실행 (알림 메시지 표시 후에 실행되도록 함)
+        canvas.delete("rotation_text")  # 회전 정보 텍스트를 삭제
+        canvas.update()  # 변경된 캔버스를 업데이트하여 화면에 표시
+        canvas.after(1000)  # 1초 후에 회전 실행 (알림 메시지 표시 후에 실행되도록 함)
+
+        # 회전을 위해 캔버스 크기를 직접 설정 (임의의 크기로 설정 가능)
+        width = 400
+        height = 300
+
+        # 회전 중심점을 캔버스의 중앙으로 설정
+        center_x = width / 2
+        center_y = height / 2
+
+        # 회전을 위한 변환 매트릭스 생성
+        rotation_matrix = [
+            math.cos(math.radians(angle)), -math.sin(math.radians(angle)),
+            math.sin(math.radians(angle)), math.cos(math.radians(angle))
+        ]
+
+        # 캔버스를 회전시키기 위해 모든 객체에 대해 변환 적용
+        objects = canvas.find_all()
+        for obj in objects:
+            # 캔버스 좌표를 얻어옴
+            coords = canvas.coords(obj)
+            # 중심점을 기준으로 회전 변환을 적용
+            for i in range(0, len(coords), 2):
+                x = coords[i] - center_x
+                y = coords[i + 1] - center_y
+                coords[i] = x * rotation_matrix[0] + y * rotation_matrix[1] + center_x
+                coords[i + 1] = x * rotation_matrix[2] + y * rotation_matrix[3] + center_y
+            # 변환된 좌표로 객체를 재배치
+            canvas.coords(obj, *coords)
+    except ValueError:
+        # 유효하지 않은 입력 값일 때 메시지 출력
+        canvas.delete("rotation_text")  # 이미 존재하는 회전 정보 텍스트를 삭제
+        canvas.create_text(20, 20, anchor='nw', text=f"잘못된 입력입니다. 숫자를 입력하세요.", fill="red", font=('Arial', 12), tag="rotation_text")  # 잘못된 입력 알림 텍스트 생성
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -185,7 +228,7 @@ text_box.pack(side=LEFT)
 canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
 
-button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
+button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦
 button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배치
 
 button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
@@ -200,6 +243,12 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+text_box = Entry(button_frame)
+text_box.pack(side=LEFT)
+
+button_rotate = Button(button_frame, text="회전", command=rotate_canvas)  # 버튼 프레임에 추가
+button_rotate.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
