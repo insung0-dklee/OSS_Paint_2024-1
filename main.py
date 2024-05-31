@@ -7,6 +7,7 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
+from tkinter import filedialog
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
@@ -127,6 +128,14 @@ def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
 
+def load_image():
+    filename = filedialog.askopenfilename(initialdir="/", title="Select Image File", filetypes=(("PNG files", "*.png"), ("jpg files", "*.jpg")))
+    if filename:
+        image = PhotoImage(file=filename)
+        canvas.create_image(0, 0, anchor=NW, image=image)
+        canvas.image = image  # GC(Garbage Collector) 가 이 객체를 회수하지 않도록 유지합니다.
+
+
 # 새 창 열기 생성
 def create_new_window():
     new_window = Tk()  #새로운 Tk 인스턴스 생성
@@ -200,6 +209,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_load_image = Button(window, text="Load Image", command=load_image)
+button_load_image.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
