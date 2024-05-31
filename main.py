@@ -201,6 +201,17 @@ button_bg_color.pack(side=LEFT)
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
 
+def zoom(event):
+    scale = 1.1
+    if event.delta > 0:  # 마우스 휠을 위로, 줌 인
+        canvas.scale("all", event.x, event.y, scale, scale)
+    else:  # 마우스 휠을 아래로, 줌 아웃
+        canvas.scale("all", event.x, event.y, 1/scale, 1/scale)
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+canvas.pack(fill=BOTH, expand=YES)
+canvas.bind("<MouseWheel>", zoom)  # 윈도우에서는 <MouseWheel>, macOS에서는 <Button-4>와 <Button-5> 사용
+
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
