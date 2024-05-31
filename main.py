@@ -17,8 +17,9 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
-last_sym_x, last_sym_y = None, None  # 대칭된 마지막 위치를 저장할 변수 초기화
+last_sym_x, last_sym_y = None, None  # 좌우 대칭된 마지막 위치를 저장할 변수 초기화
 last_vert_sym_x, last_vert_sym_y = None, None  # 상하 대칭된 마지막 위치를 저장할 변수 추가 초기화
+last_full_sym_x, last_full_sym_y = None, None  # 상하좌우 대칭된 마지막 위치를 저장할 변수 추가 초기화
 
 
 # 마우스 움직임에 따라 도형을 그리는 함수
@@ -46,31 +47,58 @@ def paint_start(event):
     x1, y1 = (event.x - brush_size), (event.y - brush_size)
 
 
+# 상하좌우 대칭 모드 활성화/비활성화
+#
+
 """""
 중앙선을 기준으로 대칭 그림을 그리는 버튼
 대칭 모드 버튼이 ON이면 그림을 그릴 때 중앙의 수직선을 기준으로 대칭된 선이 반대편에 그려진다.
 """""
 def paint(event):
-    global last_x, last_y, last_sym_x, last_sym_y, last_vert_sym_x, last_vert_sym_y
+    global last_x, last_y, last_sym_x, last_sym_y, last_vert_sym_x, last_vert_sym_y, last_full_sym_x, last_full_sym_y
     if last_x and last_y:
         # 기존 선 그리기
         canvas.create_line(last_x, last_y, event.x, event.y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
-        
-        if symmetry_mode:  # 수평 대칭 모드가 활성화되어 있다면
+
+        # 좌우 대칭 선 그리기
+        if symmetry_mode:
             sym_x, sym_y = calculate_symmetrical_point(event.x, event.y)
             if last_sym_x and last_sym_y:
-                # 수평 대칭된 선 그리기
                 canvas.create_line(last_sym_x, last_sym_y, sym_x, sym_y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
-            last_sym_x, last_sym_y = sym_x, sym_y  # 수평 대칭된 위치 업데이트
+            last_sym_x, last_sym_y = sym_x, sym_y
 
-        if vertical_symmetry_mode:  # 상하 대칭 모드가 활성화되어 있다면
+        # 상하 대칭 선 그리기
+        if vertical_symmetry_mode:
             vert_sym_x, vert_sym_y = calculate_vertical_symmetrical_point(event.x, event.y)
             if last_vert_sym_x and last_vert_sym_y:
-                # 상하 대칭된 선 그리기
                 canvas.create_line(last_vert_sym_x, last_vert_sym_y, vert_sym_x, vert_sym_y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
-            last_vert_sym_x, last_vert_sym_y = vert_sym_x, vert_sym_y  # 상하 대칭된 위치 업데이트
+            last_vert_sym_x, last_vert_sym_y = vert_sym_x, vert_sym_y
 
-    last_x, last_y = event.x, event.y  # 기존 위치 업데이트
+        if full_symmetry_mode:  # 상하좌우 대칭 모드가 활성화되어 있다면
+            # 상하 대칭 위치 계산
+            vert_sym_x, vert_sym_y = calculate_vertical_symmetrical_point(event.x, event.y)
+            # 좌우 대칭 위치 계산
+            sym_x, sym_y = calculate_symmetrical_point(event.x, event.y)
+            # 상하좌우 대칭 위치 계산
+            full_sym_x, full_sym_y = calculate_full_symmetrical_point(event.x, event.y)
+            
+            # 상하 대칭된 선 그리기
+            if last_vert_sym_x and last_vert_sym_y:
+                canvas.create_line(last_vert_sym_x, last_vert_sym_y, vert_sym_x, vert_sym_y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
+            # 좌우 대칭된 선 그리기
+            if last_sym_x and last_sym_y:
+                canvas.create_line(last_sym_x, last_sym_y, sym_x, sym_y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
+            # 상하좌우 대칭된 선 그리기
+            if last_full_sym_x and last_full_sym_y:
+                canvas.create_line(last_full_sym_x, last_full_sym_y, full_sym_x, full_sym_y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
+            
+            # 상하, 좌우, 상하좌우 대칭 위치 업데이트
+            last_vert_sym_x, last_vert_sym_y = vert_sym_x, vert_sym_y
+            last_sym_x, last_sym_y = sym_x, sym_y
+            last_full_sym_x, last_full_sym_y = full_sym_x, full_sym_y
+
+    last_x, last_y = event.x, event.y
+
 
 
 
@@ -193,6 +221,35 @@ def toggle_vertical_symmetry_mode():
     else:
         button_vertical_symmetry.config(text="상하 대칭 모드 OFF")
 
+
+"""캔버스의 중앙선을 기준으로 상하좌우 대칭되는 점의 위치를 계산"""
+def calculate_full_symmetrical_point(x, y):
+    canvas_width = canvas.winfo_width()  # 캔버스의 너비 가져오기
+    canvas_height = canvas.winfo_height()  # 캔버스 높이 가져오기
+    
+    # 캔버스 중앙 좌표 계산
+    center_x = canvas_width / 2
+    center_y = canvas_height / 2
+
+    # 캔버스 중앙을 기준으로 상하좌우 대칭점 계산
+    sym_x = center_x + (center_x - x)
+    sym_y = center_y + (center_y - y)
+
+    return sym_x, sym_y
+
+
+
+full_symmetry_mode = False # 상하좌우 대칭 그리기 모드의 초기값을 False로 설정
+
+def toggle_full_symmetry_mode():
+    global full_symmetry_mode
+    full_symmetry_mode = not full_symmetry_mode # 상화좌우 대칭 모드 토글
+    if full_symmetry_mode:
+        full_symmetry_button.config(text="상하좌우 대칭 모드 ON")
+    else:
+        full_symmetry_button.config(text="상하좌우 대칭 모드 OFF")
+
+
 # 새 창 열기 생성
 def create_new_window():
     new_window = Tk()  #새로운 Tk 인스턴스 생성
@@ -275,5 +332,8 @@ button_symmetry.pack()  # 좌우 대칭 모드 토글 버튼을 윈도우에 배
 
 button_vertical_symmetry = Button(button_frame, text="상하 대칭 모드 OFF", command=toggle_vertical_symmetry_mode)
 button_vertical_symmetry.pack()  # 상하 대칭 모드 토글 버튼을 윈도우에 배치
+
+full_symmetry_button = Button(button_frame, text="상하좌우 대칭 모드 OFF", command=toggle_full_symmetry_mode)
+full_symmetry_button.pack()
 
 window.mainloop()
