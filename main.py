@@ -134,6 +134,22 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+"""
+set_no_draw_mode : 그림이 그려지는 것을 멈추는 함수
+Solid Brush 혹은 Dotted Brush 버튼을 누르면 다시 그려짐
+매개변수 - event ) 사용자의 입력에 대한 정보를 담고 있지만, 정보를 사용하지 않고 동작 수행하지 않음
+"""
+def do_nothing(event):
+    pass
+
+def set_no_draw_mode():
+    #그림 그리는 것을 해제시켜줌
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    #그림이 그려지지 않도록 함
+    canvas.bind("<Button-1>", do_nothing)
+    canvas.bind("<B1-Motion>", do_nothing)
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -142,7 +158,7 @@ window.title("그림판")
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("640x400+200+200")
+window.geometry("710x400+200+200")
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
 #윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
 window.resizable(True,True)
@@ -200,6 +216,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_stop_draw = Button(window, text="Stop", command=set_no_draw_mode)
+button_stop_draw.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
