@@ -10,7 +10,7 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
-
+from fun_timer import Timer
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 current_color = "black"  # 기본 색상은 검은색으로 설정
@@ -134,6 +134,16 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+#타이머 기능 추가
+timer = Timer()
+#타이머의 경과시간 업데이트 
+def update_timer():
+    elapsed_time = timer.get_elapsed_time()
+    timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
+    window.after(1000, update_timer)  # 1초마다 updatae_time 함수를 호출
+#타이머 STOP
+def stop_timer():
+    timer.stop()
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -162,6 +172,15 @@ button_frame.pack(fill=X)
 
 button_clear = Button(button_frame, text="All Clear", command=clear_paint)
 button_clear.pack(side=LEFT)
+
+# 타이머 라벨
+timer_label = Label(window, text="Time: 0 s")
+timer_label.pack(side=RIGHT)
+
+# 타이머 멈춤 버튼
+button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
+button_stop_timer.pack(side=RIGHT)
+set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 # 펜 굵기를 조절할 수 있는 슬라이더 추가
 brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
@@ -195,12 +214,17 @@ canvas.bind("<B3-Motion>", erase)
 
 brush_color = "black"
 
+
 button_bg_color = Button(window, text="Change Background Color", command=change_bg_color)
 button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
 
-set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
+
+
+#프로그램 시작 시 타이머 시작
+timer.start()
+update_timer()
 
 window.mainloop()
