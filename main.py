@@ -134,7 +134,12 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 맞춤형 단축키 기능 추가
+def bind_shortcuts():
+    window.bind("<c>", lambda event: clear_paint())
 
+# 단축키 바인딩
+bind_shortcuts()
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
