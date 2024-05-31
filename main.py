@@ -18,6 +18,7 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 last_sym_x, last_sym_y = None, None  # 대칭된 마지막 위치를 저장할 변수 초기화
+last_vert_sym_x, last_vert_sym_y = None, None  # 상하 대칭된 마지막 위치를 저장할 변수 추가 초기화
 
 
 # 마우스 움직임에 따라 도형을 그리는 함수
@@ -50,17 +51,27 @@ def paint_start(event):
 대칭 모드 버튼이 ON이면 그림을 그릴 때 중앙의 수직선을 기준으로 대칭된 선이 반대편에 그려진다.
 """""
 def paint(event):
-    global last_x, last_y, last_sym_x, last_sym_y
+    global last_x, last_y, last_sym_x, last_sym_y, last_vert_sym_x, last_vert_sym_y
     if last_x and last_y:
         # 기존 선 그리기
         canvas.create_line(last_x, last_y, event.x, event.y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
-        if symmetry_mode:  # 대칭 모드가 활성화되어 있다면
+        
+        if symmetry_mode:  # 수평 대칭 모드가 활성화되어 있다면
             sym_x, sym_y = calculate_symmetrical_point(event.x, event.y)
             if last_sym_x and last_sym_y:
-                # 대칭된 선 그리기
+                # 수평 대칭된 선 그리기
                 canvas.create_line(last_sym_x, last_sym_y, sym_x, sym_y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
-            last_sym_x, last_sym_y = sym_x, sym_y  # 대칭된 위치 업데이트
-    last_x, last_y = event.x, event.y
+            last_sym_x, last_sym_y = sym_x, sym_y  # 수평 대칭된 위치 업데이트
+
+        if vertical_symmetry_mode:  # 상하 대칭 모드가 활성화되어 있다면
+            vert_sym_x, vert_sym_y = calculate_vertical_symmetrical_point(event.x, event.y)
+            if last_vert_sym_x and last_vert_sym_y:
+                # 상하 대칭된 선 그리기
+                canvas.create_line(last_vert_sym_x, last_vert_sym_y, vert_sym_x, vert_sym_y, width=brush_size, fill=current_color, capstyle=ROUND, smooth=TRUE)
+            last_vert_sym_x, last_vert_sym_y = vert_sym_x, vert_sym_y  # 상하 대칭된 위치 업데이트
+
+    last_x, last_y = event.x, event.y  # 기존 위치 업데이트
+
 
 
 
@@ -144,7 +155,7 @@ def change_brush_color():
     brush_color = askcolor()[1]
 
 
-"""캔버스의 중앙선을 기준으로 대칭되는 점의 위치를 계산"""
+"""캔버스의 중앙선을 기준으로 좌우 대칭되는 점의 위치를 계산"""
 def calculate_symmetrical_point(x, y):
     canvas_width = canvas.winfo_width()  # 캔버스의 너비를 가져오기
     center_line = canvas_width / 2  # 캔버스의 중앙선 위치를 계산
@@ -156,14 +167,31 @@ symmetry_mode = False  # 대칭 그리기 모드의 초기값을 False로 설정
 
 def toggle_symmetry_mode():
     global symmetry_mode
-    symmetry_mode = not symmetry_mode  # 대칭 모드를 토글합니다.
+    symmetry_mode = not symmetry_mode  # 좌우 대칭 모드를 토글
     if symmetry_mode:
-        button_symmetry.config(text="대칭 모드 ON")
+        button_symmetry.config(text="좌우 대칭 모드 ON")
     else:
-        button_symmetry.config(text="대칭 모드 OFF")
+        button_symmetry.config(text="좌우 대칭 모드 OFF")
 
 
+"""캔버스의 중앙선을 기준으로 상하 대칭되는 점의 위치를 계산"""
+def calculate_vertical_symmetrical_point(x, y):
+    canvas_height = canvas.winfo_height()  # 캔버스의 높이를 가져오기
+    center_line = canvas_height / 2  # 캔버스의 중앙선 위치(상하 중앙선)를 계산
+    distance_from_center = y - center_line  # 주어진 y 좌표와 중앙선 사이의 거리를 계산
+    symmetrical_y = center_line - distance_from_center  # 대칭되는 y 좌표를 올바르게 계산
+    return x, symmetrical_y  # 대칭되는 위치의 x, y 좌표를 반환
 
+
+vertical_symmetry_mode = False  # 상하 대칭 그리기 모드의 초기값을 False로 설정
+
+def toggle_vertical_symmetry_mode():
+    global vertical_symmetry_mode
+    vertical_symmetry_mode = not vertical_symmetry_mode  # 상하 대칭 모드를 토글
+    if vertical_symmetry_mode:
+        button_vertical_symmetry.config(text="상하 대칭 모드 ON")
+    else:
+        button_vertical_symmetry.config(text="상하 대칭 모드 OFF")
 
 # 새 창 열기 생성
 def create_new_window():
@@ -242,7 +270,10 @@ button_brush_color.pack(side=LEFT)
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 
-button_symmetry = Button(button_frame, text="대칭 모드 OFF", command=toggle_symmetry_mode)
-button_symmetry.pack()  # 대칭 모드 토글 버튼을 윈도우에 배치
+button_symmetry = Button(button_frame, text="좌우 대칭 모드 OFF", command=toggle_symmetry_mode)
+button_symmetry.pack()  # 좌우 대칭 모드 토글 버튼을 윈도우에 배치
+
+button_vertical_symmetry = Button(button_frame, text="상하 대칭 모드 OFF", command=toggle_vertical_symmetry_mode)
+button_vertical_symmetry.pack()  # 상하 대칭 모드 토글 버튼을 윈도우에 배치
 
 window.mainloop()
