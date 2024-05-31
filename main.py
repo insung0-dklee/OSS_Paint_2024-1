@@ -45,7 +45,7 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
     x1, y1 = x2, y2
 
 """
@@ -55,16 +55,22 @@ dotted_paint: 점선 브러쉬 함수
 """
 def dotted_paint(event): # 점선 브러쉬 함수
     global last_x, last_y
-    spacing = 10  # 점 사이의 간격을 설정
+    global dot_spacing
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
-        if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
+        if distance >= dot_spacing:
+            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill=brush_color, outline=brush_color)
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
+
+#슬라이더를 통해 점선에서 점 사이의 간격을 조절하는 함수
+def change_dot_space(self):
+    global dot_spacing
+    dot_spacing = dot_space_slider.get()
+
 
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
@@ -80,9 +86,9 @@ def set_brush_mode(mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", dotted_paint) # 점선 브러쉬로 변경
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
-def change_brush_size(new_size):
+def change_brush_size(self):
     global brush_size
-    brush_size = int(new_size)
+    brush_size = brush_size_slider.get()
 
 #all clear 기능 추가
 def clear_paint():
@@ -140,9 +146,10 @@ window = Tk()
 window.title("그림판")
 
 brush_size = 1  # 초기 브러시 크기
+dot_spacing = 10 # 초기 점 사이 간격
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("640x400+200+200")
+window.geometry("940x400+200+200")
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
 #윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
 window.resizable(True,True)
@@ -164,9 +171,16 @@ button_clear = Button(button_frame, text="All Clear", command=clear_paint)
 button_clear.pack(side=LEFT)
 
 # 펜 굵기를 조절할 수 있는 슬라이더 추가
-brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
+brush_size_var = IntVar()
+brush_size_slider = Scale(button_frame, variable=brush_size_var, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
 brush_size_slider.pack(side=LEFT)
+
+# 점선에서 점 사잉 간격을 조절할 수 있는 슬라이더 추가
+dot_space_var = IntVar()
+dot_space_slider = Scale(button_frame, variable=dot_space_var, from_=1, to=20, orient=HORIZONTAL, label="Space Between Dots", command=change_dot_space)
+dot_space_slider.set(dot_spacing)  # 슬라이더 초기값 설정
+dot_space_slider.pack(side=LEFT)
 
 button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
 button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
