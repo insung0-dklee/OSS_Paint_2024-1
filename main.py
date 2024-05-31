@@ -15,8 +15,19 @@ import math  # 수학 모듈을 가져옴
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
+symmetric_mode = False  # 대칭 그리기 모드의 활성화 여부를 판단하는 변수 - 기본적으로 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+
+#+=====================================================================================
+def toggle_symmetric_paint(event): #대칭 그리기 모드를 활성화/비활성화 하는 기능
+    global symmetric_mode 
+    if event.char == '[': #입력한 키가 "["가 맞는 경우
+        if symmetric_mode == False: #대칭 그리기 모드가 비활성화 되있을 경우
+            symmetric_mode = True
+        else: #대칭 그리기 모드가 활성화 되있을 경우
+            symmetric_mode = False
+#+=====================================================================================
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -32,11 +43,14 @@ def start_paint_pressure(event):
 
 def paint_pressure(event):
     global start_time
+    global symmetric_mode
     elapsed_time = time.time() - start_time  # 마우스를 클릭한 시간부터 지금까지의 시간을 계산
     radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+    if symmetric_mode == True:
+        canvas.create_oval(canvas.winfo_width() -x1, y1, canvas.winfo_width() -x2, y2, fill=brush_color, outline=brush_color)
 
 def paint_start(event):
     global x1, y1
@@ -44,8 +58,11 @@ def paint_start(event):
 
 def paint(event):
     global x1, y1
+    global symmetric_mode
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    if symmetric_mode == True:
+       canvas.create_line(canvas.winfo_width() - x1, y1, canvas.winfo_width() - x2, y2, fill=brush_color, width=2)
     x1, y1 = x2, y2
 
 """
@@ -55,6 +72,7 @@ dotted_paint: 점선 브러쉬 함수
 """
 def dotted_paint(event): # 점선 브러쉬 함수
     global last_x, last_y
+    global symmetric_mode
     spacing = 10  # 점 사이의 간격을 설정
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
@@ -63,6 +81,8 @@ def dotted_paint(event): # 점선 브러쉬 함수
         if distance >= spacing:
             canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
             last_x, last_y = event.x, event.y
+            if symmetric_mode == True:
+                canvas.create_oval(canvas.winfo_width() - event.x - 1, event.y - 1 , canvas.winfo_width() - event.x + 1, event.y + 1, fill="black", outline="black")
     else:
         last_x, last_y = event.x, event.y
 
@@ -118,6 +138,8 @@ def erase(event):
     x1, y1 = ( event.x-3 ), ( event.y-3 )
     x2, y2 = ( event.x+3 ), ( event.y+3 )
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
+    if symmetric_mode == True:
+        canvas.create_oval(canvas.winfo_width() - x1, y1, canvas.winfo_width() - x2, y2, fill=bg_color, outline=bg_color)
 
 def change_bg_color():
     bg_color = askcolor()
@@ -184,6 +206,7 @@ text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
 canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
+window.bind("<KeyPress>", toggle_symmetric_paint) #입력된 키에따라 대칭 그리기 모드를 활성화/비활성화.
 
 button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
 button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배치
