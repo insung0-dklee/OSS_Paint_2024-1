@@ -134,6 +134,29 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 알파벳 브러쉬 기능 추가.
+def select_alphabet_brush(event):
+    global brush_color
+    brush_color = event.widget.cget("text")
+    # 알파벳 브러쉬를 그리는 이벤트 핸들러인 paint_alphabet_brush를 바인딩합니다.
+    canvas.bind("<B1-Motion>", paint_alphabet_brush)
+
+def paint_alphabet_brush(event):
+    global last_x, last_y
+    spacing = 10
+    # 마우스 이동 시간 간격에 따라 알파벳 브러쉬를 그립니다.
+    if last_x is not None and last_y is not None:
+        dx = event.x - last_x
+        dy = event.y - last_y
+        distance = (dx ** 2 + dy ** 2) ** 0.5
+        # 지정된 간격 이상일 때만 알파벳 브러쉬를 그립니다.
+        if distance >= spacing:
+            canvas.create_text(event.x, event.y, text=brush_color, fill=brush_color, font=('Arial', brush_size * 2))
+            last_x, last_y = event.x, event.y
+    else:
+        # 초기 마우스 위치를 설정합니다.
+        last_x, last_y = event.x, event.y
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +223,21 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+# 알파벳 브러쉬에 사용할 알파벳 리스트
+alphabet_brushes = ['A', 'B', 'C', 'D', 'E', 'F', 'G','H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+# 알파벳 버튼들을 담을 프레임 생성
+alphabet_brush_frame = Frame(window)
+alphabet_brush_frame.pack()
+
+# 각 알파벳에 대해 버튼 생성하고 프레임에 추가
+for letter in alphabet_brushes:
+    alphabet_brush_button = Button(alphabet_brush_frame, text=letter, command=lambda l=letter: select_alphabet_brush(l))
+    alphabet_brush_button.pack(side=LEFT)
+
+# 브러쉬 색상을 기본 값인 검은색으로 설정
+brush_color = "black"
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
