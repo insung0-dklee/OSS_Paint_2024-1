@@ -1,15 +1,8 @@
-"""
-Project : Paint
-paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그리는 기능
-clear_paint : 그림판에 있는 그림을 다 지우는 기능
-button_delete : clear_paint의 버튼
-
-"""
-
 from tkinter import *
-import time #시간 계산을 위한 모듈
+from tkinter import filedialog  # 파일 대화상자를 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+from PIL import Image, ImageTk, ImageDraw  # 이미지 처리를 위한 모듈
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -17,6 +10,36 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+brush_size = 1  # 초기 브러시 크기 설정
+brush_color = "black"  # 초기 브러시 색상 설정
+
+# 반투명도 설정 함수
+def set_transparency(alpha):
+    # alpha 값이 유효 범위 밖인지 확인
+    if alpha < 0 or alpha > 255:
+        print("투명도 값은 0에서 255 사이여야 합니다.")
+    else:
+        # 캔버스의 모든 아이템에 반투명도 설정
+        for item in canvas.find_all():
+            canvas.itemconfig(item, stipple="gray50")  # 'gray50' stipple 패턴으로 반투명도 적용
+
+"""
+회전 함수
+캔버스의 현재 상태를 이미지로 변환
+변환된 이미지를 주어진 각도로 회전
+회전된 이미지를 Tkinter 캔버스에 표시하기 위해 PhotoImage 객체 생성
+회전된 이미지를 캔버스에 추가
+이미지가 가비지 컬렉션에 의해 수집되지 않도록 참조 유지
+
+"""
+def rotate_canvas(angle):
+    canvas.update()
+    ps = canvas.postscript(colormode='color')
+    img = Image.open(io.BytesIO(ps.encode('utf-8')))
+    rotated_img = img.rotate(angle)
+    tk_img = ImageTk.PhotoImage(rotated_img)
+    canvas.create_image(0, 0, anchor='nw', image=tk_img)
+    canvas.image = tk_img
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -91,10 +114,8 @@ def clear_paint():
     last_x, last_y = None, None # 마지막 좌표 초기화
 
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -134,6 +155,14 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 반투명도 조절 슬라이더 추가 
+opacity_slider = Scale(window, from_=0, to=255, orient=HORIZONTAL, label="Opacity", command=set_transparency) 
+opacity_slider.set(255)  # 초기값 설정 (불투명) 
+opacity_slider.pack(side=LEFT)  
+
+# 회전 버튼 추가 
+rotate_button = Button(window, text="Rotate", command=lambda: rotate_canvas(90))  # 90도 회전 
+rotate_button.pack(side=LEFT) 
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -204,3 +233,4 @@ button_brush_color.pack(side=LEFT)
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
+
