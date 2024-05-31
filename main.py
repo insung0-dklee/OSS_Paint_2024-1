@@ -134,6 +134,21 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+recent_colors = []
+
+def change_brush_color():
+    global brush_color
+    brush_color = askcolor()[1]
+    recent_colors.append(brush_color)  # 색상을 선택할 때마다 리스트에 추가
+    update_recent_colors()  # 최근 색상 표시 업데이트
+
+def update_recent_colors():
+    for widget in button_frame.winfo_children():  # 기존에 생성된 레이블 제거
+        if isinstance(widget, Label):
+            widget.destroy()
+    for i, color in enumerate(recent_colors[-5:]):  # 최근 5개의 색상만 표시
+        color_label = Label(button_frame, bg=color, width=2)
+        color_label.pack(side=LEFT)  # 레이블을 그리드에 추가
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -142,7 +157,7 @@ window.title("그림판")
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("640x400+200+200")
+window.geometry("700x400+200+200")
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
 #윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
 window.resizable(True,True)
@@ -200,7 +215,10 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
-
+"""
+button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
+button_brush_color.pack(side=LEFT)
+"""
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
