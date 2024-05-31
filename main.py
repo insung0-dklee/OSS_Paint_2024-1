@@ -203,4 +203,29 @@ button_brush_color.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
+from tkinter import filedialog  # 파일 대화 상자 모듈을 가져옴
+
+# 이미지 저장 함수
+def save_image():
+    """
+    사용자가 선택한 위치에 그림판의 현재 내용을 PNG 파일로 저장합니다.
+    파일 대화 상자를 사용하여 사용자가 파일을 저장할 위치를 선택하게 합니다.
+    """
+    file = filedialog.asksaveasfilename(defaultextension='.png')  # 사용자가 선택한 파일 경로를 가져옴
+    if file:
+        x = window.winfo_rootx() + canvas.winfo_x()
+        y = window.winfo_rooty() + canvas.winfo_y()
+        x1 = x + canvas.winfo_width()
+        y1 = y + canvas.winfo_height()
+        try:
+            ImageGrab.grab().crop((x, y, x1, y1)).save(file)
+            messagebox.showinfo("성공", "이미지가 성공적으로 저장되었습니다.")
+        except Exception as e:
+            messagebox.showinfo("오류", str(e))
+
+# 이미지 저장 버튼 추가
+button_save = Button(window, text="이미지 저장", command=save_image)
+button_save.pack(side=LEFT)
+
+
 window.mainloop()
