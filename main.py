@@ -6,10 +6,12 @@ button_delete : clear_paint의 버튼
 
 """
 
+import tkinter as tk
 from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+from PIL import Image, ImageDraw, ImageTk
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -134,6 +136,14 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+    #그림판 레퍼런스를 추가하는 기능
+def load_reference(event):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.bmp")])
+        if file_path:
+            event.reference_image = Image.open(file_path)
+            event.reference_image = event.reference_image.resize((800, 500), Image.ANTIALIAS)
+            event.reference_image_tk = ImageTk.PhotoImage(event.reference_image)
+            event.canvas.create_image(0, 0, anchor=tk.NW, image=event.reference_image_tk)
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
