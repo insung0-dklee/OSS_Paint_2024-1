@@ -10,6 +10,8 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+from tkinter import filedialog #파일을 불러오기 위한 모듈
+from picture import ImageEditor #이미지 모듈을 가져옴 
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -134,6 +136,12 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+#이미지 파일 불러오기 
+def open_image():
+    file_path = filedialog.askopenfilename()
+    if file_path:
+        editor.open_image(file_path)
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -174,11 +182,6 @@ button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
 button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
 button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
 
-button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
-button_paint.pack(side=RIGHT)
-
-button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
-button_paint.pack(side=RIGHT)
 
 text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
@@ -200,6 +203,21 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+editor = ImageEditor(canvas)
+
+
+button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
+button_paint.pack(side=LEFT)
+
+button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
+button_paint.pack(side=LEFT)
+
+#이미지를 불러오는 기능 
+button_open_image = Button(window, text="Open Image", command=open_image)
+button_open_image.pack(side=LEFT)
+
+
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
