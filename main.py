@@ -13,8 +13,7 @@ import math  # 수학 모듈을 가져옴
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
-current_color = "black"  # 기본 색상은 검은색으로 설정
-eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
+brush_color = "black"  # 기본 색상은 검은색으로 설정
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 
@@ -45,7 +44,7 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
     x1, y1 = x2, y2
 
 """
@@ -55,13 +54,13 @@ dotted_paint: 점선 브러쉬 함수
 """
 def dotted_paint(event): # 점선 브러쉬 함수
     global last_x, last_y
-    spacing = 10  # 점 사이의 간격을 설정
+    spacing = 10 + brush_size  # 점 사이의 간격을 설정
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
+            canvas.create_oval(event.x-brush_size / 2, event.y-brush_size / 2, event.x+brush_size / 2, event.y+brush_size / 2, fill=brush_color, outline=brush_color)
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
@@ -115,8 +114,8 @@ def flip_horizontal():
 def erase(event):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
-    x1, y1 = ( event.x-3 ), ( event.y-3 )
-    x2, y2 = ( event.x+3 ), ( event.y+3 )
+    x1, y1 = ( event.x - brush_size ), ( event.y - brush_size )
+    x2, y2 = ( event.x + brush_size ), ( event.y + brush_size )
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
 
 def change_bg_color():
@@ -142,7 +141,7 @@ window.title("그림판")
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("640x400+200+200")
+window.geometry("700x480+200+200")
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
 #윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
 window.resizable(True,True)
@@ -192,8 +191,6 @@ button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
 button_flip.pack(side=LEFT)
 
 canvas.bind("<B3-Motion>", erase)
-
-brush_color = "black"
 
 button_bg_color = Button(window, text="Change Background Color", command=change_bg_color)
 button_bg_color.pack(side=LEFT)
