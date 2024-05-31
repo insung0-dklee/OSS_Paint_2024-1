@@ -10,6 +10,7 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 from tkinter import simpledialog # 값을 입력하는 창을 생성하기 위한 simple dialog 모듈
+from tkinter import messagebox #경고 메시지를 위판 모
 import math  # 수학 모듈을 가져옴
 
 # 초기 설정 값들
@@ -25,31 +26,35 @@ def draw_comic_frames(): # 행과 열 그리고 선의 굵기를 입력 받아 �
     cols = simpledialog.askinteger("Cols", "Enter number of cols") #열의 개수를 입력
     line_size = simpledialog.askinteger("Line Size", "Enter size of lines") #선의 굵기를 입력
 
-    width = window.winfo_width()  # 창의 너비를 가져옵니다.
-    height = window.winfo_height() - canvas.winfo_reqheight() / 2 # 창과 캔버스의 높이를 가져옵니다. 그리고 이 둘을 계산하여 실제 창 안에서 캔버스의 높이를 구함
-    row_height = height / rows  # 각 행의 높이를 계산
-    col_width = width / cols  # 각 열의 너비를 계산
+    if rows > 0 and cols > 0:
+        width = window.winfo_width()  # 창의 너비를 가져옵니다.
+        height = window.winfo_height() - canvas.winfo_reqheight() / 2 # 창과 캔버스의 높이를 가져옵니다. 그리고 이 둘을 계산하여 실제 창 안에서 캔버스의 높이를 구함
+        row_height = height / rows  # 각 행의 높이를 계산
+        col_width = width / cols  # 각 열의 너비를 계산
 
-    # 각 행에 대해 수평선을 그림
-    for i in range(rows + 1):
-        if(i == 0):
-            y = i * row_height + line_size
-        elif(i == rows):
-            y = i * row_height - line_size
-        else:
-            y = i * row_height + line_size / 2
-        canvas.create_line(0, y, width - line_size / 2, y, width = line_size)
+        # 각 행에 대해 수평선을 그림
+        for i in range(rows + 1):
+            if(i == 0):
+                y = i * row_height + line_size
+            elif(i == rows):
+                y = i * row_height - line_size
+            else:
+                y = i * row_height + line_size / 2
+            canvas.create_line(0, y, width - line_size / 2, y, width = line_size)
 
-    # 각 열에 대해 수직선을 그림
-    for i in range(cols + 1):
-        if(i == 0):
-            x = i * col_width + line_size
-        elif(i == cols):
-            x = i * col_width - line_size
-        else:
-            x = i * col_width + line_size / 2
-        canvas.create_line(x, 0, x, height - line_size / 2, width = line_size)
-    # 화면에서 선이 보일 수 있도록 선의 간격을 조정하여 그림
+        # 각 열에 대해 수직선을 그림
+        for i in range(cols + 1):
+            if(i == 0):
+                x = i * col_width + line_size
+            elif(i == cols):
+                x = i * col_width - line_size
+            else:
+                x = i * col_width + line_size / 2
+            canvas.create_line(x, 0, x, height - line_size / 2, width = line_size)
+        # 화면에서 선이 보일 수 있도록 선의 간격을 조정하여 그림
+    else:
+        messagebox.showwarning("WARNING", "Rows and cols must be higher than 0") #경고 메시지 출력
+
 #+================================================================
 
 # 마우스 움직임에 따라 도형을 그리는 함수
