@@ -61,13 +61,22 @@ def paint(event, canvas):
     x1, y1 = x2, y2
 def dotted_paint(event, canvas):
     global last_x, last_y
-    spacing = 10  # 점 사이의 간격을 설정
+    spacing = brush_size  # Spacing between dots matches brush size
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
-        if distance >= spacing:
-            canvas.create_oval(event.x - 1, event.y - 1, event.x + 1, event.y + 1, fill=brush_color, outline=brush_color)#브러쉬 컬러 변경 에러 수정
+        num_dots = int(distance / spacing)  # Number of dots to draw based on distance and spacing
+        if num_dots > 0:
+            dot_size_step = brush_size / num_dots  # Size increment per dot
+            for i in range(num_dots):
+                dot_size = brush_size - i * dot_size_step  # Decreasing dot size
+                ratio = (i + 1) / num_dots  # Ratio of current dot to total dots
+                x = last_x + ratio * dx
+                y = last_y + ratio * dy
+                canvas.create_oval(x - dot_size // 2, y - dot_size // 2,
+                                   x + dot_size // 2, y + dot_size // 2,
+                                   fill=brush_color, outline=brush_color)
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
