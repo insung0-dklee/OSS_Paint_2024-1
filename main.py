@@ -134,9 +134,57 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
-#네모 도형 생성하기
-def create_rectangle():
-    canvas.create_rectangle(50, 50, 150, 150, outline="black", fill="white")
+#사각형 그리기    
+def create_rectangle(event):
+    canvas.bind("<Button-1>", start_rectangle)
+#삼각형 그리기
+def create_triangle(event):
+    canvas.bind("<Button-1>", start_triangle)
+#원형 그리기
+def create_circle(event):
+    canvas.bind("<Button-1>", start_circle)
+    
+#사각형 그릴 위치 정하고 생성하는 함수 호출
+def start_rectangle(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", lambda event: draw_rectangle(event))
+#사각형 생성하기
+def draw_rectangle(event):
+    global start_x, start_y
+    canvas.delete("temp_shape")
+    canvas.create_rectangle(start_x, start_y, event.x, event.y, outline="black", fill="white", tags="temp_shape")
+
+#삼각형 그릴 위치 정하고 생성하는 함수 호출
+def start_triangle(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", lambda event: draw_triangle(event))
+#삼각형 생성하기
+def draw_triangle(event): 
+    global start_x, start_y
+    canvas.delete("temp_shape")
+    canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
+
+#원형 그릴 위치 정하고 생성하는 함수 호출
+def start_circle(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", lambda event: draw_circle(event))
+#원형 생성하기
+def draw_circle(event):
+    global start_x, start_y
+    canvas.delete("temp_shape")
+    r = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
+    canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline="black", fill="white", tags="temp_shape")
+
+#모양 선택하는 팝업 메뉴
+def choose_shape(event):
+    popup = Menu(window, tearoff=0)
+    popup.add_command(label="Rectangle", command=lambda: create_rectangle(event))
+    popup.add_command(label="Triangle", command=lambda: create_triangle(event))
+    popup.add_command(label="Circle", command=lambda: create_circle(event))
+    popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -204,9 +252,10 @@ button_bg_color.pack(side=LEFT)
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
 
-#네모 모형 그려주는 버튼 생성 
-button_create_rectangle = Button(window, text="Create rectangle", command=create_rectangle)
-button_create_rectangle.pack(side=LEFT)
+#도형 모양 선택하는 버튼 생성
+button_choose_shape = Button(window, text="shape")
+button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
+button_choose_shape.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
