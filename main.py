@@ -3,8 +3,10 @@ Project : Paint
 paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그리는 기능
 clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
-save(): canvas의 내용을 png 파일로 저장하는 기능
-button_save : save()를 실행하는 버튼
+save_sel(): canvas의 내용을 어떻게 저장하는지에 대한 버튼 생성하는 함수(png 또는 ps 로 저장 가능)
+save_png(): png로 저장
+save_postscript(): ps로 저장
+button_save : save_sel()를 실행하는 버튼
 
 """
 
@@ -148,17 +150,31 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
-def save(): # canvas 그림 저장
-    file_path = filedialog.asksaveasfilename(defaultextension='.png',filetypes=[("png file",".png")]) #파일 다이얼로그로 저장할 위치를 정하고 이름을 입력
-    #위의 파일 다이얼로그는 위치와 이름을 file_path에 반환
+def save_sel(): # 누르면 저장 방식을 선택하는 버튼 생성
+    global opt_extension1, opt_extension2
+    opt_extension1 = Button(button_save,text = ".PS",command = save_postscript) # .ps로 저장하는 버튼
+    opt_extension2 = Button(button_save,text = ".PNG",command = save_png)# .png로 저장하는 버튼
+    opt_extension1.pack(side="top")
+    opt_extension2.pack(side="top")
 
-    x = window.winfo_rootx() # 그림판 창의 크기를 추출
-    y = window.winfo_rooty()
-    w = window.winfo_width()+x
-    h = window.winfo_height()+y
-    drawing = (x, y, w, h)
-    img=ImageGrab.grab(drawing) #창의 크기만큼만 이미지저장
-    img.save(file_path) # 위에서 정한 이름과 위치로 저장
+def save_png(): #png 파일로 저장
+    opt_extension1.destroy()
+    opt_extension2.destroy()
+    file_path = filedialog.asksaveasfilename(defaultextension='.png',filetypes=[("png file",".png")]) #파일 다이얼로그로 저장할 위치를 정하고 이름을 입력(.png 기본확장자)
+    #위의 파일 다이얼로그는 위치와 이름을 file_path에 반환
+    x = canvas.winfo_rootx() # 그림판 창의 크기를 추출
+    y = canvas.winfo_rooty()
+    w = canvas.winfo_width()+x
+    h = canvas.winfo_height()+y
+    drawing_area = (x, y, w, h)
+    png=ImageGrab.grab(drawing_area) #ImageGrab을 사용하여 캔버스 크기 만큼 이미지 추출 
+    png.save(file_path) # 위에서 정한 이름과 위치로 저장
+
+def save_postscript(): #postscript 파일로 저장
+    opt_extension1.destroy()
+    opt_extension2.destroy()
+    file_path = filedialog.asksaveasfilename(defaultextension='.ps',filetypes=[("postscript files", "*.ps")]) #파일 다이얼로그로 저장할 위치를 정하고 이름을 입력(.ps 기본확장자)
+    canvas.postscript(file=file_path)
 
 window = Tk()
 canvas = Canvas(window)
@@ -168,7 +184,7 @@ window.title("그림판")
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("840x600+200+200")
+window.geometry("600x600+200+200")
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
 #윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
 window.resizable(True,True)
@@ -227,8 +243,8 @@ button_bg_color.pack(side=LEFT)
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
 
-button_save = Button(window, text="저장하기", command=save)
-button_save.pack(side=LEFT)
+button_save = Button(window, text="저장하기", command=save_sel)
+button_save.pack(side=TOP)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
