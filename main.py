@@ -42,10 +42,14 @@ def paint_start(event):
     global x1, y1
     x1, y1 = (event.x - brush_size), (event.y - brush_size)
 
+"""
+@매개변수
+ width를 추가하여 brush_size 조절 기능 수정
+"""
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
     x1, y1 = x2, y2
 
 """
