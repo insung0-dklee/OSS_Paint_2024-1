@@ -127,6 +127,8 @@ def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
 
+
+
 # 새 창 열기 생성
 def create_new_window():
     new_window = Tk()  #새로운 Tk 인스턴스 생성
@@ -134,6 +136,13 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def four_split():
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    # 수직 중앙선
+    canvas.create_line(canvas_width / 2, 0, canvas_width / 2, canvas_height, fill="black")
+    # 수평 중앙선
+    canvas.create_line(0, canvas_height / 2, canvas_width, canvas_height / 2, fill="black")
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +209,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_four_split = Button(window, text="4", command=four_split)
+button_four_split.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
