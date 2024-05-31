@@ -10,6 +10,8 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+from tkinter import filedialog
+from tkinter import PhotoImage
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -135,6 +137,14 @@ def create_new_window():
     new_window.mainloop()
 
 
+def upload_image():
+    path = filedialog.askopenfilename()
+    if path:
+        image = PhotoImage(file=path)
+        canvas.create_image(0, 0, anchor=NW, image=image)
+        canvas.image = image
+
+
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
@@ -200,6 +210,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_upload_image = Button(window, text="Upload Image", command=upload_image)
+button_upload_image.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
