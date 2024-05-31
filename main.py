@@ -34,18 +34,18 @@ def paint_pressure(event):
     global start_time
     elapsed_time = time.time() - start_time  # 마우스를 클릭한 시간부터 지금까지의 시간을 계산
     radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
-    x1, y1 = ( event.x - radius ), ( event.y - radius )
-    x2, y2 = ( event.x + radius ), ( event.y + radius )
+    x1, y1 = (canvas.canvasx(event.x) - radius), (canvas.canvasy(event.y) - radius)
+    x2, y2 = (canvas.canvasx(event.x) + radius), (canvas.canvasy(event.y) + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
 def paint_start(event):
     global x1, y1
-    x1, y1 = (event.x - brush_size), (event.y - brush_size)
+    x1, y1 = (canvas.canvasx(event.x) - brush_size), (canvas.canvasy(event.y) - brush_size)
 
 def paint(event):
     global x1, y1
-    x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    x2, y2 = canvas.canvasx(event.x), canvas.canvasy(event.y)
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
     x1, y1 = x2, y2
 
 """
@@ -56,15 +56,16 @@ dotted_paint: 점선 브러쉬 함수
 def dotted_paint(event): # 점선 브러쉬 함수
     global last_x, last_y
     spacing = 10  # 점 사이의 간격을 설정
+    x, y = canvas.canvasx(event.x), canvas.canvasy(event.y)
     if last_x is not None and last_y is not None:
-        dx = event.x - last_x
-        dy = event.y - last_y
+        dx = x - last_x
+        dy = y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
-            last_x, last_y = event.x, event.y
+            canvas.create_oval(x-1, y-1, x+1, y+1, fill="black", outline="black")
+            last_x, last_y = x, y
     else:
-        last_x, last_y = event.x, event.y
+        last_x, last_y = x, y
 
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
@@ -93,7 +94,7 @@ def clear_paint():
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
     text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
+    canvas.create_text(canvas.canvasx(event.x), canvas.canvasy(event.y), text=text, fill="black", font=('Arial', 12))
    
 
 def toggle_fullscreen(event):
@@ -115,8 +116,8 @@ def flip_horizontal():
 def erase(event):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
-    x1, y1 = ( event.x-3 ), ( event.y-3 )
-    x2, y2 = ( event.x+3 ), ( event.y+3 )
+    x1, y1 = (canvas.canvasx(event.x) - 3), (canvas.canvasy(event.y) - 3)
+    x2, y2 = (canvas.canvasx(event.x) + 3), (canvas.canvasy(event.y) + 3)
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
 
 def change_bg_color():
@@ -134,6 +135,53 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def set_pan_zoom_mode():
+    canvas.bind("<MouseWheel>", zoom)
+    canvas.bind("<ButtonPress-1>", start_pan)
+    canvas.bind("<B1-Motion>", do_pan)
+
+    """
+    마우스휠 - 줌
+    좌클릭 - 이동 시작 좌표를 지정
+    드래그 - 드래그가 끝나면 do_pan 함수를 시
+    """
+def zoom(event):
+    scale = 1.0
+    if event.delta > 0:
+        scale = 1.1
+    elif event.delta < 0:
+        scale = 0.9
+
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+
+    canvas.scale("all", canvas_width / 2, canvas_height / 2, scale, scale)
+    canvas.configure(scrollregion=canvas.bbox("all"))
+    """
+    마우스 휠을 이벤트로 하여 확대/ 축소를 할 수 있도록 함
+    """
+
+def start_pan(event):
+    global pan_start_x, pan_start_y
+    pan_start_x = canvas.canvasx(event.x)
+    pan_start_y = canvas.canvasy(event.y)
+    """
+    이동 시작 좌표를 canvas.canvasx(event.x), canvas.canvasy(event.y)를 이용하여
+    윈도우 상 x,y 좌표에서 캔버스 상 x,y 좌표로 옮김
+    
+    """
+
+def do_pan(event):
+    global pan_start_x, pan_start_y
+    dx = canvas.canvasx(event.x) - pan_start_x
+    dy = canvas.canvasy(event.y) - pan_start_y
+    canvas.move("all", dx, dy)
+    pan_start_x = canvas.canvasx(event.x)
+    pan_start_y = canvas.canvasy(event.y)
+    """
+    마우스 드래그 이후의 좌표에서 드래그 이전 좌표를 빼서 얼마나 움직일지 정하고
+    그 거리만큼 캔버스를 움직인후 드래그 이전 좌표와 이후 좌표를 동기화시킴
+    """
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -153,6 +201,7 @@ canvas.pack(fill="both",expand=True)
 
 last_x, last_y = None, None # 마지막 좌표 초기화
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
+pan_start_x, pan_start_y= 0, 0 #캔버스 이동을 위하여 이동시작 점의 좌표를 0,0 으로 지정
 canvas.bind("<Button-1>", paint_start)
 canvas.bind("<B1-Motion>", paint)
 # 캔버스에 마우스 왼쪽 버튼을 누르고 움직일 때마다 paint 함수를 호출하도록 바인딩
@@ -200,6 +249,13 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_pan_zoom = Button(window, text="Pan/Zoom Mode", command=set_pan_zoom_mode)
+button_pan_zoom.pack(side=LEFT)
+"""
+확대 축소를 하기 위하여 모드를 선택하는 버튼을 생성
+
+"""
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
