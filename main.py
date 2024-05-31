@@ -10,6 +10,7 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+from tkinter import messagebox
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -17,6 +18,7 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+favorite_pens = []
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -91,7 +93,6 @@ def clear_paint():
     last_x, last_y = None, None # 마지막 좌표 초기화
 
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
    
@@ -133,6 +134,58 @@ def create_new_window():
     new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
+
+def save_favorite_pen(size, color):
+    favorite_pens.append((size, color))
+
+def select_favorite_pen(index):
+    try:
+        brush_size_slider.set(favorite_pens[index][0])
+        set_brush_color(favorite_pens[index][1])
+    except IndexError:
+        messagebox.showerror("Error", "Favorite pen not found!")
+
+def add_favorite_pen():
+    def save_pen():
+        size = brush_size_slider.get()
+        color = askcolor()[1]
+        save_favorite_pen(size, color)
+        update_favorite_pens()
+    pen_dialog = Toplevel(window)
+    pen_dialog.title("Add Favorite Pen")
+    Label(pen_dialog, text="Pen Size:").grid(row=0, column=0)
+    size_entry = Entry(pen_dialog)
+    size_entry.grid(row=0, column=1)
+    Label(pen_dialog, text="Pen Color:").grid(row=1, column=0)
+    color_button = Button(pen_dialog, text="Choose Color", command=lambda: color_button.config(bg=askcolor()[1]))
+    color_button.grid(row=1, column=1)
+    save_button = Button(pen_dialog, text="Save", command=save_pen)
+    save_button.grid(row=2, columnspan=2)
+
+def update_favorite_pens():
+    for widget in favorite_pens_frame.winfo_children():
+        widget.destroy()
+    for i, pen in enumerate(favorite_pens):
+        button = Button(favorite_pens_frame, text=f"Pen {i+1}", command=lambda index=i: select_favorite_pen(index))
+        button.pack()
+        
+
+# Favorite Pen 선택 시 설정 적용
+def set_brush_color(color):
+    global brush_color
+    brush_color = color
+
+def set_brush_size(size):
+    global brush_size
+    brush_size = size
+
+def set_brush_mode(mode): 
+    global brush_mode
+    brush_mode = mode
+    if brush_mode == "solid": 
+        canvas.bind("<B1-Motion>", paint) 
+    elif brush_mode == "dotted": 
+        canvas.bind("<B1-Motion>", dotted_paint) 
 
 
 window = Tk()
@@ -200,6 +253,14 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_add_favorite_pen = Button(window, text="Add Favorite Pen", command=add_favorite_pen)
+button_add_favorite_pen.pack()
+
+favorite_pens_frame = Frame(window)
+favorite_pens_frame.pack()
+
+update_favorite_pens()
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
