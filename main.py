@@ -134,6 +134,10 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def update_time():
+    current_time = time.strftime("%H:%M:%S")
+    time_label.config(text=current_time)
+    window.after(1000, update_time)  # 1초 후에 update_time 함수를 다시 호출
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -194,6 +198,11 @@ button_flip.pack(side=LEFT)
 canvas.bind("<B3-Motion>", erase)
 
 brush_color = "black"
+
+time_label = Label(window, text="", font=('Arial', 12))
+time_label.pack(side=RIGHT)
+
+update_time()  # 시간을 업데이트하는 함수 호출
 
 button_bg_color = Button(window, text="Change Background Color", command=change_bg_color)
 button_bg_color.pack(side=LEFT)
