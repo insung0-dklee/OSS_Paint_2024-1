@@ -17,6 +17,11 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+def on_enter(event):
+    event.widget.config(bg="light blue")
+
+def on_leave(event):
+    event.widget.config(bg="SystemButtonFace")
 
 def set_paint_mode_normal(canvas):
     canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
@@ -121,6 +126,8 @@ def reset_brush(canvas):
 def setup_reset_brush_button(window, canvas):
     button_reset = Button(window, text="Reset Brush", command=lambda: reset_brush(canvas))
     button_reset.pack(side=LEFT)
+    button_reset.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_reset.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
 def setup_paint_app(window):
     global brush_size, brush_color
@@ -135,12 +142,14 @@ def setup_paint_app(window):
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
-
-    button_frame = Frame(window)
+    button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
+    
     
     button_clear = Button(button_frame, text="All Clear", command=lambda: clear_paint(canvas))
     button_clear.pack(side=LEFT)
+    button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     
     brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
@@ -150,19 +159,26 @@ def setup_paint_app(window):
     
     button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
     button_solid.pack()
-    
+    button_solid.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_solid.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode(canvas, "dotted"))
     button_dotted.pack()
-    
+    button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
     
     
     
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
     button_paint.pack(side=RIGHT)
+    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
     button_paint.pack(side=RIGHT)
+    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
@@ -171,19 +187,27 @@ def setup_paint_app(window):
 
     button_flip = Button(window, text="Flip Horizontal", command=lambda: flip_horizontal(canvas))
     button_flip.pack(side=LEFT)
+    button_flip.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_flip.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
     button_bg_color = Button(window, text="Change Background Color", command=lambda: change_bg_color(canvas))
     button_bg_color.pack(side=LEFT)
+    button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
     button_brush_color.pack(side=LEFT)
+    button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     set_paint_mode_normal(canvas)
     
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
+    button_new_window.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_new_window.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     
 
     
@@ -191,12 +215,14 @@ def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
     new_window.title("새 그림판")
     new_window.geometry("800x600+200+200")
+    new_window.configure(bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     setup_paint_app(new_window)
 
 window = Tk()
 window.title("그림판")
 window.geometry("800x600+200+200")
 window.resizable(True, True)
+window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 
 setup_paint_app(window)
 
