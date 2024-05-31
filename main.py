@@ -7,7 +7,7 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
-import time #시간 계산을 위한 모듈
+import time  # 시간을 계산하기 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
 
@@ -20,22 +20,23 @@ last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 �
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
+    canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint)
 
 def set_paint_mode_pressure():
-    canvas.bind("<Button-1>", start_paint_pressure)  # 마우스 클릭시작시
-    canvas.bind("<B1-Motion>", paint_pressure) #마우스를 클릭중일시 -> 그림을 그리고 있을시
+    canvas.bind("<Button-1>", start_paint_pressure)  # 마우스 클릭 시작시
+    canvas.bind("<B1-Motion>", paint_pressure)  # 마우스를 클릭 중일시 -> 그림을 그리고 있을시
 
 def start_paint_pressure(event):
     global start_time
-    start_time = time.time() #마우스를 클릭한 시간을 변수에 저장
+    start_time = time.time()  # 마우스를 클릭한 시간을 변수에 저장
 
 def paint_pressure(event):
     global start_time
     elapsed_time = time.time() - start_time  # 마우스를 클릭한 시간부터 지금까지의 시간을 계산
-    radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
-    x1, y1 = ( event.x - radius ), ( event.y - radius )
-    x2, y2 = ( event.x + radius ), ( event.y + radius )
+    radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵기는 마우스 클릭 시간에 비례하여 최대 5까지 증가
+    x1, y1 = (event.x - radius), (event.y - radius)
+    x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
 def paint_start(event):
@@ -48,12 +49,8 @@ def paint(event):
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
     x1, y1 = x2, y2
 
-"""
-dotted_paint: 점선 브러쉬 함수
-이벤트가 발생한 위치에 검은색 원을 일정한 간격으로 그린다.
-매개변수: event - 마우스 이벤트 객체로, 마우스의 현재 좌표를 포함
-"""
-def dotted_paint(event): # 점선 브러쉬 함수
+# 점선 브러쉬 함수
+def dotted_paint(event):  # 점선 브러쉬 함수
     global last_x, last_y
     spacing = 10  # 점 사이의 간격을 설정
     if last_x is not None and last_y is not None:
@@ -61,40 +58,35 @@ def dotted_paint(event): # 점선 브러쉬 함수
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
+            canvas.create_oval(event.x - 1, event.y - 1, event.x + 1, event.y + 1, fill="black", outline="black")
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
 
-"""
-set_brush_mode: 브러쉬 모드를 변경하는 함수
-실선 브러쉬와 점선 브러쉬로 전환한다.
-매개변수: mode - 브러쉬 모드를 나타내는 문자열 ("solid" 또는 "dotted")
-"""
-def set_brush_mode(mode): # 브러쉬 모드를 변경하는 함수
+# 브러쉬 모드를 변경하는 함수
+def set_brush_mode(mode):  # 브러쉬 모드를 변경하는 함수
     global brush_mode
     brush_mode = mode
-    if brush_mode == "solid": # 브러쉬 모드가 solid면 
-        canvas.bind("<B1-Motion>", paint) # 실선(기본) 브러쉬로 변경
-    elif brush_mode == "dotted": # 브러쉬 모드가 dotted면
-        canvas.bind("<B1-Motion>", dotted_paint) # 점선 브러쉬로 변경
+    if brush_mode == "solid":  # 브러쉬 모드가 solid면
+        canvas.bind("<B1-Motion>", paint)  # 실선(기본) 브러쉬로 변경
+    elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
+        canvas.bind("<B1-Motion>", dotted_paint)  # 점선 브러쉬로 변경
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
     global brush_size
     brush_size = int(new_size)
 
-#all clear 기능 추가
+# all clear 기능 추가
 def clear_paint():
     canvas.delete("all")
     global last_x, last_y
-    last_x, last_y = None, None # 마지막 좌표 초기화
+    last_x, last_y = None, None  # 마지막 좌표 초기화
+    polygon_drawer.clear_points()  # 점의 리스트 초기화
 
-def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
+def add_text(event):  # 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -115,8 +107,8 @@ def flip_horizontal():
 def erase(event):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
-    x1, y1 = ( event.x-3 ), ( event.y-3 )
-    x2, y2 = ( event.x+3 ), ( event.y+3 )
+    x1, y1 = (event.x - 3), (event.y - 3)
+    x2, y2 = (event.x + 3), (event.y + 3)
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
 
 def change_bg_color():
@@ -129,29 +121,76 @@ def change_brush_color():
 
 # 새 창 열기 생성
 def create_new_window():
-    new_window = Tk()  #새로운 Tk 인스턴스 생성
-    new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
-    new_canvas.pack() #캔버스가 새로운 창에 배치
+    new_window = Tk()  # 새로운 Tk 인스턴스 생성
+    new_canvas = Canvas(new_window)  # 새로운 창에 캔버스 추가
+    new_canvas.pack()  # 캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+class PolygonDrawer:
+    """
+    다각형을 그리기 위한 클래스.
+    
+    사용자가 클릭한 점들을 사용하여 다각형을 그림.
+    """
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self.polygon_points = []
+        self.num_sides = 3  # 기본 다각형은 삼각형
+
+    def add_point(self, event):
+        """
+        사용자가 캔버스를 클릭할 때마다 점을 추가.
+        점의 수가 num_sides와 같아지면 다각형을 그림.
+        """
+        if len(self.polygon_points) < self.num_sides:
+            self.polygon_points.append((event.x, event.y))
+            self.canvas.create_oval(event.x - 3, event.y - 3, event.x + 3, event.y + 3, fill="#d2b48c", outline="black")
+            if len(self.polygon_points) == self.num_sides:
+                self.draw_polygon(self.polygon_points)
+                self.polygon_points.clear()
+
+    def draw_polygon(self, points):
+        """
+        주어진 점들을 사용하여 다각형을 그림.
+        """
+        self.canvas.create_polygon(points, outline="black", fill="")
+
+    def enable_polygon_mode(self):
+        """
+        다각형 모드를 활성화하여 캔버스 클릭 시 add_point 메서드를 호출하도록 설정.
+        """
+        canvas.unbind("<B1-Motion>")  # 다른 모드를 비활성화
+        canvas.bind("<Button-1>", self.add_point)
+
+    def set_num_sides(self, sides):
+        """
+        그릴 다각형의 변의 수를 설정.
+        """
+        self.num_sides = sides
+
+    def clear_points(self):
+        """
+        다각형 점의 리스트를 초기화.
+        """
+        self.polygon_points.clear()
 
 window = Tk()
-#Tk 객체를 생성하여 주 윈도우를 만들기
+# Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
 
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
-#Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("640x400+200+200")
-#윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
-#윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
-window.resizable(True,True)
-#윈도우이름.resizeable(상하, 좌우)을 이용하여
-#윈도우 창의 창 크기 조절 가능 여부를 설정
-canvas.pack(fill="both",expand=True)
-#캔버스를 창 너비에 맞춰 동적으로 크기 조절
+# Canvas 위젯을 생성하여 주 윈도우에 추가
+window.geometry("1000x600+200+200")
+# 윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
+# 윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
+window.resizable(True, True)
+# 윈도우이름.resizeable(상하, 좌우)을 이용하여
+# 윈도우 창의 창 크기 조절 가능 여부를 설정
+canvas.pack(fill="both", expand=True)
+# 캔버스를 창 너비에 맞춰 동적으로 크기 조절
 
-last_x, last_y = None, None # 마지막 좌표 초기화
+last_x, last_y = None, None  # 마지막 좌표 초기화
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 canvas.bind("<Button-1>", paint_start)
 canvas.bind("<B1-Motion>", paint)
@@ -168,25 +207,25 @@ brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
 brush_size_slider.pack(side=LEFT)
 
-button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
-button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
+button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid"))  # 버튼을 누르면 실선 모드로 바꾼다
+button_solid.pack()  # 실선 브러쉬 버튼을 윈도우에 배치
 
-button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
-button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
+button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted"))  # 버튼을 누르면 점선 모드로 바꾼다
+button_dotted.pack()  # 점선 브러쉬 버튼을 윈도우에 배치
 
-button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
+button_paint = Button(window, text="normal", command=set_paint_mode_normal)  # 기본 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
-button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
+button_paint = Button(window, text="pressure", command=set_paint_mode_pressure)  # 감압 브러시 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
-text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
+text_box = Entry(window)  # 텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
-canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
+canvas.bind("<Button-3>", add_text)  # 입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
 
-button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
-button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배치
+button_new_window = Button(window, text="새 창 열기", command=create_new_window)  # "새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦
+button_new_window.pack(side=LEFT)  # "새 창 열기"버튼을 윈도우에 배치
 
 button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
 button_flip.pack(side=LEFT)
@@ -201,6 +240,21 @@ button_bg_color.pack(side=LEFT)
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
 
-set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
+polygon_drawer = PolygonDrawer(canvas)
+button_draw_polygon = Button(window, text="Draw Polygon", command=polygon_drawer.enable_polygon_mode)
+button_draw_polygon.pack(side=LEFT)
+
+num_sides_entry = Entry(window)
+num_sides_entry.pack(side=LEFT)
+num_sides_entry.insert(0, "3")  # 기본값은 삼각형
+
+def update_num_sides():
+    num_sides = int(num_sides_entry.get())
+    polygon_drawer.set_num_sides(num_sides)
+
+button_set_sides = Button(window, text="Set Sides", command=update_num_sides)
+button_set_sides.pack(side=LEFT)
+
+set_paint_mode_normal()  # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
