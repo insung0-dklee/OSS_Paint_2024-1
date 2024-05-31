@@ -17,6 +17,13 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+drawn_items=[] #그린 항목을 저장할 리스트
+
+# 되돌리기 함수
+def undo():
+    if drawn_items:
+        last_item = drawn_items.pop()
+        canvas.delete(last_item)
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -36,7 +43,8 @@ def paint_pressure(event):
     radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
-    canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+    item = canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+    drawn_items.append(item) #그린 항목을 리스트에 추가
 
 def paint_start(event):
     global x1, y1
@@ -45,7 +53,8 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    item = canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    drawn_items.append(item) #그린 항목을 리스트에 추가
     x1, y1 = x2, y2
 
 """
@@ -61,7 +70,8 @@ def dotted_paint(event): # 점선 브러쉬 함수
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
+            item = canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
+            drawn_items.append(item) #그린 항목을 리스트에 추가
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
@@ -89,11 +99,13 @@ def clear_paint():
     canvas.delete("all")
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
+    drawn_items.clear() #그린 항목 리스트 초기화
 
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
     text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
+    item = canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
+    drawn_items.append(item) #그린 텍스트 항목을 리스트에 추가
    
 
 def toggle_fullscreen(event):
@@ -118,6 +130,7 @@ def erase(event):
     x1, y1 = ( event.x-3 ), ( event.y-3 )
     x2, y2 = ( event.x+3 ), ( event.y+3 )
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
+    drawn_items.append(item) #지운 항목을 리스트에 추가
 
 def change_bg_color():
     bg_color = askcolor()
@@ -139,6 +152,8 @@ window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
 
+button_undo = Button(window, text="Undo", command=undo)  # 되돌리기 버튼 추가
+button_undo.pack(side=LEFT)
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
