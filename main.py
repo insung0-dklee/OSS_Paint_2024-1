@@ -49,6 +49,45 @@ def paint(event):
     x1, y1 = x2, y2
 
 """
+start_rectangle: 사각형 그리기를 시작하는 함수
+draw_rectangle: 사각형을 그리는 함수
+set_rectangle_mode: 사각형 모드로 전환하는 함수
+"""
+def start_rectangle(event):  # 사각형 그리기를 시작하는 함수 
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+
+def draw_rectangle(event):  # 사각형을 그리는 함수 
+    global start_x, start_y
+    canvas.delete("rect")
+    canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=brush_color, tags="rect")
+
+def set_rectangle_mode():  # 사각형 모드로 전환하는 함수
+    canvas.bind("<Button-1>", start_rectangle)
+    canvas.bind("<B1-Motion>", draw_rectangle)
+    canvas.bind("<ButtonRelease-1>", lambda event: canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=brush_color))
+
+"""
+start_triangle: 삼각형 그리기를 시작하는 함수
+draw_triangle: 삼각형을 그리는 함수
+set_triangle_mode: 삼각형 모드로 전환하는 함수
+"""
+def start_triangle(event):  # 삼각형 그리기를 시작하는 함수
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+
+def draw_triangle(event):  # 삼각형을 그리는 함수 
+    global start_x, start_y
+    canvas.delete("tri")
+    canvas.create_polygon(start_x, start_y, event.x, event.y, (start_x + event.x) / 2, start_y - (event.y - start_y), outline=brush_color, fill='', tags="tri")
+
+def set_triangle_mode():  # 삼각형 모드로 전환하는 함수
+    canvas.bind("<Button-1>", start_triangle)
+    canvas.bind("<B1-Motion>", draw_triangle)
+    canvas.bind("<ButtonRelease-1>", lambda event: canvas.create_polygon(start_x, start_y, event.x, event.y, (start_x + event.x) / 2, start_y - (event.y - start_y), outline=brush_color, fill=''))
+
+
+"""
 dotted_paint: 점선 브러쉬 함수
 이벤트가 발생한 위치에 검은색 원을 일정한 간격으로 그린다.
 매개변수: event - 마우스 이벤트 객체로, 마우스의 현재 좌표를 포함
@@ -179,6 +218,12 @@ button_paint.pack(side=RIGHT)
 
 button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
+
+button_rectangle = Button(window, text="Rectangle Mode", command=set_rectangle_mode)  # 사각형 모드 버튼 추가
+button_rectangle.pack(side=RIGHT) 
+
+button_triangle = Button(window, text="Triangle Mode", command=set_triangle_mode)  # 삼각형 모드 버튼 추가
+button_triangle.pack(side=RIGHT)
 
 text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
