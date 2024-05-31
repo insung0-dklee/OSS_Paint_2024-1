@@ -18,6 +18,27 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 
+def insert_math_symbol(symbol): # 선택한 수학 기호를 캔버스에 텍스트로 추가하는 함수
+    canvas.create_text(320, 200, text=symbol, fill="black", font=('Arial', 20))
+
+def select_math_symbol(event):
+    # 수학 기호 선택 시 호출되는 함수
+    # 선택한 기호를 캔버스에 추가
+    symbol = event.widget.get()
+    insert_math_symbol(symbol)
+
+# 수학 기호 목록
+math_symbols = ["+", "-", "*", "/", "=", "≠", "√", "π", "∑", "∫"]
+
+# 수학 기호를 위한 StringVar 변수 생성
+math_symbol_var = StringVar(window)
+math_symbol_var.set(math_symbols[0])  # 기본값 설정
+
+# OptionMenu 위젯을 생성하여 수학 기호 선택 메뉴 추가
+math_symbol_menu = OptionMenu(button_frame, math_symbol_var, *math_symbols, command=select_math_symbol)
+math_symbol_menu.pack(side=LEFT)  # 버튼 프레임의 왼쪽에 배치
+
+
 #캔버스 캡쳐하는 함수
 def capture_canvas():
     # 파일 저장 대화 상자를 열어 파일 경로를 얻음
