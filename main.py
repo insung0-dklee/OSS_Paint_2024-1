@@ -5,11 +5,13 @@ clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
 
 """
-
+from PIL import ImageGrab
 from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+
+
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -19,6 +21,16 @@ spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 
 # 마우스 움직임에 따라 도형을 그리는 함수
+"""
+canvas.find_all() returns a list of canvas object IDs, gets their coordinates, and inverts each x coordinate to complete the horizontal flip. 
+Use canvas.coords(obj, *coords) to update the coordinates of each object to achieve the horizontal flip effect.
+
+@Param:
+    NONE
+
+@Return
+    NONE
+"""
 def set_paint_mode_normal():
     canvas.bind("<B1-Motion>", paint)
 
@@ -100,6 +112,10 @@ def toggle_fullscreen(event):
     window.state = not window.state
     window.attributes("-fullscreen", window.state)
 
+"""
+canvas.find_all() returns a list of canvas object IDs, gets their coordinates, and inverts each x coordinate to complete the horizontal flip. 
+Use canvas.coords(obj, *coords) to update the coordinates of each object to achieve the horizontal flip effect.
+"""
 # 좌우 반전 기능 추가
 def flip_horizontal():
     objects = canvas.find_all()
@@ -134,6 +150,37 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+"""
+이미지를 저장하는 버튼을 만들고, 캔버스의 크기와 위치를 가져오고, 이미지를 가져와 paint.jpeg로 저장합니다.
+@Param 
+    None
+@Return 
+    None
+"""
+# 이미지 저장 기능
+def save_Image():
+    x = window.winfo_rootx() + canvas.winfo_x()
+    y = window.winfo_rooty() + canvas.winfo_y()
+    x1 = x + canvas.winfo_width()
+    y1 = y + canvas.winfo_height()
+    ImageGrab.grab().crop((x, y, x1, y1)).save("paint.jpeg")
+
+
+"""
+사용자가 선택한 파일을 열고 Tkinter에서 지원하는 형식으로 변환한 다음 캔버스의 왼쪽 상단 모서리부터 이미지를 표시합니다.
+@Param 
+    None
+@Return 
+    None
+"""
+def import_Image():
+    file_path = filedialog.askopenfilename()
+    if file_path:
+        image = Image.open(file_path)
+        image = ImageTk.PhotoImage(image)
+        canvas.create_image(0, 0, anchor=NW, image=image)
+        canvas.image = image
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -156,6 +203,12 @@ brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 canvas.bind("<Button-1>", paint_start)
 canvas.bind("<B1-Motion>", paint)
 # 캔버스에 마우스 왼쪽 버튼을 누르고 움직일 때마다 paint 함수를 호출하도록 바인딩
+
+button_save = Button(button_frame, text="Save image", command=save_Image)
+button_save.pack(side=LEFT)
+
+button_import = Button(button_frame, text="Import image", command=import_Image)
+button_import.pack(side=LEFT)
 
 button_frame = Frame(window)
 button_frame.pack(fill=X)
