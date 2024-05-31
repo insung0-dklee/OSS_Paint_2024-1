@@ -45,7 +45,7 @@ def paint_start(event):
 def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size) # 굵기가 적용이 안되는 부분 버그 수정
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size) # 굵기가 조정이 되지 않는 버그 수정
     x1, y1 = x2, y2
 
 """
@@ -61,9 +61,9 @@ def dotted_paint(event): # 점선 브러쉬 함수
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black", width=brush_size) # 굵기가 적용이 안되는 부분 수정
+            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black", width=brush_size) # 굵기가 조정이 되지 않는 버그 수정
             last_x, last_y = event.x, event.y
-        else:
+    else:
         last_x, last_y = event.x, event.y
 
 """
@@ -167,7 +167,6 @@ button_clear.pack(side=LEFT)
 brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
 brush_size_slider.pack(side=LEFT)
-
 
 button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
 button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
