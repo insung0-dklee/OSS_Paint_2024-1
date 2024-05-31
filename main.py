@@ -17,6 +17,7 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+frame_active = False  # 액자 활성화 여부를 저장하는 변수
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -134,6 +135,35 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+'''
+    draw_frame : 캔버스의 너비와 높이를 가져오고 상하좌우에 나무 액자를 그리는 함수
+    toggle_frame : frame_active 변수에 따라 액자의 활성화 상태를 변경하는 함수
+'''
+# 액자 그리기 함수
+def draw_frame():
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    frame_thickness = 20
+    frame_color = "#8B4513"  # 나무 색상
+
+    # 상단
+    canvas.create_rectangle(0, 0, canvas_width, frame_thickness, fill=frame_color, outline=frame_color)
+    # 하단
+    canvas.create_rectangle(0, canvas_height - frame_thickness, canvas_width, canvas_height, fill=frame_color, outline=frame_color)
+    # 좌측
+    canvas.create_rectangle(0, 0, frame_thickness, canvas_height, fill=frame_color, outline=frame_color)
+    # 우측
+    canvas.create_rectangle(canvas_width - frame_thickness, 0, canvas_width, canvas_height, fill=frame_color, outline=frame_color)
+
+def toggle_frame():
+    global frame_active
+    frame_active = not frame_active
+    if frame_active:
+        draw_frame()
+    else:
+        clear_paint()
+
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +230,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_frame_toggle = Button(window, text="Toggle Frame", command=toggle_frame)
+button_frame_toggle.pack(side=RIGHT) # 버튼을 클릭할 때마다 액자가 활성화/비활성화가 이루어집니다.
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
