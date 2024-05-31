@@ -21,6 +21,9 @@ last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 �
 text_color = "black"  # 기본 텍스트 색상
 current_font = "Arial"  # 기본 글꼴 설정
 current_font_size = 12  # 기본 글꼴 크기 설정
+current_font_weight = "normal"  # 기본 글꼴 굵기 설정
+current_font_slant = "roman"  # 기본 글꼴 기울임 설정
+current_font_underline = 0  # 기본 글꼴 밑줄 설정
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -96,8 +99,9 @@ def clear_paint():
 
 def add_text(event):  # 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
     text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill=text_color, font=(current_font, current_font_size))
-   
+    font_style = font.Font(family=current_font, size=current_font_size, weight=current_font_weight,
+                           slant=current_font_slant, underline=current_font_underline)
+    canvas.create_text(event.x, event.y, text=text, fill=text_color, font=font_style)
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -141,6 +145,20 @@ def change_font(new_font):
 def change_font_size(new_size):
     global current_font_size
     current_font_size = int(new_size)
+
+def change_font_weight(weight):
+    global current_font_weight
+    current_font_weight = weight
+
+
+def change_font_slant(slant):
+    global current_font_slant
+    current_font_slant = slant
+
+
+def toggle_underline():
+    global current_font_underline
+    current_font_underline = 0 if current_font_underline == 1 else 1
 
 # 새 창 열기 생성
 def create_new_window():
@@ -233,6 +251,24 @@ font_menu.pack(side=LEFT)
 font_size_slider = Scale(button_frame, from_=8, to=72, orient=HORIZONTAL, label="Font Size", command=change_font_size)
 font_size_slider.set(current_font_size)
 font_size_slider.pack(side=LEFT)
+
+# 글꼴 굵기 선택 버튼 추가
+button_bold = Button(window, text="Bold", command=lambda: change_font_weight("bold"))
+button_bold.pack(side=LEFT)
+
+button_normal = Button(window, text="Normal Weight", command=lambda: change_font_weight("normal"))
+button_normal.pack(side=LEFT)
+
+# 글꼴 기울임 선택 버튼 추가
+button_italic = Button(window, text="Italic", command=lambda: change_font_slant("italic"))
+button_italic.pack(side=LEFT)
+
+button_roman = Button(window, text="Roman", command=lambda: change_font_slant("roman"))
+button_roman.pack(side=LEFT)
+
+# 밑줄 토글 버튼 추가
+button_underline = Button(window, text="Underline", command=toggle_underline)
+button_underline.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
