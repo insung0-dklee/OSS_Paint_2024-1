@@ -10,6 +10,7 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+from tkinter import font  # 폰트 모듈을 가져옴
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -18,6 +19,8 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 text_color = "black"  # 기본 텍스트 색상
+current_font = "Arial"  # 기본 글꼴 설정
+current_font_size = 12  # 기본 글꼴 크기 설정
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -93,7 +96,7 @@ def clear_paint():
 
 def add_text(event):  # 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
     text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill=text_color, font=('Arial', 12))
+    canvas.create_text(event.x, event.y, text=text, fill=text_color, font=(current_font, current_font_size))
    
 
 def toggle_fullscreen(event):
@@ -130,6 +133,14 @@ def change_brush_color():
 def change_text_color():
     global text_color
     text_color = askcolor()[1]
+
+def change_font(new_font):
+    global current_font
+    current_font = new_font
+
+def change_font_size(new_size):
+    global current_font_size
+    current_font_size = int(new_size)
 
 # 새 창 열기 생성
 def create_new_window():
@@ -211,6 +222,17 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+# 글꼴 선택 드롭다운 메뉴 추가
+font_var = StringVar(window)
+font_var.set(current_font)
+font_menu = OptionMenu(button_frame, font_var, *font.families(), command=change_font)
+font_menu.pack(side=LEFT)
+
+# 글꼴 크기 선택 슬라이더 추가
+font_size_slider = Scale(button_frame, from_=8, to=72, orient=HORIZONTAL, label="Font Size", command=change_font_size)
+font_size_slider.set(current_font_size)
+font_size_slider.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
