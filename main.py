@@ -134,6 +134,29 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def start_shape(event):
+    global shape_start_x, shape_start_y
+    shape_start_x = event.x
+    shape_start_y = event.y
+    global current_shape
+    current_shape = None
+
+def draw_shape(event):
+    global current_shape
+    if current_shape:
+        canvas.delete(current_shape)
+    if selected_shape == "oval":
+        current_shape = canvas.create_oval(shape_start_x, shape_start_y, event.x, event.y, outline=current_color)
+    elif selected_shape == "rectangle":
+        current_shape = canvas.create_rectangle(shape_start_x, shape_start_y, event.x, event.y, outline=current_color)
+
+def set_shape_mode(shape):
+    global selected_shape
+    selected_shape = shape
+    canvas.bind("<Button-1>", start_shape)
+    canvas.bind("<B1-Motion>", draw_shape)
+    canvas.bind("<ButtonRelease-1>", lambda event: draw_shape(event))
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +223,12 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_oval = Button(window, text="빈 타원", command=lambda: set_shape_mode("oval"))
+button_oval.pack(side=LEFT)
+
+button_rectangle = Button(window, text="빈 사각형", command=lambda: set_shape_mode("rectangle"))
+button_rectangle.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
