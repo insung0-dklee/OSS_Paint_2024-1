@@ -7,7 +7,7 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
-import time #시간 계산을 위한 모듈
+import time  # 시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
 
@@ -33,9 +33,9 @@ def start_paint_pressure(event):
 def paint_pressure(event):
     global start_time
     elapsed_time = time.time() - start_time  # 마우스를 클릭한 시간부터 지금까지의 시간을 계산
-    radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
-    x1, y1 = ( event.x - radius ), ( event.y - radius )
-    x2, y2 = ( event.x + radius ), ( event.y + radius )
+    radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵기는 마우스 클릭 시간에 비례하여 최대 5까지 증가
+    x1, y1 = (event.x - radius), (event.y - radius)
+    x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
 def paint_start(event):
@@ -91,11 +91,9 @@ def clear_paint():
     last_x, last_y = None, None # 마지막 좌표 초기화
 
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
    
-
 def toggle_fullscreen(event):
     window.state = not window.state
     window.attributes("-fullscreen", window.state)
@@ -115,8 +113,8 @@ def flip_horizontal():
 def erase(event):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
-    x1, y1 = ( event.x-3 ), ( event.y-3 )
-    x2, y2 = ( event.x+3 ), ( event.y+3 )
+    x1, y1 = (event.x-3), (event.y-3)
+    x2, y2 = (event.x+3), (event.y+3)
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
 
 def change_bg_color():
@@ -129,27 +127,27 @@ def change_brush_color():
 
 # 새 창 열기 생성
 def create_new_window():
-    new_window = Tk()  #새로운 Tk 인스턴스 생성
+    new_window = Tk()  # 새로운 Tk 인스턴스 생성
     new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
-    new_canvas.pack() #캔버스가 새로운 창에 배치
+    new_canvas.pack() # 캔버스가 새로운 창에 배치
     new_window.mainloop()
 
-
 window = Tk()
-#Tk 객체를 생성하여 주 윈도우를 만들기
-window.title("그림판")
+# Tk 객체를 생성하여 주 윈도우를 만들기
+version = "1.0.0"  # 프로그램 버전
+window.title(f"그림판 v{version}")
 
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
-#Canvas 위젯을 생성하여 주 윈도우에 추가
+# Canvas 위젯을 생성하여 주 윈도우에 추가
 window.geometry("640x400+200+200")
-#윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
-#윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
-window.resizable(True,True)
-#윈도우이름.resizeable(상하, 좌우)을 이용하여
-#윈도우 창의 창 크기 조절 가능 여부를 설정
-canvas.pack(fill="both",expand=True)
-#캔버스를 창 너비에 맞춰 동적으로 크기 조절
+# 윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
+# 윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
+window.resizable(True, True)
+# 윈도우이름.resizeable(상하, 좌우)을 이용하여
+# 윈도우 창의 창 크기 조절 가능 여부를 설정
+canvas.pack(fill="both", expand=True)
+# 캔버스를 창 너비에 맞춰 동적으로 크기 조절
 
 last_x, last_y = None, None # 마지막 좌표 초기화
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
@@ -174,18 +172,18 @@ button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
 button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
 button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
 
-button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
+button_paint = Button(window, text="normal", command=set_paint_mode_normal) # 기본 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
-button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
+button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) # 감압 브러시 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
-text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
+text_box = Entry(window) # 텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
-canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
+canvas.bind("<Button-3>", add_text) # 입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
 
-button_new_window = Button(window, text="새 창 열기", command=create_new_window) #"새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
+button_new_window = Button(window, text="새 창 열기", command=create_new_window) # "새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦 
 button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배치
 
 button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
@@ -204,3 +202,4 @@ button_brush_color.pack(side=LEFT)
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
+
