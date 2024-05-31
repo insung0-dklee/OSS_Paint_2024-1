@@ -17,6 +17,15 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+mirror_mode = False  # 미러 모드 비활성화
+
+def toggle_mirror_mode(): # 미러 모드 상태를 토글하는 함수
+    global mirror_mode
+    mirror_mode = not mirror_mode
+
+def get_mirror_coords(x, y): # 대칭 좌표를 계산하는 함수
+    canvas_width = canvas.winfo_width()
+    return canvas_width - x, y
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -46,6 +55,10 @@ def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    if mirror_mode: # 미러 모드인 경우
+        mx1, my1 = get_mirror_coords(x1, y1)
+        mx2, my2 = get_mirror_coords(x2, y2)
+        canvas.create_line(mx1, my1, mx2, my2, fill=brush_color, width=2)
     x1, y1 = x2, y2
 
 """
@@ -200,6 +213,9 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_mirror = Button(window, text="Toggle Mirror Mode", command=toggle_mirror_mode)
+button_mirror.pack(side=LEFT) # 미러 모드 토글 버튼을 윈도우에 배치
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
