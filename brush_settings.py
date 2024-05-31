@@ -63,12 +63,16 @@ def paint_pressure(event, canvas):
 def paint_start(event, canvas):
     global x1, y1, brush_size
     x1, y1 = (event.x, event.y)
+    canvas.history_manager.start_drawing()
 
 def paint(event, canvas):
     global x1, y1, brush_size, brush_color
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
     x1, y1 = x2, y2
+
+def paint_end(event, canvas):
+    canvas.history_manager.end_drawing()
 
 """
 dotted_paint: 점선 브러쉬 함수

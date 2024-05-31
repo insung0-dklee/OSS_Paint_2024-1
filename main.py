@@ -8,7 +8,8 @@ button_delete : clear_paint의 버튼
 
 from tkinter import *
 import brush_settings  # brush_settings 모듈 임포트
-from brush_settings import change_brush_size, change_bg_color, change_brush_color, set_brush_mode, set_paint_mode_normal, set_paint_mode_pressure, paint_start, paint, dotted_paint
+from brush_settings import change_brush_size, change_bg_color, change_brush_color, set_brush_mode, set_paint_mode_normal, set_paint_mode_pressure, paint_start, paint, paint_end
+import history  # history 모듈 임포트
 import time  # 시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
@@ -29,15 +30,43 @@ x1, y1 = None, None
 # brush_settings 모듈에 전역 변수 전달
 brush_settings.initialize_globals(globals())
 
+window = Tk()
+# Tk 객체를 생성하여 주 윈도우를 만들기
+window.title("그림판")
+
+brush_size = 1  # 초기 브러시 크기
+canvas = Canvas(window, bg="white")
+
+# Canvas 위젯을 생성하여 주 윈도우에 추가
+window.geometry("640x400+200+200")
+# 윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
+# 윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
+window.resizable(True, True)
+# 윈도우이름.resizeable(상하, 좌우)을 이용하여
+# 윈도우 창의 창 크기 조절 가능 여부를 설정
+canvas.pack(fill="both", expand=True)
+# 캔버스를 창 너비에 맞춰 동적으로 크기 조절
+
+canvas.bind("<Button-1>", lambda event: paint_start(event, canvas))
+canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
+canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event, canvas))
+
+# history_manager 인스턴스 생성
+history_manager = history.HistoryManager(canvas)
+canvas.history_manager = history_manager  # canvas에 history_manager 속성 추가
+
+
 # all clear 기능 추가
 def clear_paint():
     canvas.delete("all")
     global last_x, last_y
     last_x, last_y = None, None  # 마지막 좌표 초기화
+    history_manager.add_state()
 
 def add_text(event):  # 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
+    history_manager.add_state()
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -54,6 +83,7 @@ def flip_horizontal():
             if i % 2 == 0:  # x 좌표를 반전시킵니다.
                 coords[i] = canvas_width - coords[i]
         canvas.coords(obj, *coords)
+    history_manager.add_state()
 
 def erase(event):
     bg_color = canvas.cget("bg")
@@ -61,6 +91,7 @@ def erase(event):
     x1, y1 = (event.x - 3), (event.y - 3)
     x2, y2 = (event.x + 3), (event.y + 3)
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
+    history_manager.add_state()
 
 # 새 창 열기 생성
 def create_new_window():
@@ -69,24 +100,7 @@ def create_new_window():
     new_canvas.pack()  # 캔버스가 새로운 창에 배치
     new_window.mainloop()
 
-window = Tk()
-# Tk 객체를 생성하여 주 윈도우를 만들기
-window.title("그림판")
 
-brush_size = 1  # 초기 브러시 크기
-canvas = Canvas(window, bg="white")
-# Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("640x400+200+200")
-# 윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
-# 윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
-window.resizable(True, True)
-# 윈도우이름.resizeable(상하, 좌우)을 이용하여
-# 윈도우 창의 창 크기 조절 가능 여부를 설정
-canvas.pack(fill="both", expand=True)
-# 캔버스를 창 너비에 맞춰 동적으로 크기 조절
-
-canvas.bind("<Button-1>", lambda event: paint_start(event, canvas))
-canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
 
 button_frame = Frame(window)
 button_frame.pack(fill=X)
@@ -129,6 +143,13 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+button_undo = Button(window, text="Undo", command=history_manager.undo)
+button_undo.place(x=10, y=10)
+
+button_redo = Button(window, text="Redo", command=history_manager.redo)
+button_redo.place(x=70, y=10)
+
 
 set_paint_mode_normal(canvas)  # 프로그램 시작 시 기본 그리기 모드 설정
 
