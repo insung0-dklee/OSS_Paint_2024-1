@@ -90,6 +90,13 @@ def clear_paint():
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
 
+#이전으로 되돌리기 기능 추가
+undo_stack = []
+
+def undo():
+    if undo_stack:
+        canvas.delete(undo_stack.pop())
+
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
     text = text_box.get()
@@ -162,6 +169,10 @@ button_frame.pack(fill=X)
 
 button_clear = Button(button_frame, text="All Clear", command=clear_paint)
 button_clear.pack(side=LEFT)
+
+button_undo = Button(button_frame, text="Undo", command=undo)
+button_undo.pack(side=LEFT)
+
 
 # 펜 굵기를 조절할 수 있는 슬라이더 추가
 brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
