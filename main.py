@@ -7,6 +7,7 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
+
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
@@ -17,6 +18,7 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -41,12 +43,20 @@ def paint_pressure(event):
 def paint_start(event):
     global x1, y1
     x1, y1 = (event.x - brush_size), (event.y - brush_size)
-
+"""
+만약 selected_stamp.get에  값이 있다면 text변수가 brush가 됨
+"""
 def paint(event):
     global x1, y1
-    x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
-    x1, y1 = x2, y2
+    
+    x, y = event.x, event.y
+    if selected_stamp.get():
+        canvas.create_text(x, y, text=selected_stamp.get(),fill=brush_color, font=("Arial", brush_size * 10 ))
+        return  # 스템프를 설정하고 바로 리턴하여 다른 동작을 하지 않도록 함
+
+    x1, y1 = (x - brush_size // 2), (y - brush_size // 2)
+    x2, y2 = (x + brush_size // 2), (y + brush_size // 2)
+    canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
 """
 dotted_paint: 점선 브러쉬 함수
@@ -65,6 +75,30 @@ def dotted_paint(event): # 점선 브러쉬 함수
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
+
+# STEAP 기능 추가
+'''
+set_stamp(char)     : 스탬프 문자 설정
+selected_stamp      : 현재 선택된 스탬프 문자를 저장
+
+paint 함수에서 stamp를 가지고 있다면 텍스트를 생성
+'''
+window = Tk()  # Tk 객체 생성
+stamp_frame = Frame(window)
+stamp_frame.pack()
+
+def set_stamp(char):
+    selected_stamp.set(char)
+
+selected_stamp = StringVar()
+
+
+for char in "A B C D F + -".split():
+    Button(stamp_frame, text=char, command=lambda ch=char: set_stamp(ch)).pack(side=LEFT)
+
+# 브러쉬 모드로 전환하는 버튼
+Button(stamp_frame, text="Brush", command=lambda: set_stamp("")).pack(side=LEFT)
+
 
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
@@ -99,6 +133,7 @@ def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위�
 def toggle_fullscreen(event):
     window.state = not window.state
     window.attributes("-fullscreen", window.state)
+    
 
 # 좌우 반전 기능 추가
 def flip_horizontal():
@@ -133,7 +168,6 @@ def create_new_window():
     new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
-
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
