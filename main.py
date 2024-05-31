@@ -18,6 +18,8 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 
+basic_color_lists = ["black", "white", "orange", "purple", "green", "yellow", "blue", "red"] #기본으로 주어지는 8가지 색상을 저장하는 배열
+
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
     canvas.bind("<B1-Motion>", paint)
@@ -125,7 +127,22 @@ def change_bg_color():
 
 def change_brush_color():
     global brush_color
+    global custom_brush_color_button
     brush_color = askcolor()[1]
+    button_current_color.config(bg=brush_color) # 현재 브러쉬 색을 표시하는 라벨 업데이트
+
+#+===========================================================
+def custom_brush_color_button(event): # 브러쉬 색을 자신이 원하는데로 변경 뒤, 바뀐 색을 버튼에 적용하는 기능 
+    global brush_color
+    brush_color = askcolor()[1] # 지정된 색을 브러쉬의 색에 적용
+    event.widget.config(bg=brush_color) # 브러쉬색을 버튼에 적용
+    button_current_color.config(bg=brush_color) # 현재 브러쉬 색을 표시하는 라벨 업데이트
+
+def select_color_from_button(event): # 브러쉬 색을 버튼의 색으로 적용하는 기능 
+    global brush_color
+    brush_color = event.widget.cget('bg') # 버튼의 색을 브러쉬의 색에 적용
+    button_current_color.config(bg=brush_color) # 현재 브러쉬 색을 표시하는 라벨 업데이트
+#+===========================================================
 
 # 새 창 열기 생성
 def create_new_window():
@@ -142,7 +159,7 @@ window.title("그림판")
 brush_size = 1  # 초기 브러시 크기
 canvas = Canvas(window, bg="white")
 #Canvas 위젯을 생성하여 주 윈도우에 추가
-window.geometry("640x400+200+200")
+window.geometry("640x480+200+200")
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
 #윈도우 창의 너비와 높이, 초기 화면 위치의 x좌표와 y좌표를 설정
 window.resizable(True,True)
@@ -159,6 +176,13 @@ canvas.bind("<B1-Motion>", paint)
 
 button_frame = Frame(window)
 button_frame.pack(fill=X)
+
+#+===========================================================
+button_frame_basic_color = Frame(window) # 기본색 버튼을 위한 프레임
+button_frame_basic_color.pack(fill=X)
+button_frame_custom_color = Frame(window)  # 지정 가능한 색 버튼을 위한 프레임
+button_frame_custom_color.pack(fill=X)
+#+===========================================================
 
 button_clear = Button(button_frame, text="All Clear", command=clear_paint)
 button_clear.pack(side=LEFT)
@@ -194,6 +218,22 @@ button_flip.pack(side=LEFT)
 canvas.bind("<B3-Motion>", erase)
 
 brush_color = "black"
+
+#+===========================================================
+for color in basic_color_lists: #기본 색만큼 루프를 돌아 버튼을 생성
+    button_basic_color = Button(button_frame_basic_color, bg=color, width=2, height=1)
+    button_basic_color.bind('<Button-1>', lambda event: select_color_from_button(event)) #버튼을 좌클릭시 현재 브러쉬 색을 버튼색으로 적용
+    button_basic_color.pack(side=RIGHT)
+
+button_current_color = Label(button_frame_basic_color, text="", bg=brush_color, width=2, height=1)  # 현재 브러쉬 색을 보여주는 라벨 생성
+button_current_color.pack(side=RIGHT)
+
+for i in range(8):
+    button_custom_color = Button(button_frame_custom_color, bg="white", width=2, height=1)
+    button_custom_color.bind('<Button-1>', lambda event: select_color_from_button(event))  #버튼을 좌클릭시 현재 브러쉬 색을 버튼색으로 적용
+    button_custom_color.bind('<Button-3>', lambda event: custom_brush_color_button(event))  #버튼을 우클릭시 현재 브러쉬 색을 지정
+    button_custom_color.pack(side=RIGHT)
+#+===========================================================
 
 button_bg_color = Button(window, text="Change Background Color", command=change_bg_color)
 button_bg_color.pack(side=LEFT)
