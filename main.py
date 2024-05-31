@@ -11,6 +11,68 @@ import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
 
+
+"""
+
+그림판 사용시간을 측정하기 위한 스톱워치 기능을 가진 클래스
+__init__(self, win) : 스톱워치 객체를 초기화하는 메소드
+run(self) : 스톱워치 실행 상태 확인 & 경과 시간을 갱신하는 메소드
+start(self) : 스톱워치를 시작하는 메소드
+stop(self) : 스톱워치를 멈추는 메소드
+reset(self) : 스톱워치를 리셋하는 메소드
+
+"""
+
+class StopWatch():
+    def __init__(self, win): 
+        self.running = False
+        self.start_time = time.time() #시간 시작
+        self.timer_counter = 0 #counter=0
+        self.elapsed_time = 0.0 #지난 시간
+        self.prev_elapsed_time = 0.0
+        self.win = win #정의
+        self.win.title("사용시간 측정") #제목 설정
+       
+        self.timeText = Label(win, height = 5, text="0.000", font=("Arial 30 bold")) #글씨 및 폰트
+        self.timeText.pack(side = TOP) #위치
+        self.startButton = Button(win, width=10, text="Start", bg="sky blue", command=self.start) 
+        self.startButton.pack(side = LEFT) 
+        self.stopButton = Button(win, width=10, text="Stop", bg="red", command=self.stop) 
+        self.stopButton.pack(side = LEFT)
+        self.resetButton = Button(win, width=10, text="Reset", bg="light pink", command=self.reset) 
+        self.resetButton.pack(side = LEFT) 
+
+    def run(self): 
+        if self.running == True: #if
+            self.timer_counter += 1 #1씩 더하기
+            cur_time = time.time() #시간
+            time_diff = cur_time - self.start_time
+            self.elapsed_time = time_diff + self.prev_elapsed_time #경과시간 계산
+            self.timeText.configure(text="{:.3f}".format(self.elapsed_time)) #경과시간 출력
+        self.win.after(10, self.run) # sleep 10 ms
+
+
+    def start(self): 
+        if (self.running != True):
+            self.running = True
+            self.start_time = time.time() #시간 재기 
+            self.prev_elapsed_time = self.elapsed_time
+
+    def stop(self): 
+        self.running = False 
+        self.prev_elapsed_time = self.elapsed_time 
+
+    def reset(self): 
+        self.running = False
+        self.timer_counter = 0 #0으로 초기화
+        self.elapsed_time = 0.0 #경과시간 0
+        self.prev_elapsed_time = 0.0 
+        self.timeText.configure(text="{:.3f}".format(self.elapsed_time)) #0.00st로 나타남
+
+
+
+
+
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 current_color = "black"  # 기본 색상은 검은색으로 설정
@@ -134,6 +196,11 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+win = Tk()
+stop_watch = StopWatch(win) #스톱워치 클래스에서 인스턴스를 생성
+stop_watch.run()
+
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -204,3 +271,5 @@ button_brush_color.pack(side=LEFT)
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
+
+
