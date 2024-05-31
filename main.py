@@ -18,6 +18,8 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 
+
+
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
     canvas.bind("<B1-Motion>", paint)
@@ -37,6 +39,10 @@ def paint_pressure(event):
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+
+def paint_start(event):
+    global last_x, last_y
+    last_X, last_y = event.x,event.y #######
 
 def paint_start(event):
     global x1, y1
@@ -91,7 +97,6 @@ def clear_paint():
     last_x, last_y = None, None # 마지막 좌표 초기화
 
 def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
    
@@ -134,6 +139,15 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+ #돋보기 기능 생성   
+def magnify():
+    items = canvas.find_all()
+    for item in items:
+        coords = canvas.coords(item)
+        new_coords = [coord * 1.5 for coord in coords]
+        canvas.coords(item, *new_coords)
+    canvas.scale("all", 0, 0, 1.5, 1.5)
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -168,19 +182,22 @@ brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
 brush_size_slider.pack(side=LEFT)
 
-button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
+button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
 button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
 
-button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
+button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
 button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
 
-button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
+button_paint = Button(button_frame, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
-button_paint = Button(window, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
+button_paint = Button(button_frame, text="pressure", command=set_paint_mode_pressure) #감압 브러시 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
-text_box = Entry(window) #텍스트를 입력할 공간을 생성합니다.
+button_magnify= Button(button_frame,text="magnify", command=magnify)
+button_magnify.pack(side=LEFT)
+
+text_box = Entry(button_frame) #텍스트를 입력할 공간을 생성합니다.
 text_box.pack(side=LEFT)
 canvas.bind("<Button-3>", add_text) #입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
@@ -191,7 +208,7 @@ button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배�
 button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
 button_flip.pack(side=LEFT)
 
-canvas.bind("<B3-Motion>", erase)
+canvas.bind("<B4-Motion>", erase)
 
 brush_color = "black"
 
@@ -202,5 +219,6 @@ button_brush_color = Button(window, text="Change Brush Color", command=change_br
 button_brush_color.pack(side=LEFT)
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
+
 
 window.mainloop()
