@@ -10,13 +10,31 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
-
+from PIL import ImageGrab  # PIL (Python Imaging Library)의 ImageGrab 모듈을 가져옴, 화면 캡처를 위해 사용
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+
+#캔버스 캡쳐하는 함수
+def capture_canvas():
+    # 파일 저장 대화 상자를 열어 파일 경로를 얻음
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
+    if file_path:
+        # 캔버스의 절대 좌표를 가져옴
+        x = window.winfo_rootx() + canvas.winfo_x()
+        y = window.winfo_rooty() + canvas.winfo_y()
+        x1 = x + canvas.winfo_width()
+        y1 = y + canvas.winfo_height()
+        # ImageGrab.grab()을 사용하여 전체 화면을 캡처하고, crop()을 사용하여 캔버스 부분만 잘라냄
+        ImageGrab.grab().crop((x, y, x1, y1)).save(file_path)
+        print(f"화면 캡쳐가 저장되었습니다: {file_path}")
+
+# Capture 버튼 추가
+button_capture = Button(window, text="Capture", command=capture_canvas)
+button_capture.pack(side=LEFT)
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
