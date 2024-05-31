@@ -161,7 +161,7 @@ window = Tk()
 window.title("그림판")
 
 brush_size = 1  # 초기 브러시 크기
-canvas = Canvas(window, bg="white")
+canvas = Canvas(window, bg="white", cursor="pencil")  # 커서를 펜 모양으로 변경
 #Canvas 위젯을 생성하여 주 윈도우에 추가
 window.geometry("800x600+200+200")  # 초기 창 크기를 800x600으로 설정
 #윈도우이름.geometry("너비x높이+x좌표+y좌표")를 이용하여
