@@ -133,6 +133,10 @@ def create_new_window():
     new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
+    
+#마우스 왼쪽드래그를 지우기 모드로 변경
+def set_erase_mode():
+    canvas.bind("<B1-Motion>", erase)
 
 
 window = Tk()
@@ -160,12 +164,16 @@ canvas.bind("<B1-Motion>", paint)
 button_frame = Frame(window)
 button_frame.pack(fill=X)
 
+# 지우기 모드로 바꾸는 버튼 추가
 button_clear = Button(button_frame, text="All Clear", command=clear_paint)
 button_clear.pack(side=LEFT)
+button_erase = Button(window, text="Erase Mode", command=set_erase_mode)
+button_erase.pack(side=LEFT)
+
 
 # 펜 굵기를 조절할 수 있는 슬라이더 추가
 brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
-brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
+brush_size_slider.set(brush_size)
 brush_size_slider.pack(side=LEFT)
 
 button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid")) # 버튼을 누르면 실선 모드로 바꾼다
@@ -191,7 +199,6 @@ button_new_window.pack(side=LEFT) # "새 창 열기"버튼을 윈도우에 배�
 button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
 button_flip.pack(side=LEFT)
 
-canvas.bind("<B3-Motion>", erase)
 
 brush_color = "black"
 
