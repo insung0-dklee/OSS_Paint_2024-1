@@ -43,34 +43,54 @@ def paint_start(event):
     x1, y1 = (event.x - brush_size), (event.y - brush_size)
 
 def paint(event):
-    global x1, y1
+    global x1, y1, brush_size
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    radius = brush_size // 2
+    canvas.create_line(x1-radius, y1-radius, x2+radius, y2+radius, fill=brush_color, width=brush_size)
     x1, y1 = x2, y2
-
+    
 """
 dotted_paint: 점선 브러쉬 함수
 이벤트가 발생한 위치에 검은색 원을 일정한 간격으로 그린다.
 매개변수: event - 마우스 이벤트 객체로, 마우스의 현재 좌표를 포함
 """
-def dotted_paint(event): # 점선 브러쉬 함수
-    global last_x, last_y
-    spacing = 10  # 점 사이의 간격을 설정
+def dotted_paint(event):
+    global last_x, last_y, brush_size
+    spacing = 10
+    radius = brush_size // 2
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-1, event.y-1, event.x+1, event.y+1, fill="black", outline="black")
+            canvas.create_oval(event.x-radius, event.y-radius, event.x+radius, event.y+radius, fill=brush_color, outline=brush_color)
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
+"""
+circle_paint: 연속되는 원 브러쉬 함수
+이벤트가 발생한 위치에 중심이 투명한 원을 일정한 간격으로 그린다.
+매개변수: event - 마우스 이벤트 객체로, 마우스의 현재 좌표를 포함
+"""
+def circle_brush(event):
+    global brush_size
+    x, y = event.x, event.y
+    brush_radius = brush_size // 2
+    inner_radius = brush_radius - 2
 
+    canvas.create_oval(x - inner_radius, y - inner_radius,
+                       x + inner_radius, y + inner_radius,
+                       fill=canvas.cget("bg"), outline="")
+
+    canvas.create_oval(x - brush_radius, y - brush_radius,
+                       x + brush_radius, y + brush_radius,
+                       outline=brush_color, width=2)
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
 매개변수: mode - 브러쉬 모드를 나타내는 문자열 ("solid" 또는 "dotted")
 """
+
 def set_brush_mode(mode): # 브러쉬 모드를 변경하는 함수
     global brush_mode
     brush_mode = mode
@@ -78,6 +98,9 @@ def set_brush_mode(mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", paint) # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted": # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", dotted_paint) # 점선 브러쉬로 변경
+    elif brush_mode =="circle": #브러쉬 모드가 circle이면
+        canvas.bind("<B1-Motion>", circle_brush)
+
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -94,7 +117,7 @@ def add_text(event):# 텍스트 박스의 내용을 가져와서 클릭한 위�
 
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
+
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -174,6 +197,12 @@ button_solid.pack() # 실선 브러쉬 버튼을 윈도우에 배치
 button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted")) # 버튼을 누르면 점선 모드로 바꾼다
 button_dotted.pack() # 점선 브러쉬 버튼을 윈도우에 배치
 
+#브러쉬 버튼 추가
+button_circle = Button(window, text="circle Brush", command=lambda: set_brush_mode("circle")) # 버튼을 누르면 점선 모드로 바꾼다
+button_circle.pack() # 원 브러쉬 버튼을 윈도우에 배치
+
+
+
 button_paint = Button(window, text="normal", command=set_paint_mode_normal) #기본 그리기 모드로 전환하는 기능
 button_paint.pack(side=RIGHT)
 
@@ -200,6 +229,7 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
