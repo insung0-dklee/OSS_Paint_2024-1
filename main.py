@@ -17,6 +17,8 @@ current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+timer_running = False
+start_time = None
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
@@ -134,6 +136,22 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+def start_stop_timer():
+    global timer_running, start_time
+    if not timer_running:
+        timer_running = True
+        start_time = time.time() # 타이머 시작 시간 기록
+        timer_button.config(text="Stop Timer")
+        update_timer() # 타이머 업데이트 함수 호출
+    else:
+        timer_running = False
+        timer_button.config(text="Start Timer")
+
+def update_timer():
+    if timer_running:
+        elapsed_time = time.time() - start_time # 현재 시간 - 시작 시간 = 경과 시간
+        timer_label.config(text="Elapsed Time: {:.2f} seconds".format(elapsed_time))
+        timer_label.after(100, update_timer) # 100ms 후에 update_timer() 함수를 다시 호출하여 업데이트 반복
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -200,6 +218,12 @@ button_bg_color.pack(side=LEFT)
 
 button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
 button_brush_color.pack(side=LEFT)
+
+timer_button = Button(window, text="Start Timer", command=start_stop_timer)
+timer_button.pack()
+
+timer_label = Label(window, text="Elapsed Time: 0.00 seconds")
+timer_label.pack()
 
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
