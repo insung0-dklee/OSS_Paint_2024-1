@@ -18,6 +18,11 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 
+#동적 브러시 설정을 위한 변수 초기화
+dynamic_brush = False
+previous_time = None
+previous_x, previous_y = None, None
+
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal():
     canvas.bind("<B1-Motion>", paint)
@@ -46,6 +51,27 @@ def paint(event):
     global x1, y1
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    x1, y1 = x2, y2
+
+# 동적 브러시 효과 적용하는 로직
+# 속도 기반 브러시 조정, 브러시 크기 및 색상을 설정하고, 라인을 그린다.
+    if dynamic_brush and previous_time is not None:
+        current_time = time.time()
+        time_diff = current_time - previous_time
+        distance = ((event.x - previous_x) ** 2 + (event.y - previous_y) ** 2) ** 0.5
+        speed = distance / time_diff
+        
+        brush_width = min(max(int(speed / 2), 1), 20)  # 속도에 따른 브러시 크기 조정
+        color_intensity = max(255 - int(speed * 10), 50)  # 속도에 따른 색상 진하기 조정
+        dynamic_color = f'#{color_intensity:02x}{color_intensity:02x}{color_intensity:02x}'
+        
+        canvas.create_line(x1, y1, x2, y2, fill=dynamic_color, width=brush_width)
+        
+        previous_time = current_time
+        previous_x, previous_y = event.x, event.y
+    else:
+        canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=2)
+    
     x1, y1 = x2, y2
 
 """
@@ -133,8 +159,16 @@ def create_new_window():
     new_canvas = Canvas(new_window) # 새로운 창에 캔버스 추가
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
-
-
+    
+#toggle_dynamic_brush 함수를 통해, 동적 브러시 모드를 켜고 끈다
+def toggle_dynamic_brush():
+    global dynamic_brush
+    dynamic_brush = not dynamic_brush
+    if dynamic_brush:
+        print("동적 브러시 모드 활성화")
+    else:
+        print("동적 브러시 모드 비활성화")
+        
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
