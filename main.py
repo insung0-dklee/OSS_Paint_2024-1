@@ -17,6 +17,7 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
+from PIL import ImageGrab
 
 
 # 초기 설정 값들
@@ -132,6 +133,24 @@ def paint(event, canvas):
     if last_x and last_y:
         canvas.create_line(last_x, last_y, event.x, event.y, fill=brush_color, width=brush_size, capstyle=ROUND, smooth=TRUE)
     last_x, last_y = event.x, event.y
+
+
+def get_pixel_color(x, y):
+    # 현재 화면 캡처
+    screenshot = ImageGrab.grab()
+
+    # 클릭한 위치의 색상 추출
+    pixel_color = screenshot.getpixel((x, y))
+    
+    return pixel_color
+
+def get_color_on_click(event):
+    x, y = event.x, event.y
+    pixel_color = get_pixel_color(x, y)
+    print("Clicked Pixel color at ({}, {}): RGB {}".format(x, y, pixel_color))
+
+# 윈도우에서 클릭한 위치의 색상 추출
+canvas.bind("<Button-1>", get_color_on_click)
 
 # 점선 브러쉬 함수
 def dotted_paint(event, canvas):
