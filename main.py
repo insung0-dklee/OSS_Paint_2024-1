@@ -10,6 +10,8 @@ from tkinter import *
 import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
+import tkinter as tk
+from tkinter import ttk
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -204,3 +206,59 @@ button_brush_color.pack(side=LEFT)
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
+
+# 레이어를 추가하는 함수
+def add_layer():
+    global layers, active_layer_index
+    layer = tk.Canvas(canvas, bg="white", width=800, height=600)  # 새로운 레이어 생성
+    layers.append(layer)  # 레이어 리스트에 추가
+    layer_listbox.insert(tk.END, f"레이어 {len(layers)}")  # 리스트 박스에 레이어 추가
+    canvas.create_window((0, 0), window=layer, anchor="nw")  # 메인 캔버스에 레이어 표시
+    select_layer(len(layers) - 1)  # 새 레이어를 활성화
+
+# 리스트 박스에서 레이어를 선택했을 때 호출되는 함수
+def on_layer_select(event):
+    selected_index = layer_listbox.curselection()
+    if selected_index:
+        select_layer(selected_index[0])  # 선택된 레이어를 활성화
+
+# 지정된 인덱스의 레이어를 활성화하는 함수
+def select_layer(index):
+    global active_layer_index
+    if active_layer_index >= 0:
+        layers[active_layer_index].lower()  # 이전 활성화된 레이어를 비활성화
+    active_layer_index = index
+    layers[active_layer_index].lift()  # 선택된 레이어를 활성화
+
+# 현재 활성화된 레이어의 가시성을 토글하는 함수
+def toggle_layer():
+    if active_layer_index >= 0:
+        layer = layers[active_layer_index]
+        if layer.winfo_viewable():
+            layer.lower()  # 레이어를 비활성화
+        else:
+            layer.lift()  # 레이어를 활성화
+
+root = tk.Tk()
+root.title("그림판 앱")
+
+layers = []  # 레이어를 저장하는 리스트
+active_layer_index = -1  # 현재 활성화된 레이어의 인덱스
+
+canvas = tk.Canvas(root, bg="white", width=800, height=600)
+canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+control_frame = ttk.Frame(root)
+control_frame.pack(side=tk.RIGHT, fill=tk.Y)
+
+add_layer_button = ttk.Button(control_frame, text="레이어 추가", command=add_layer)
+add_layer_button.pack(pady=10)
+
+layer_listbox = tk.Listbox(control_frame)
+layer_listbox.pack(pady=10)
+layer_listbox.bind("<<ListboxSelect>>", on_layer_select)
+
+toggle_layer_button = ttk.Button(control_frame, text="레이어 토글", command=toggle_layer)
+toggle_layer_button.pack(pady=10)
+
+root.mainloop()
