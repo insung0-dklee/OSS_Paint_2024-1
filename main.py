@@ -425,7 +425,12 @@ def create_triangle(event):
 #원형 그리기
 def create_circle(event):
     canvas.bind("<Button-1>", start_circle)
-
+# 별모양 그리기
+def create_star(event):
+    canvas.bind("<Button-1>", start_star)
+# 마름모 그리기
+def create_rhombus(event):
+    canvas.bind("<Button-1>", start_rhombus)
 #사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
     global start_x, start_y
@@ -446,7 +451,7 @@ def start_triangle(event):
 def draw_triangle(event): 
     global start_x, start_y
     canvas.delete("temp_shape")
-    canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
+    canvas.create_polygon(start_x, start_y, event.x, event.y,  (start_x + event.x) / 2, start_y - (event.x - start_x), outline="black", fill="white", tags="temp_shape")
 
 #원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
@@ -460,12 +465,63 @@ def draw_circle(event):
     r = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
     canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline="black", fill="white", tags="temp_shape")
 
+# 별모양 그릴 위치 정하고 생성하는 함수 호출
+def start_star(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", draw_star)
+
+# 별모양 생성하기
+def draw_star(event):
+    global start_x, start_y
+    canvas.delete("temp_shape")
+    points = calculate_star_points(start_x, start_y, event.x, event.y)
+    canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
+# 별모양의 좌표 계산
+def calculate_star_points(x1, y1, x2, y2):
+    cx, cy = (x1 + x2) / 2, (y1 + y2) / 2 #cx,cy: 별 모양의 중심좌표
+    r = ((x2 - cx)**2 + (y2 - cy)**2)**0.5 #중심점에서 반지름 계산
+    points = [] # 각 점의 좌표 저장
+    for i in range(5): #5개의 꼭짓점 loop
+        angle = math.radians(i * 144)  # 각 점의 각도
+        x = cx + r * math.cos(angle)
+        y = cy + r * math.sin(angle)
+        points.append((x, y))
+    return points
+
+# 마름모 그릴 위치 정하고 생성하는 함수 호출
+def start_rhombus(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", draw_rhombus)
+
+# 마름모 생성하기
+def draw_rhombus(event):
+    global start_x, start_y
+    canvas.delete("temp_shape")
+    points = calculate_rhombus_points(start_x, start_y, event.x, event.y)
+    canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
+
+# 마름모의 좌표 계산
+def calculate_rhombus_points(x1, y1, x2, y2):
+    cx, cy = (x1 + x2) / 2, (y1 + y2) / 2  # 대각선의 중심
+    dx, dy = abs(x2 - x1) / 2, abs(y2 - y1) / 2  # 대각선 길이의 절반
+    points = [
+        (cx, y1),  # 위쪽 꼭짓점
+        (x1, cy),  # 왼쪽 꼭짓점
+        (cx, y2),  # 아래쪽 꼭짓점
+        (x2, cy)   # 오른쪽 꼭짓점
+    ]
+    return points
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
     popup.add_command(label="Rectangle", command=lambda: create_rectangle(event))
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
+    popup.add_command(label="Star", command=lambda: create_star(event))
+    popup.add_command(label="Rhombus", command=lambda: create_rhombus(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 """
