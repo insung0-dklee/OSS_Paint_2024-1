@@ -1,5 +1,6 @@
 import time
 from tkinter.colorchooser import askcolor
+import tkinter as tk
 
 def initialize_globals(main_globals):
     global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1
@@ -87,3 +88,26 @@ def dotted_paint(event, canvas):
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
+
+
+# 올가미(lasso) 기능 업데이트 함수
+def update_lasso(event):
+    global lasso_end, lasso_rect
+    lasso_end = (event.x, event.y)
+    if lasso_rect:
+        canvas.delete(lasso_rect)
+    # 올가미 영역을 사각형으로 표시
+    lasso_rect = canvas.create_rectangle(lasso_start[0], lasso_start[1],
+                                         lasso_end[0], lasso_end[1],
+                                         outline="blue", dash=(2, 2))
+
+# 올가미(lasso) 기능 종료 함수
+def end_lasso(event):
+    global lasso_start, lasso_end, lasso_rect
+    if lasso_rect:
+        canvas.delete(lasso_rect)
+    lasso_start, lasso_end, lasso_rect = None, None, None
+
+canvas.bind("<Button-3>", start_lasso)  # 마우스 오른쪽 버튼을 사용하여 올가미 기능 시작
+canvas.bind("<B3-Motion>", update_lasso)  # 마우스 오른쪽 버튼을 누른 상태로 이동할 때 올가미 영역 업데이트
+canvas.bind("<ButtonRelease-3>", end_lasso)  # 마우스 오른쪽 버튼을 놓아 올가미 기능 종료
