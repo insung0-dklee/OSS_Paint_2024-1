@@ -416,28 +416,43 @@ def show_coordinates(event):
 def hide_coordinates(event):
     canvas.delete("coord_text")
 
+#도형
+# 도형을 그릴 때 사용할 색상
+current_color = "white"
+# 색상 변경
+def change_color():
+    global current_color
+    color = askcolor(title="Choose color")
+    if color[1]:  # 사용자가 색상을 선택한 경우
+        current_color = color[1]
 #사각형 그리기    
 def create_rectangle(event):
     canvas.bind("<Button-1>", start_rectangle)
+    canvas.bind("<Button-3>", lambda event: change_color())
 #삼각형 그리기
 def create_triangle(event):
     canvas.bind("<Button-1>", start_triangle)
+    canvas.bind("<Button-3>", lambda event: change_color())
 #원형 그리기
 def create_circle(event):
     canvas.bind("<Button-1>", start_circle)
+    canvas.bind("<Button-3>", lambda event: change_color())
 # 별모양 그리기
 def create_star(event):
     canvas.bind("<Button-1>", start_star)
+    canvas.bind("<Button-3>", lambda event: change_color())
 # 마름모 그리기
 def create_rhombus(event):
     canvas.bind("<Button-1>", start_rhombus)
+    canvas.bind("<Button-3>", lambda event: change_color())
 # 오각형 그리기
 def create_pentagon(event):
     canvas.bind("<Button-1>", start_pentagon)
-
+    canvas.bind("<Button-3>", lambda event: change_color())
 # 육각형 그리기
 def create_hexagon(event):
     canvas.bind("<Button-1>", start_hexagon)
+    canvas.bind("<Button-3>", lambda event: change_color())
 
 #사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
@@ -448,7 +463,7 @@ def start_rectangle(event):
 def draw_rectangle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
-    canvas.create_rectangle(start_x, start_y, event.x, event.y, outline="black", fill="white", tags="temp_shape")
+    canvas.create_rectangle(start_x, start_y, event.x, event.y, outline="black", fill=current_color, tags="temp_shape")
 
 #삼각형 그릴 위치 정하고 생성하는 함수 호출
 def start_triangle(event):
@@ -459,7 +474,7 @@ def start_triangle(event):
 def draw_triangle(event): 
     global start_x, start_y
     canvas.delete("temp_shape")
-    canvas.create_polygon(start_x, start_y, event.x, event.y,  (start_x + event.x) / 2, start_y - (event.x - start_x), outline="black", fill="white", tags="temp_shape")
+    canvas.create_polygon(start_x, start_y, event.x, event.y, (start_x + event.x) / 2, start_y - (event.x - start_x), outline="black", fill=current_color, tags="temp_shape")
 
 #원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
@@ -471,20 +486,19 @@ def draw_circle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     r = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
-    canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline="black", fill="white", tags="temp_shape")
+    canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline="black", fill=current_color, tags="temp_shape")
 
 # 별모양 그릴 위치 정하고 생성하는 함수 호출
 def start_star(event):
     global start_x, start_y
     start_x, start_y = event.x, event.y
-    canvas.bind("<B1-Motion>", draw_star)
-
+    canvas.bind("<B1-Motion>", lambda event: draw_star(event))
 # 별모양 생성하기
 def draw_star(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     points = calculate_star_points(start_x, start_y, event.x, event.y)
-    canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
+    canvas.create_polygon(points, outline="black", fill=current_color, tags="temp_shape")
 # 별모양의 좌표 계산
 def calculate_star_points(x1, y1, x2, y2):
     cx, cy = (x1 + x2) / 2, (y1 + y2) / 2 #cx,cy: 별 모양의 중심좌표
@@ -501,15 +515,13 @@ def calculate_star_points(x1, y1, x2, y2):
 def start_rhombus(event):
     global start_x, start_y
     start_x, start_y = event.x, event.y
-    canvas.bind("<B1-Motion>", draw_rhombus)
-
+    canvas.bind("<B1-Motion>", lambda event: draw_rhombus(event))
 # 마름모 생성하기
 def draw_rhombus(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     points = calculate_rhombus_points(start_x, start_y, event.x, event.y)
-    canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
-
+    canvas.create_polygon(points, outline="black", fill=current_color, tags="temp_shape")
 # 마름모의 좌표 계산
 def calculate_rhombus_points(x1, y1, x2, y2):
     cx, cy = (x1 + x2) / 2, (y1 + y2) / 2  # 대각선의 중심
@@ -526,25 +538,25 @@ def calculate_rhombus_points(x1, y1, x2, y2):
 def start_pentagon(event):
     global start_x, start_y
     start_x, start_y = event.x, event.y
-    canvas.bind("<B1-Motion>", draw_pentagon)
+    canvas.bind("<B1-Motion>",  lambda event: draw_pentagon(event))
 # 오각형 생성하기
 def draw_pentagon(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     points = calculate_polygon_points(start_x, start_y, event.x, event.y, 5)
-    canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
-
+    canvas.create_polygon(points, outline="black", fill=current_color, tags="temp_shape")
+    
 # 육각형 그릴 위치 정하고 생성하는 함수 호출
 def start_hexagon(event):
     global start_x, start_y
     start_x, start_y = event.x, event.y
-    canvas.bind("<B1-Motion>", draw_hexagon)
-# 육각형 생성하기
+    canvas.bind("<B1-Motion>", lambda event: draw_hexagon(event))
 def draw_hexagon(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     points = calculate_polygon_points(start_x, start_y, event.x, event.y, 6)
-    canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
+    canvas.create_polygon(points, outline="black", fill=current_color, tags="temp_shape")
+
 # 다각형의 좌표 계산
 def calculate_polygon_points(x1, y1, x2, y2, num_sides):
     cx, cy = (x1 + x2) / 2, (y1 + y2) / 2  # 중심점
@@ -569,6 +581,7 @@ def choose_shape(event):
     popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
     popup.add_command(label="Hexagon", command=lambda: create_hexagon(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
+
 
 """
 그림그리는 것을 획 단위로 그리도록 개선, 획 단위로 지우는 지우개 기능 추가, 지웠던 획을 다시 되돌리는 기능 추가
