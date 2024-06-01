@@ -621,3 +621,88 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PaintApp(root)
     root.mainloop()  # Tkinter 이벤트 루프를 시작합니다.
+
+class PaintApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Python Paint with Lasso Tool")
+        
+        self.width = 800  # 캔버스 너비
+        self.height = 600  # 캔버스 높이
+        
+        # Tkinter 캔버스를 생성하고 창에 추가
+        self.canvas = Canvas(root, bg="white", width=self.width, height=self.height)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        
+        # 기본 그림 이미지를 RGBA 모드로 생성 (투명한 배경)
+        self.image = Image.new("RGBA", (self.width, self.height), (255, 255, 255, 0))
+        self.draw = ImageDraw.Draw(self.image)
+        
+        self.lasso_coords = []  # 올가미 선택 좌표 리스트
+        self.lasso_active = False  # 올가미 선택 활성화 여부
+        self.selection_rect = None  # 선택된 영역을 나타내는 사각형
+        
+        # 이벤트 바인딩
+        self.canvas.bind("<B1-Motion>", self.paint)  # 왼쪽 버튼 드래그로 그림 그리기
+        self.canvas.bind("<ButtonPress-3>", self.start_lasso)  # 오른쪽 버튼 클릭으로 올가미 선택 시작
+        self.canvas.bind("<B3-Motion>", self.update_lasso)  # 오른쪽 버튼 드래그로 올가미 선택 업데이트
+        self.canvas.bind("<ButtonRelease-3>", self.complete_lasso)  # 오른쪽 버튼 릴리즈로 올가미 선택 완료
+        
+        self.update_canvas()  # 초기 캔버스 업데이트
+        
+    def paint(self, event):
+        # 왼쪽 버튼을 드래그할 때 검은색 점을 그립니다.
+        x, y = event.x, event.y
+        self.draw.ellipse((x-5, y-5, x+5, y+5), fill="black")
+        self.update_canvas()
+        
+    def start_lasso(self, event):
+        # 오른쪽 버튼 클릭으로 올가미 선택을 시작합니다.
+        self.lasso_coords = [(event.x, event.y)]  # 시작 좌표 추가
+        self.lasso_active = True
+        self.update_canvas()
+        
+    def update_lasso(self, event):
+        # 오른쪽 버튼을 드래그하면서 올가미 선택 영역을 업데이트합니다.
+        if self.lasso_active:
+            self.lasso_coords.append((event.x, event.y))  # 현재 좌표 추가
+            self.update_canvas()
+            
+    def complete_lasso(self, event):
+        # 오른쪽 버튼을 릴리즈하여 올가미 선택을 완료합니다.
+        if self.lasso_active:
+            self.lasso_coords.append((event.x, event.y))  # 마지막 좌표 추가
+            self.lasso_active = False
+            
+            # 선택 영역을 위한 마스크 생성
+            mask = Image.new("L", (self.width, self.height), 0)
+            mask_draw = ImageDraw.Draw(mask)
+            mask_draw.polygon(self.lasso_coords, outline=1, fill=1)
+            
+            # 선택 영역 추출
+            selected_region = ImageChops.multiply(self.image, Image.merge("RGBA", [mask] * 4))
+            
+            # 선택 영역을 붙여넣을 새로운 빈 이미지를 생성
+            self.image = Image.new("RGBA", (self.width, self.height), (255, 255, 255, 0))
+            self.draw = ImageDraw.Draw(self.image)
+            self.image.paste(selected_region, (0, 0), mask)
+            
+            self.lasso_coords = []  # 올가미 좌표 초기화
+            self.update_canvas()
+        
+    def update_canvas(self):
+        # 캔버스를 업데이트하여 현재 이미지를 그립니다.
+        self.canvas.delete("all")  # 기존 캔버스 내용을 삭제
+        
+        tk_image = ImageTk.PhotoImage(self.image)  # PIL 이미지를 Tkinter 이미지로 변환
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)  # 캔버스에 이미지 추가
+        self.canvas.image = tk_image  # 이미지 참조를 유지하여 가비지 컬렉션 방지
+        
+        # 올가미 선택 영역이 활성화된 경우 선택 경로를 빨간색 선으로 그립니다.
+        if self.lasso_active and self.lasso_coords:
+            self.canvas.create_line(self.lasso_coords, fill="red", width=2)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PaintApp(root)
+    root.mainloop()  # Tkinter 이벤트 루프를 시작합니다.
