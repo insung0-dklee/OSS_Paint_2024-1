@@ -19,6 +19,7 @@ import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
+from tkinter import simpledialog, messagebox # 입력을 받을 수 있는 대화상자, 알림 메시지
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -341,6 +342,129 @@ def flood_fill(event):
     if target:
         canvas.itemconfig(target, fill=fill_color)
 
+def draw_actor(event, actor_name):
+    """
+    draw_actor: 액터를 그리는 함수
+    캔버스의 특정 위치에 액터를 그린다.
+    """
+    x, y = event.x, event.y
+    canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill="white", outline="black") # 머리
+    canvas.create_line(x, y + 15, x, y + 40) # 몸통
+    canvas.create_line(x, y + 20, x - 10, y + 30) # 왼팔
+    canvas.create_line(x, y + 20, x + 10, y + 30) # 오른팔
+    canvas.create_line(x, y + 40, x - 10, y + 50) # 왼다리
+    canvas.create_line(x, y + 40, x + 10, y + 50) # 오른다리
+    canvas.create_text(x, y + 60, text=actor_name, anchor="center") # 액터 이름
+    # 바인딩 해제
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def draw_use_case(event, use_case_name):
+    """
+    draw_use_case: 유스케이스를 그리는 함수
+    캔버스의 특정 위치에 유스케이스를 그린다.
+    유스케이스는 타원으로 표시되고, 유스케이스의 이름이 타원의 중앙에 표시된다.
+    """
+    x, y = event.x, event.y
+    canvas.create_oval(x - 50, y - 25, x + 50, y + 25, fill="white", outline="black") # 유스케이스 모양
+    canvas.create_text(x, y, text=use_case_name, anchor="center") # 유스케이스 이름
+    # 바인딩 해제
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def draw_relationship_start(event):
+    """
+    draw_relationship_start: 관계 그리기를 시작하는 함수
+    관계의 시작 지점을 기록하고, 드래그 중에 미리보기 선을 그린다.
+    """
+    global x1, y1, preview_line
+    x1, y1 = event.x, event.y # 시작 지점 기록
+    preview_line = None # 미리보기 선 초기화
+    canvas.bind("<B1-Motion>", draw_relationship_preview) # 드래그할 때 미리보기 선 그리기
+
+def draw_relationship_preview(event):
+    """
+    draw_relationship_preview: 관계 그리기 미리보기 함수
+    관계를 그리기 위해 드래그할 때 현재 위치까지의 미리보기 선을 그린다.
+    """
+    global x1, y1, preview_line
+    x2, y2 = event.x, event.y # 현재 지점
+    if preview_line:
+        canvas.delete(preview_line) # 이전 미리보기 선 삭제
+    preview_line = canvas.create_line(x1, y1, x2, y2, dash=(4, 2)) # 새로운 미리보기 선 그리기
+
+def draw_relationship_end(event, relationship_type):
+    """
+    draw_relationship_end: 관계 그리기를 종료하는 함수
+    드래그 종료 지점에서 실제 선을 그린다. 
+    관계 유형에 따라 화살표와 텍스트를 추가한다.
+    """
+    global x1, y1, preview_line
+    x2, y2 = event.x, event.y # 종료 지점
+    if preview_line:
+        canvas.delete(preview_line) # 미리보기 선 삭제
+    if relationship_type in ["include", "extend"]: # 포함 관계나 확장 관계면
+        canvas.create_line(x1, y1, x2, y2, arrow=LAST, dash=(4, 2)) # 화살표가 있는 점선 그리기
+    else:
+        canvas.create_line(x1, y1, x2, y2) # 일반 선 그리기
+    
+    # 관계 유형에 따라 텍스트 추가
+    if relationship_type == "include":
+        canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, text="<<include>>", anchor="center")
+    elif relationship_type == "extend":
+        canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, text="<<extend>>", anchor="center")
+
+    # 바인딩 해제
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def add_actor():
+    """
+    add_actor: 액터 추가 함수
+    액터의 이름을 입력받고, 캔버스에 액터를 그리는 이벤트를 바인딩한다.
+    """
+    actor_name = simpledialog.askstring("Input", "액터의 이름을 입력하세요:") # 액터 이름 입력받기
+    if actor_name:
+        canvas.bind("<Button-1>", lambda event: draw_actor(event, actor_name)) # 클릭 시 액터 그리기
+
+def add_use_case():
+    """
+    add_use_case: 유스케이스 추가 함수
+    유스케이스의 이름을 입력받고, 캔버스에 유스케이스를 그리는 이벤트를 바인딩한다.
+    """
+    use_case_name = simpledialog.askstring("Input", "유스케이스의 이름을 입력하세요:") # 유스케이스 이름 입력받기
+    if use_case_name:
+        canvas.bind("<Button-1>", lambda event: draw_use_case(event, use_case_name)) # 클릭 시 유스케이스 그리기
+
+def add_relationship():
+    """
+    add_relationship: 관계 추가 함수
+    관계의 유형을 입력받고, 관계를 그리는 이벤트를 바인딩한다.
+    """
+    relationship_type = simpledialog.askstring("Input", "관계의 유형을 입력하세요 (include/extend/line):") # 관계 유형 입력받기
+    if relationship_type in ["include", "extend", "line"]:
+        canvas.bind("<Button-1>", draw_relationship_start) # 클릭 시 관계 그리기 시작
+        canvas.bind("<ButtonRelease-1>", lambda event: draw_relationship_end(event, relationship_type)) # 마우스 버튼 놓으면 관계 그리기 종료
+    else:
+        messagebox.showerror("Error", "잘못된 입력입니다. include, extend, line 중에 입력하세요.")  # 잘못된 입력에 대한 오류 메시지
+
+def choose_use_case_element(event=None):
+    """
+    choose_use_case_element: 유스케이스 다이어그램 요소 선택 함수
+    액터, 유스케이스, 관계를 선택할 수 있는 팝업 메뉴를 생성한다.
+    """
+    popup = Menu(window, tearoff=0)
+    popup.add_command(label="Actor", command=add_actor) # 액터 추가
+    popup.add_command(label="Use Case", command=add_use_case) # 유스케이스 추가
+    popup.add_command(label="Relationship", command=add_relationship) # 관계 추가
+    if event:
+        popup.post(event.x_root, event.y_root) # 마우스 위치에 팝업 메뉴 표시
+    else:
+        popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
+
 def setup_paint_app(window):
     global brush_size, brush_color
 
@@ -519,6 +643,9 @@ def setup_paint_app(window):
 
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
+
+    button_use_case = Button(window, text="Use Case Diagram", command=choose_use_case_element)
+    button_use_case.pack(side=LEFT) # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
 
 # 새 창 열기 생성
 def create_new_window():
