@@ -218,6 +218,14 @@ def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
 
+# 색 채우기 기능 추가
+def flood_fill(event):
+    fill_color = askcolor()[1]  # 색상 선택 대화 상자에서 색상을 선택
+    x, y = event.x, event.y
+    target = canvas.find_closest(x, y)
+    if target:
+        canvas.itemconfig(target, fill=fill_color)
+
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
