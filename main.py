@@ -256,18 +256,25 @@ def setup_paint_app(window):
 
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
-    button_stop_timer.pack(side=RIGHT)
+    button_stop_timer.pack(side=LEFT)
+    button_stop_timer.bind("<Enter>", on_enter)  
+    button_stop_timer.bind("<Leave>", on_leave)  
 
     #타이머 리셋 버튼
     button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
-    button_reset_timer.pack(side=RIGHT)
-
+    button_reset_timer.pack(side=LEFT)
+    button_reset_timer.bind("<Enter>", on_enter)  
+    button_reset_timer.bind("<Leave>", on_leave)  
     
     button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
     button_erase_last_stroke.pack(side=LEFT)
+    button_erase_last_stroke.bind("<Enter>", on_enter)  
+    button_erase_last_stroke.bind("<Leave>", on_leave)  
 
     button_redo_last_stroke = Button(button_frame, text="Rewrite Last Stroke", command=rewrite_last_stroke)
     button_redo_last_stroke.pack(side=LEFT)
+    button_redo_last_stroke.bind("<Enter>", on_enter)  
+    button_redo_last_stroke.bind("<Leave>", on_leave)  
 
     button_clear = Button(button_frame, text="All Clear", command=lambda: clear_paint(canvas))
     button_clear.pack(side=LEFT)
@@ -281,12 +288,12 @@ def setup_paint_app(window):
 
 
     button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
-    button_solid.pack()
+    button_solid.pack(side=LEFT)
     button_solid.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_solid.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode(canvas, "dotted"))
-    button_dotted.pack()
+    button_dotted.pack(side=LEFT)
     button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
@@ -295,12 +302,12 @@ def setup_paint_app(window):
 
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
-    button_paint.pack(side=RIGHT)
+    button_paint.pack(side=LEFT)
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint.pack(side=RIGHT)
+    button_paint.pack(side=LEFT)
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
@@ -329,14 +336,20 @@ def setup_paint_app(window):
     # 버튼 프레임에 저장 버튼 추가
     button_save = Button(window, text="Save", command=lambda: save_canvas(canvas))
     button_save.pack(side=LEFT)
+    button_save.bind("<Enter>", on_enter)  
+    button_save.bind("<Leave>", on_leave)  
 
     button_upload_image = Button(window, text="Upload Image", command=upload_image)
     button_upload_image.pack(side=LEFT)
+    button_upload_image.bind("<Enter>", on_enter)  
+    button_upload_image.bind("<Leave>", on_leave)  
 
     #도형 모양 선택하는 버튼 생성
     button_choose_shape = Button(window, text="shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
     button_choose_shape.pack(side=LEFT)
+    button_choose_shape.bind("<Enter>", on_enter)  
+    button_choose_shape.bind("<Leave>", on_leave)  
 
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
@@ -356,26 +369,28 @@ def setup_paint_app(window):
     dot_distance.set(10)
 
     frame_distance = Frame(window)
-    frame_distance.pack(side=RIGHT)
+    frame_distance.pack(side=LEFT)
 
     frame_count = Frame(window)
-    frame_count.pack(side=RIGHT)
+    frame_count.pack(side=LEFT)
 
 
 
     # 에어브러쉬 속성 조절 버튼 추가
-    Button(frame_distance, text="+", command=increase_dot_distance).pack(side=RIGHT)
-    Label(frame_distance, text="Distance").pack(side=RIGHT)
-    Label(frame_distance, textvariable=dot_distance).pack(side=RIGHT)  # 거리 표시
-    Button(frame_distance, text="-", command=decrease_dot_distance).pack(side=RIGHT)
+    Button(frame_distance, text="+", command=increase_dot_distance).pack(side=LEFT)
+    Label(frame_distance, text="Distance").pack(side=LEFT)
+    Label(frame_distance, textvariable=dot_distance).pack(side=LEFT)  # 거리 표시
+    Button(frame_distance, text="-", command=decrease_dot_distance).pack(side=LEFT)
 
-    Button(frame_count, text="+", command=increase_dot_count).pack(side=RIGHT)
-    Label(frame_count, text="Count").pack(side=RIGHT)
-    Label(frame_count, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
-    Button(frame_count, text="-", command=decrease_dot_count).pack(side=RIGHT)
+    Button(frame_count, text="+", command=increase_dot_count).pack(side=LEFT)
+    Label(frame_count, text="Count").pack(side=LEFT)
+    Label(frame_count, textvariable=dot_count).pack(side=LEFT)  # 개수 표시
+    Button(frame_count, text="-", command=decrease_dot_count).pack(side=LEFT)
 
     button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
-    button_paint.pack(side=RIGHT)
+    button_paint.pack(side=LEFT)
+    button_paint.bind("<Enter>", on_enter)  
+    button_paint.bind("<Leave>", on_leave)  
 
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
@@ -385,6 +400,8 @@ def setup_paint_app(window):
 
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
+    button_new_window.bind("<Enter>", on_enter)
+    button_new_window.bind("<Leave>", on_leave) 
 
 # 새 창 열기 생성
 def create_new_window():
@@ -522,7 +539,7 @@ editor = ImageEditor(canvas)
 
 # 타이머 라벨
 timer_label = Label(window, text="Time: 0 s")
-timer_label.pack(side=RIGHT)
+timer_label.pack(side=LEFT)
 
 
 
@@ -534,10 +551,10 @@ dot_distance = IntVar()
 dot_distance.set(10)
 
 frame_distance = Frame(window)
-frame_distance.pack(side=RIGHT)
+frame_distance.pack(side=LEFT)
 
 frame_count = Frame(window)
-frame_count.pack(side=RIGHT)
+frame_count.pack(side=LEFT)
 
 
 #프로그램 시작 시 타이머 시작
