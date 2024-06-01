@@ -93,7 +93,9 @@ def decrease_dot_distance():
 
     # 맞춤형 단축키 기능 추가
 def bind_shortcuts():
-    window.bind("<c>", lambda event: clear_paint(canvas))
+    window.bind("<c>", lambda event: clear_paint(canvas)) #clear 단축키 c
+    window.bind("<Control-s>", save_canvas) #save 단축키 crtl+s
+    window.bind("<Control-z>", erase_last_stroke) #undo 단축키 crtl+z
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
@@ -474,6 +476,8 @@ def choose_shape(event):
 이를 최근에 그린 획을 지우는 기능을 추가하였으며, 지웠던 획을 다시 되돌리도록 하는 기능을 구현하였다.
 지웠던 획들 다시 되돌리는 것은 획 지우기 기능을 이용해 지웠던 경우에만 한함
 """
+def bind_shortcuts():
+    window.bind("<Control-s>", save_canvas)
 strokes = [] #획을 담아 둠
 current_stroke = []
 redo_strokes = []
@@ -524,7 +528,8 @@ editor = ImageEditor(canvas)
 timer_label = Label(window, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
 
-
+# save 단축키
+bind_shortcuts()
 
 # 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
