@@ -17,6 +17,7 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
+from spray import SprayBrush #spray 모듈을 가지고 옴
 
 
 # 초기 설정 값들
@@ -251,6 +252,12 @@ def setup_paint_app(window):
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
+    #spray 인스턴스 생성 
+    spray_brush = SprayBrush(canvas, "black")
+    # 스프레이 버튼
+    button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
+    button_spray.pack(side=LEFT)
+
     button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
 
@@ -261,6 +268,7 @@ def setup_paint_app(window):
     #타이머 리셋 버튼
     button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
     button_reset_timer.pack(side=RIGHT)
+
 
     
     button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
