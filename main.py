@@ -31,6 +31,16 @@ spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
 
+# 마커 모드 추가
+def paint_marker(event, canvas):
+    radius = brush_size
+    x1, y1 = (event.x - radius), (event.y - radius)
+    x2, y2 = (event.x + radius), (event.y + radius)
+    canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+
+def set_paint_mode_marker(canvas):
+    canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
+    canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
 
 
 #이미지 파일 불러오기 
@@ -101,6 +111,17 @@ def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환
 
 def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능 
     canvas.bind("<B1-Motion>", paint)
+
+#마커 기능 함수    
+def paint_marker(event, canvas):
+    radius = brush_size
+    x1, y1 = (event.x - radius), (event.y - radius)
+    x2, y2 = (event.x + radius), (event.y + radius)
+    canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+
+def set_paint_mode_marker(canvas):
+    canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
+    canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal(canvas):
@@ -254,9 +275,16 @@ def setup_paint_app(window):
     button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
 
+    # setup_paint_app 함수에 마커 모드 버튼 추가
+    button_marker = Button(button_frame, text="Marker Mode", command=lambda: set_paint_mode_marker(canvas))
+    button_marker.pack(side=LEFT)
+    button_marker.bind("<Enter>", on_enter)
+    button_marker.bind("<Leave>", on_leave)
+
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
+
 
     #타이머 리셋 버튼
     button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
@@ -274,6 +302,14 @@ def setup_paint_app(window):
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
+    #마커기능 버튼 추가
+    button_marker = Button(window, text="Marker Mode", command=lambda: set_paint_mode_marker(canvas))
+    button_marker.pack(side=LEFT)
+    button_marker.bind("<Enter>", on_enter)
+    button_marker.bind("<Leave>", on_leave)
+
+    setup_reset_brush_button(window, canvas)  
+
 
     brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
@@ -289,9 +325,6 @@ def setup_paint_app(window):
     button_dotted.pack()
     button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
-
 
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
