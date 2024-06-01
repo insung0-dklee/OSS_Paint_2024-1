@@ -383,6 +383,32 @@ def upload_background_image():
         canvas.create_image(0, 0, anchor=NW, image=background_image)
         canvas.image = background_image
 
+# 패턴을 그리는 함수들 추가
+def draw_tile_pattern(canvas, tile_size=50):
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    for x in range(0, canvas_width, tile_size):
+        for y in range(0, canvas_height, tile_size):
+            canvas.create_rectangle(x, y, x + tile_size, y + tile_size, outline="black")
+
+def draw_wave_pattern(canvas, wave_length=50, amplitude=20):
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    for y in range(0, canvas_height, wave_length):
+        for x in range(0, canvas_width, wave_length):
+            canvas.create_arc(x, y, x + wave_length, y + wave_length, start=0, extent=180, style=ARC)
+            canvas.create_arc(x, y + amplitude, x + wave_length, y + wave_length + amplitude, start=180, extent=180, style=ARC)
+
+def draw_diagonal_pattern(canvas, line_spacing=50):
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    for x in range(0, canvas_width, line_spacing):
+        canvas.create_line(x, 0, 0, x, fill="black")
+        canvas.create_line(canvas_width - x, canvas_height, canvas_width, canvas_height - x, fill="black")
+    for y in range(0, canvas_height, line_spacing):
+        canvas.create_line(0, y, y, 0, fill="black")
+        canvas.create_line(canvas_width, canvas_height - y, canvas_width - y, canvas_height, fill="black")
+
 def setup_paint_app(window):
     global brush_size, brush_color
     global canvas  # canvas 변수를 전역으로 선언
@@ -401,6 +427,25 @@ def setup_paint_app(window):
     # 백그라운드 이미지 버튼
     button_upload_background = Button(window, text="Upload Background", command=upload_background_image)
     button_upload_background.pack(side=LEFT)
+
+    # 타일 패턴 버튼 추가
+    button_tile_pattern = Button(button_frame, text="Tile Pattern", command=lambda: draw_tile_pattern(canvas))
+    button_tile_pattern.pack(side=LEFT)
+    button_tile_pattern.bind("<Enter>", on_enter)
+    button_tile_pattern.bind("<Leave>", on_leave)
+
+    # 물결 패턴 버튼 추가
+    button_wave_pattern = Button(button_frame, text="Wave Pattern", command=lambda: draw_wave_pattern(canvas))
+    button_wave_pattern.pack(side=LEFT)
+    button_wave_pattern.bind("<Enter>", on_enter)
+    button_wave_pattern.bind("<Leave>", on_leave)
+
+    # 대각선 패턴 버튼 추가
+    button_diagonal_pattern = Button(button_frame, text="Diagonal Pattern",
+                                     command=lambda: draw_diagonal_pattern(canvas))
+    button_diagonal_pattern.pack(side=LEFT)
+    button_diagonal_pattern.bind("<Enter>", on_enter)
+    button_diagonal_pattern.bind("<Leave>", on_leave)
 
     # setup_paint_app 함수에 마커 모드 버튼 추가
     button_marker = Button(button_frame, text="Marker Mode", command=lambda: set_paint_mode_marker(canvas))
