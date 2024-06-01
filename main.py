@@ -26,3 +26,27 @@ button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
 
 window.mainloop()
+
+import pyautogui
+import time
+
+def insert_text_in_paint(text):
+    # 그림판 내에서 도형의 위치를 찾기 (여기서는 예시로 100, 100 위치를 사용)
+    shape_position = (100, 100)
+    
+    # 도형 클릭
+    pyautogui.click(shape_position)
+    
+    # 글자 삽입 모드 활성화를 위한 단축키, 그림판 버전에 따라 다를 수 있음 (여기서는 'T' 키를 사용)
+    pyautogui.press('t')
+    
+    # 잠시 대기
+    time.sleep(1)  # 필요에 따라 대기 시간 조정
+    
+    # 텍스트 입력
+    pyautogui.typewrite(text)
+    
+    # 저장 또는 추가 조작을 위해 더 많은 pyautogui 함수를 여기에 추가할 수 있습니다.
+
+if __name__ == '__main__':
+    insert_text_in_paint('안녕하세요!')
