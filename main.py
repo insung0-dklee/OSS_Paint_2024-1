@@ -31,6 +31,31 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+is_dark_mode = False  # 기본 모드는 라이트 모드
+
+def toggle_dark_mode(): # 다크 모드를 토글하는 함수
+    global is_dark_mode
+    if is_dark_mode: # 지금 다크 모드라면
+        apply_light_mode() # 라이트 모드 적용
+    else: # 지금 라이트 모드라면
+        apply_dark_mode() # 다크 모드 적용
+    is_dark_mode = not is_dark_mode # 다크 모드 상태 변경
+
+def apply_light_mode(): # 라이트 모드 적용(기본)
+    window.config(bg="sky blue") # 윈도우 배경색
+    canvas.config(bg="white") # 캔버스 배경색
+    button_frame.config(bg="sky blue") # 버튼 프레임 배경색
+    for widget in button_frame.winfo_children(): 
+        widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
+    timer_label.config(bg="sky blue", fg="black") # 타이머 라벨 배경색, 글자색
+
+def apply_dark_mode(): # 다크 모드 적용
+    window.config(bg="grey20") # 윈도우 배경색
+    canvas.config(bg="grey30") # 캔버스 배경색
+    button_frame.config(bg="grey20") # 버튼 프레임 배경색
+    for widget in button_frame.winfo_children():
+        widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
+    timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -342,7 +367,7 @@ def flood_fill(event):
         canvas.itemconfig(target, fill=fill_color)
 
 def setup_paint_app(window):
-    global brush_size, brush_color
+    global brush_size, brush_color, button_frame
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
@@ -519,6 +544,9 @@ def setup_paint_app(window):
 
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
+    
+    button_toggle_mode = Button(window, text="Toggle Dark Mode", command=toggle_dark_mode)
+    button_toggle_mode.pack(side=LEFT) # 다크 모드 토글 버튼을 윈도우에 배치
 
 # 새 창 열기 생성
 def create_new_window():
