@@ -510,6 +510,84 @@ def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
         for line in last_redo_stroke:
             canvas.create_line(*line, fill=brush_color, width=brush_size)
 
+"""
+
+눈금자를 그리는 기능
+ruler_lines : 눈금자의 선을 저장하는 리스트
+ruler_text : 눈금자의 텍스트(숫자)를 저장하는 리스트
+
+try문을 통해 int형 데이터가 아닌 다른 데이터가 들어올 경우(ValueError) 간격을 10(기본값)으로 조정
+interval : 격자의 간격 변수
+
+5번째로 생성된 눈금에 숫자 표기 및 크기 증가
+눈금자을 생성할 시 각 리스트에 눈금 선과 숫자값을 저장
+
+"""
+
+
+def draw_ruler():
+    global ruler_lines, ruler_texts
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+
+    try:
+        interval = int(interval_entry.get())
+    except ValueError:
+        interval = 10
+
+    # 상단 눈금자 그리기
+    for x in range(0, canvas_width, interval):
+        if x % (interval * 5) == 0:
+            line = canvas.create_line(x, 0, x, 15, fill="black")
+            text = canvas.create_text(x, 25, text=str(x), anchor=N)
+            ruler_lines.append(line)
+            ruler_texts.append(text)
+        else:
+            line = canvas.create_line(x, 0, x, 10, fill="black")
+            ruler_lines.append(line)
+
+    # 좌측 눈금자 그리기
+    for y in range(0, canvas_height, interval):
+        if y % (interval * 5) == 0:
+            line = canvas.create_line(0, y, 15, y, fill="black")
+            text = canvas.create_text(25, y, text=str(y), anchor=W)
+            ruler_lines.append(line)
+            ruler_texts.append(text)
+        else:
+            line = canvas.create_line(0, y, 10, y, fill="black")
+            ruler_lines.append(line)
+
+"""
+clear_ruler : 눈금자를 지우는 함수
+리스트 내의 요소를 전부 제거한 후 리스트 초기화
+
+toggle_ruler
+ruler_on : 눈금자가 활성화되어 있는 지 확인하는 변수
+눈금자가 켜져 있을 경우 clear_ruler() 함수를 호출
+아닐 경우 draw_ruler() 함수를 호출
+
+on_resize : 위젯의 크기가 변경될 경우 눈금자 재생성
+<Configure> : 크기가 변경될 경우
+"""
+def clear_ruler():
+    global ruler_lines, ruler_texts
+    for item in ruler_lines + ruler_texts:
+        canvas.delete(item)
+    ruler_lines.clear()
+    ruler_texts.clear()
+
+def toggle_ruler():
+    global ruler_on
+    if ruler_on:
+        clear_ruler()
+    else:
+        draw_ruler()
+    ruler_on = not ruler_on
+
+def on_resize(event):
+    if ruler_on:
+        clear_ruler()
+        draw_ruler()
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -538,6 +616,28 @@ frame_distance.pack(side=RIGHT)
 
 frame_count = Frame(window)
 frame_count.pack(side=RIGHT)
+
+
+# 눈금자 기본 설정
+ruler_on = False
+ruler_lines = []
+ruler_texts = []
+
+toggle_button = Button(window, text="Ruler", command=toggle_ruler)
+toggle_button.pack()
+
+# 눈금자 간격 입력 레이블
+interval_label = Label(window, text="Ruler Interval:")
+interval_label.pack()
+
+interval_entry = Entry(window)
+interval_entry.pack()
+interval_entry.insert(0, "10")  # 기본값 설정
+
+canvas.bind("<Configure>", on_resize)
+
+
+
 
 
 #프로그램 시작 시 타이머 시작
