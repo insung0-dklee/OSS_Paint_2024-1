@@ -446,7 +446,22 @@ def start_triangle(event):
 def draw_triangle(event): 
     global start_x, start_y
     canvas.delete("temp_shape")
-    canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
+    x2, y2 = event.x, event.y
+    
+    # 시작점과 마우스 이벤트가 발생한 점 사이의 거리 계산
+    side_length = math.sqrt((x2 - start_x) ** 2 + (y2 - start_y) ** 2)
+    
+    # 정삼각형의 꼭짓점을 계산
+    angle = math.radians(60)  # 120도를 라디안으로 변환
+    x3 = start_x + side_length * math.cos(angle)
+    y3 = start_y + side_length * math.sin(angle)
+    
+    angle += math.radians(60)  # 240도를 라디안으로 변환
+    x4 = start_x + side_length * math.cos(angle)
+    y4 = start_y + side_length * math.sin(angle)
+    
+    # 시작점과 세 개의 점으로 정삼각형 그리기
+    canvas.create_polygon(start_x, start_y, x3, y3, x4, y4, outline="black", fill="white", tags="temp_shape")
 
 #원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
