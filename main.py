@@ -431,6 +431,14 @@ def create_star(event):
 # 마름모 그리기
 def create_rhombus(event):
     canvas.bind("<Button-1>", start_rhombus)
+# 오각형 그리기
+def create_pentagon(event):
+    canvas.bind("<Button-1>", start_pentagon)
+
+# 육각형 그리기
+def create_hexagon(event):
+    canvas.bind("<Button-1>", start_hexagon)
+
 #사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
     global start_x, start_y
@@ -514,6 +522,42 @@ def calculate_rhombus_points(x1, y1, x2, y2):
     ]
     return points
 
+# 오각형 그릴 위치 정하고 생성하는 함수 호출
+def start_pentagon(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", draw_pentagon)
+# 오각형 생성하기
+def draw_pentagon(event):
+    global start_x, start_y
+    canvas.delete("temp_shape")
+    points = calculate_polygon_points(start_x, start_y, event.x, event.y, 5)
+    canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
+
+# 육각형 그릴 위치 정하고 생성하는 함수 호출
+def start_hexagon(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", draw_hexagon)
+# 육각형 생성하기
+def draw_hexagon(event):
+    global start_x, start_y
+    canvas.delete("temp_shape")
+    points = calculate_polygon_points(start_x, start_y, event.x, event.y, 6)
+    canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
+# 다각형의 좌표 계산
+def calculate_polygon_points(x1, y1, x2, y2, num_sides):
+    cx, cy = (x1 + x2) / 2, (y1 + y2) / 2  # 중심점
+    r = ((x2 - cx)**2 + (y2 - cy)**2)**0.5  # 반지름 계산
+    points = []
+    angle_offset = -math.pi / 2  # 첫 점을 위쪽으로
+    for i in range(num_sides):
+        angle = angle_offset + i * (2 * math.pi / num_sides)  # 각 점의 각도 계산
+        x = cx + r * math.cos(angle)
+        y = cy + r * math.sin(angle)
+        points.append((x, y))
+    return points
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -522,6 +566,8 @@ def choose_shape(event):
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
     popup.add_command(label="Rhombus", command=lambda: create_rhombus(event))
+    popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
+    popup.add_command(label="Hexagon", command=lambda: create_hexagon(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 """
