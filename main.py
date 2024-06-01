@@ -561,46 +561,58 @@ def select_shape_color():
     shape_outline_color = askcolor()[1]  # 윤곽선 색상 선택
     shape_fill_color = askcolor()[1]  # 내부 색상 선택
 
-#사각형 그리기    
-def create_rectangle(event):
+# 사각형 그리기
+def create_rectangle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_rectangle)
-#삼각형 그리기
-def create_triangle(event):
+
+# 삼각형 그리기
+def create_triangle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_triangle)
-#원형 그리기
-def create_circle(event):
+
+# 원형 그리기
+def create_circle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_circle)
 
-#사각형 그릴 위치 정하고 생성하는 함수 호출
+# 사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
     global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
     current_shape = None
     canvas.bind("<B1-Motion>", lambda event: draw_rectangle(event))
-#사각형 생성하기
+    canvas.bind("<ButtonRelease-1>", finish_rectangle) # 마우스 버튼을 떼면 사각형 그리기 종료
+
+# 사각형 생성하기
 def draw_rectangle(event):
     global start_x, start_y, current_shape
-    canvas.delete(current_shape)
+    canvas.delete("temp_shape")
     current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
     paint_start(event)
 
-#삼각형 그릴 위치 정하고 생성하는 함수 호출
+# 사각형 그리기 종료
+def finish_rectangle(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+# 삼각형 그릴 위치 정하고 생성하는 함수 호출
 def start_triangle(event):
     global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
-    current_triangle = None
+    current_shape = None
     canvas.bind("<B1-Motion>", draw_triangle)
     canvas.bind("<ButtonRelease-1>", finish_triangle)
-#삼각형 생성하기
+
+# 삼각형 생성하기
 def draw_triangle(event):
-    global start_x, start_y
+    global start_x, start_y, current_shape 
     canvas.delete("temp_shape")
     x2, y2 = event.x, event.y
 
-    
     # 시작점과 마우스 이벤트가 발생한 점 사이의 거리 계산
     side_length = math.sqrt((x2 - start_x) ** 2 + (y2 - start_y) ** 2)
 
@@ -613,30 +625,83 @@ def draw_triangle(event):
     x4 = start_x + side_length * math.cos(angle)
     y4 = start_y + side_length * math.sin(angle)
 
-    # 시작점과 세 개의 점으로 정삼각형 그리기
-    current_shape = canvas.create_polygon(start_x, start_y, event.x, event.y, (start_x-event.x)+start_x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(start_x, start_y, x2, y2, x3, y3, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
-#삼각형 그리기 종료
+# 삼각형 그리기 종료
 def finish_triangle(event):
-    global current_triangle
+    global current_shape
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
-    if current_triangle:
-        canvas.delete(current_triangle)
-        canvas.create_polygon(start_x, start_y, event.x, start_y, event.x, event.y, outline="black", fill="white")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
 
-#원형 그릴 위치 정하고 생성하는 함수 호출
+# 원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
     global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
     current_shape = None
     canvas.bind("<B1-Motion>", lambda event: draw_circle(event))
-#원형 생성하기
+    canvas.bind("<ButtonRelease-1>", finish_circle)
+
+# 원형 생성하기
 def draw_circle(event):
     global start_x, start_y, current_shape
-    canvas.delete(current_shape)
+    canvas.delete("temp_shape")
     r = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
     current_shape = canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 원형 그리기 종료
+def finish_circle(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+# 별 모양 그리기
+def create_star(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_star)
+
+# 별 모양 그릴 위치 정하고 생성하는 함수 호출
+def start_star(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_star(event))
+    canvas.bind("<ButtonRelease-1>", finish_star)
+
+# 별 모양 생성하기
+def draw_star(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    outer_radius = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
+    inner_radius = outer_radius / 2.5  # 내각 반지름은 외각 반지름의 2.5분의 1
+    points = []
+    
+    for i in range(5):
+        angle_outer = math.radians(i * 72 - 90)
+        angle_inner = math.radians(i * 72 + 36 - 90)
+        
+        x_outer = start_x + outer_radius * math.cos(angle_outer)
+        y_outer = start_y + outer_radius * math.sin(angle_outer)
+        x_inner = start_x + inner_radius * math.cos(angle_inner)
+        y_inner = start_y + inner_radius * math.sin(angle_inner)
+        
+        points.append(x_outer)
+        points.append(y_outer)
+        points.append(x_inner)
+        points.append(y_inner)
+    
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 별 모양 그리기 종료
+def finish_star(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
 
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
@@ -644,6 +709,7 @@ def choose_shape(event):
     popup.add_command(label="Rectangle", command=lambda: create_rectangle(event))
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
+    popup.add_command(label="Star", command=lambda: create_star(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 # 마커 모드 추가
