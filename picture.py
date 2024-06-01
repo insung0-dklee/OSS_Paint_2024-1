@@ -28,3 +28,23 @@ class
 self.canvas.create_image: 이미지를 캔버스에 배치 
   
 """
+
+#rotate기능 추가: 이미지를 회전하고 크기 조정하는 기능 
+
+from PIL import Image
+
+def rotate_and_resize_image(image_path, degrees, output_size):
+    # 이미지를 로드합니다.
+    img = Image.open(image_path)
+    
+    # 이미지를 회전합니다. expand=True를 설정하여 회전된 이미지가 잘리지 않도록 합니다.
+    rotated_img = img.rotate(degrees, expand=True)
+    
+    # 이미지의 크기를 조정합니다.
+    resized_img = rotated_img.resize(output_size)
+    
+    # 결과 이미지를 저장합니다.
+    resized_img.save("output_image.jpg")
+
+# 예제 사용
+rotate_and_resize_image("example.jpg", 90, (800, 600))
