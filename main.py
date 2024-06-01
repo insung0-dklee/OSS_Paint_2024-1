@@ -67,6 +67,10 @@ def reset_timer():
     timer.reset()
     if not timer.running:
         timer.start()
+#타이머 재시작
+def start_stop():
+    if not timer.running:
+        timer.start()
 
 
 def paint_airbrush(event, canvas):
@@ -257,6 +261,9 @@ def setup_paint_app(window):
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
+
+    start_button = Button(button_frame, text="Start", command=start_stop)
+    start_button.pack(side = RIGHT)
 
     #타이머 리셋 버튼
     button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
