@@ -214,7 +214,7 @@ def change_bg_color(canvas):
     bg_color = askcolor()
     canvas.config(bg=bg_color[1])
 
-def change_brush_color():
+def change_brush_color(canvas):
     global brush_color
     brush_color = askcolor()[1]
 
