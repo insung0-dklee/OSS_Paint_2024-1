@@ -204,3 +204,55 @@ button_brush_color.pack(side=LEFT)
 set_paint_mode_normal() # 프로그램 시작 시 기본 그리기 모드 설정
 
 window.mainloop()
+
+# 초기 설정 값들
+current_color = "black"
+
+def change_brush_color():
+    global current_color
+    color = askcolor()[1]
+    if color:
+        current_color = color
+
+def paint(event):
+    x1, y1 = (event.x - 1), (event.y - 1)
+    x2, y2 = (event.x + 1), (event.y + 1)
+    canvas.create_oval(x1, y1, x2, y2, fill=current_color, outline=current_color)
+
+def save_image():
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
+    if file_path:
+        # 캔버스 크기 가져오기
+        canvas.update()
+        canvas.postscript(file="tmp_canvas.ps", colormode='color')
+        
+        # PIL을 사용해 PostScript 파일을 이미지로 변환
+        img = Image.open("tmp_canvas.ps")
+        img.save(file_path, "png")
+
+# Tkinter 윈도우 설정
+window = Tk()
+window.title("그림판")
+
+canvas = Canvas(window, bg="white")
+canvas.pack(fill="both", expand=True)
+
+# 기본 그리기 기능 설정
+canvas.bind("<B1-Motion>", paint)
+
+# 버튼 프레임 생성
+button_frame = Frame(window)
+button_frame.pack(fill=X)
+
+# 버튼 추가
+button_clear = Button(button_frame, text="All Clear", command=lambda: canvas.delete("all"))
+button_clear.pack(side=LEFT)
+
+button_brush_color = Button(button_frame, text="Change Brush Color", command=change_brush_color)
+button_brush_color.pack(side=LEFT)
+
+button_save = Button(button_frame, text="Save", command=save_image)
+button_save.pack(side=LEFT)
+
+window.mainloop()
+
