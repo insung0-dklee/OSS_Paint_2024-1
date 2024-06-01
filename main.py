@@ -28,6 +28,7 @@ brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
+shift_left_pressed = False # 쉬프트키를 눌렀는가에 대한 여부를 저장하는 변수
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
@@ -36,6 +37,18 @@ x1, y1 = None, None
 dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
+
+#+=========================================================================================================
+def on_key_press(event): #키를 눌렀을때를 판단하는 기능
+    global shift_left_pressed
+    if event.keysym == 'Shift_L':
+        shift_left_pressed = True
+
+def on_key_release(event): #키를 때었을때를 판단하는 기능
+    global shift_left_pressed
+    if event.keysym == 'Shift_L':
+        shift_left_pressed = False
+#+=========================================================================================================
 
 #이미지 파일 불러오기 
 def open_image():
@@ -580,12 +593,34 @@ def start_rectangle(event):
     start_x, start_y = event.x, event.y
     current_shape = None
     canvas.bind("<B1-Motion>", lambda event: draw_rectangle(event))
+
+#+=========================================================================================================
 #사각형 생성하기
 def draw_rectangle(event):
     global start_x, start_y, current_shape
     canvas.delete(current_shape)
-    current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+    if shift_left_pressed is True: #쉬프트를 누르고 있을 경우
+
+        dx = event.x - start_x  # x축 방향의 변화량
+        dy = event.y - start_y  # y축 방향의 변화량
+        size = max(abs(dx), abs(dy))  # 정사각형의 사이즈 결정
+        # 마우스를 드래그하는 방향에 따라 정사각형을 그림
+
+        if dx >= 0 and dy >= 0:  # 우하단
+            current_shape = canvas.create_rectangle(start_x, start_y, start_x + size, start_y + size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+        elif dx < 0 and dy >= 0:  # 좌하단
+            current_shape = canvas.create_rectangle(start_x, start_y, start_x - size, start_y + size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+        elif dx >= 0 and dy < 0:  # 우상단
+            current_shape = canvas.create_rectangle(start_x, start_y, start_x + size, start_y - size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+        else:  # 좌상단
+           current_shape = canvas.create_rectangle(start_x, start_y, start_x - size, start_y - size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+        #정사각형으로 계산 후 그림
+    else:
+        current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+         #직사각형으로 계산 후 그림
     paint_start(event)
+#+=========================================================================================================
 
 #삼각형 그릴 위치 정하고 생성하는 함수 호출
 def start_triangle(event):
@@ -594,27 +629,38 @@ def start_triangle(event):
     current_triangle = None
     canvas.bind("<B1-Motion>", draw_triangle)
     canvas.bind("<ButtonRelease-1>", finish_triangle)
+
+#+=========================================================================================================
 #삼각형 생성하기
 def draw_triangle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     x2, y2 = event.x, event.y
+    inverse = 1
 
-    
+    if y2 < start_y:  # 마우스가 위에 있을 때
+        inverse = -1
+
     # 시작점과 마우스 이벤트가 발생한 점 사이의 거리 계산
     side_length = math.sqrt((x2 - start_x) ** 2 + (y2 - start_y) ** 2)
 
     # 정삼각형의 꼭짓점을 계산
-    angle = math.radians(60)  # 120도를 라디안으로 변환
+    angle = math.radians(inverse * 60)  # 120도를 라디안으로 변환
     x3 = start_x + side_length * math.cos(angle)
     y3 = start_y + side_length * math.sin(angle)
 
-    angle += math.radians(60)  # 240도를 라디안으로 변환
+    angle += math.radians(inverse * 60)  # 240도를 라디안으로 변환
     x4 = start_x + side_length * math.cos(angle)
     y4 = start_y + side_length * math.sin(angle)
 
     # 시작점과 세 개의 점으로 정삼각형 그리기
-    current_shape = canvas.create_polygon(start_x, start_y, event.x, event.y, (start_x-event.x)+start_x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    if shift_left_pressed is True: #쉬프트를 누르고 있을 경우
+        current_shape = canvas.create_polygon(start_x, start_y, x3, y3, x4, y4, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+        #정삼각형으로 계산 후 그림
+    else:
+        current_shape = canvas.create_polygon(start_x, start_y, event.x, event.y, (start_x-event.x)+start_x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+        #일반 삼각형으로 계산 후 그림
+#+=========================================================================================================
 
 #삼각형 그리기 종료
 def finish_triangle(event):
@@ -896,6 +942,11 @@ interval_entry.pack()
 interval_entry.insert(0, "10")  # 기본값 설정
 
 canvas.bind("<Configure>", on_resize)
+
+#+=========================================================================================================
+window.bind('<KeyPress>', on_key_press) #누른 키를 판별
+window.bind('<KeyRelease>', on_key_release) # 땐 키를 판별
+#+=========================================================================================================
 
 bind_shortcuts_window(window)
 
