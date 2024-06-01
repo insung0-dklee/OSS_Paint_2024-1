@@ -1,6 +1,7 @@
 import time
 from tkinter.colorchooser import askcolor
 
+# 전역 변수 초기화 함수
 def initialize_globals(main_globals):
     global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1
     brush_size = main_globals['brush_size']
@@ -16,11 +17,13 @@ def change_brush_size(new_size):
     global brush_size
     brush_size = int(new_size)
 
+# 캔버스의 배경색을 변경하는 함수
 def change_bg_color(canvas):
     bg_color = askcolor()
     if bg_color[1]:  # 색상이 선택된 경우에만 변경
         canvas.config(bg=bg_color[1])
 
+# 브러쉬 색상을 변경하는 함수
 def change_brush_color():
     global brush_color
     color = askcolor()[1]
@@ -32,6 +35,7 @@ set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
 매개변수: mode - 브러쉬 모드를 나타내는 문자열 ("solid" 또는 "dotted")
 """
+# 브러쉬 모드를 변경하고 적절한 그리기 함수를 호출하는 함수
 def set_brush_mode(canvas, mode):
     global brush_mode
     brush_mode = mode
@@ -64,6 +68,7 @@ def paint_start(event, canvas):
     global x1, y1, brush_size
     x1, y1 = (event.x, event.y)
 
+# 마우스 움직임에 따라 도형을 그리는 함수
 def paint(event, canvas):
     global x1, y1, brush_size, brush_color
     x2, y2 = event.x, event.y
@@ -75,15 +80,18 @@ dotted_paint: 점선 브러쉬 함수
 이벤트가 발생한 위치에 검은색 원을 일정한 간격으로 그린다.
 매개변수: event - 마우스 이벤트 객체로, 마우스의 현재 좌표를 포함
 """
+
+# 점선 브러쉬 함수
 def dotted_paint(event, canvas):
-    global last_x, last_y
-    spacing = 10
+    global last_x, last_y, brush_size, brush_color
+    spacing = brush_size  # 점 사이의 간격을 브러시 크기로 설정
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x - 1, event.y - 1, event.x + 1, event.y + 1, fill="black", outline="black")
+            canvas.create_oval(event.x - brush_size, event.y - brush_size, event.x + brush_size, event.y + brush_size, fill=brush_color, outline=brush_color)
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
+        canvas.create_oval(last_x - brush_size, last_y - brush_size, last_x + brush_size, last_y + brush_size, fill=brush_color, outline=brush_color)
