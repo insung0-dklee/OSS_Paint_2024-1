@@ -134,6 +134,17 @@ def create_new_window():
     new_canvas.pack() #캔버스가 새로운 창에 배치
     new_window.mainloop()
 
+# 광고 배너를 표시하는 함수
+def display_ad_banner():
+    ad_banner = Label(window, text="광고 배너: 여기에 광고를 표시하세요", bg="yellow", fg="black", font=('Arial', 16))
+    ad_banner.pack(side=TOP, fill=X)
+
+# 메인 윈도우 초기화 후 광고 배너 표시
+window = Tk()
+window.title("그림판")
+
+display_ad_banner()  # 광고 배너 표시
+
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
