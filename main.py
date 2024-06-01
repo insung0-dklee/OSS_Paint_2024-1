@@ -17,7 +17,10 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
-
+import imageio
+import threading
+from PIL import ImageGrab
+import numpy as np
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -30,10 +33,11 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+# 녹화 상태를 나타내는 전역 변수
+recording = False
 
 
-
-#이미지 파일 불러오기 
+#이미지 파일 불러오기
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -54,7 +58,7 @@ def upload_image():
 
 #타이머 기능 추가
 timer = Timer()
-#타이머의 경과시간 업데이트 
+#타이머의 경과시간 업데이트
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
@@ -99,7 +103,7 @@ def bind_shortcuts():
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
     canvas.bind("<B1-Motion>", paint_airbrush)
 
-def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능 
+def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능
     canvas.bind("<B1-Motion>", paint)
 
 # 마우스 움직임에 따라 도형을 그리는 함수
@@ -250,7 +254,15 @@ def setup_paint_app(window):
 
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
+    global button_start_recording,button_stop_recording
+    # 녹화 시작 버튼 생성
+    button_start_recording = Button(window, text="Start Recording", command=start_recording)
+    button_start_recording.pack(side=LEFT)
 
+    # 녹화 종료 버튼 생성
+    button_stop_recording = Button(window, text="Stop Recording", command=stop_recording,state="disabled")
+    button_stop_recording.pack(side=LEFT)
+    
     button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
 
@@ -416,7 +428,7 @@ def show_coordinates(event):
 def hide_coordinates(event):
     canvas.delete("coord_text")
 
-#사각형 그리기    
+#사각형 그리기
 def create_rectangle(event):
     canvas.bind("<Button-1>", start_rectangle)
 #삼각형 그리기
@@ -443,7 +455,7 @@ def start_triangle(event):
     start_x, start_y = event.x, event.y
     canvas.bind("<B1-Motion>", lambda event: draw_triangle(event))
 #삼각형 생성하기
-def draw_triangle(event): 
+def draw_triangle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
@@ -509,7 +521,45 @@ def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
         strokes.append(last_redo_stroke)
         for line in last_redo_stroke:
             canvas.create_line(*line, fill=brush_color, width=brush_size)
+# 녹화를 시작하는 함수
+def start_recording():
+    global recording
+    recording = True
+    # 녹화 쓰레드 시작
+    recording_thread = threading.Thread(target=record_canvas)
+    recording_thread.start()
+    # 녹화 버튼 비활성화
+    button_start_recording.config(state="disabled")
+    # 녹화 종료 버튼 활성화
+    button_stop_recording.config(state="normal")
 
+# 녹화를 종료하는 함수
+def stop_recording():
+    global recording
+    recording = False
+    # 녹화 종료 버튼 비활성화
+    button_stop_recording.config(state="disabled")
+    # 녹화 버튼 활성화
+    button_start_recording.config(state="normal")
+# 캔버스 녹화 함수
+def record_canvas():
+    # 녹화할 파일 이름
+    filename = "paint_recording.mp4"
+    # 녹화 시작
+    writer = imageio.get_writer(filename, fps=30, format='ffmpeg')
+
+    while recording:
+        # 캔버스 이미지를 캡처하여 녹화
+        canvas_img = ImageGrab.grab(bbox=(
+            canvas.winfo_rootx(),
+            canvas.winfo_rooty(),
+            canvas.winfo_rootx() + canvas.winfo_width(),
+            canvas.winfo_rooty() + canvas.winfo_height()
+        )).resize((800,528))
+        writer.append_data(np.array(canvas_img))
+
+    # 녹화 종료
+    writer.close()
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
