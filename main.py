@@ -19,7 +19,7 @@ import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
-from PIL import Image, ImageTk  #PIL(Pillow) 라이브러리를 사용
+from PIL import Image, ImageTk, ImageGrab  #PIL(Pillow) 라이브러리를 사용
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -40,6 +40,10 @@ previous_x, previous_y = None, None
 
 # 백그라운드 이미지 설정
 background_image = None
+
+# 변경 사항 추적 변수
+global has_changes
+has_changes = False  # 변경 사항이 있는지 여부를 추적하는 변수
 
 #이미지 파일 불러오기 
 def open_image():
@@ -322,6 +326,20 @@ def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
     if file_path:
         canvas.postscript(file=file_path)
+
+# 자동 저장 함수
+
+def auto_save_canvas():
+    global has_changes
+    if has_changes:
+        # 화면을 PNG 파일로 저장
+        file_path = "autosave.png"
+        ImageGrab.grab().save(file_path)
+        print(f"Canvas auto-saved to {file_path}")
+        has_changes = False  # 저장 후 변경 사항 초기화
+
+    # 10초 후 다시 자동 저장 함수 호출
+    window.after(10000, auto_save_canvas)
 
 def reset_brush(canvas):
     global brush_size, brush_color
@@ -695,9 +713,10 @@ current_stroke = []
 redo_strokes = []
 
 def paint_start(event): #획 시작
-    global x1, y1, current_stroke
+    global x1, y1, current_stroke, has_changes
     x1, y1 = event.x, event.y
     current_stroke = []
+    has_changes = True  # 변경 사항이 발생했음을 표시
 
 def paint_stroke(event): #획 그림
     global x1, y1, current_stroke
@@ -929,5 +948,8 @@ bind_shortcuts_window(window)
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
+
+# 자동 저장 기능 시작
+auto_save_canvas()
 
 window.mainloop()
