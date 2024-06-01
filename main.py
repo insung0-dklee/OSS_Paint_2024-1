@@ -148,6 +148,32 @@ def dotted_paint(event, canvas):
         last_x, last_y = event.x, event.y
         canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
 
+def start_new_line(event):
+    global last_x, last_y
+    last_x, last_y = None, None
+
+# 이중실선 브러쉬 함수
+def double_line_paint(event, canvas):
+    global last_x, last_y
+    spacing = brush_size  # 두 선 사이의 간격 설정
+    if last_x is not None and last_y is not None:
+        # 마지막 위치와 현재 위치 사이의 각도 계산
+        angle = math.atan2(event.y - last_y, event.x - last_x)
+        # 각도에 따라 선 사이의 수직 거리를 계산하여 두 선의 시작점과 끝점을 결정
+        dx = math.cos(angle + math.pi / 2) * spacing
+        dy = math.sin(angle + math.pi / 2) * spacing
+
+        # 첫 번째 선 그리기
+        canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color)
+        # 두 번째 선 그리기
+        canvas.create_line(last_x + dx, last_y + dy, event.x + dx, event.y + dy, width=brush_size, fill=brush_color)
+
+        last_x, last_y = event.x, event.y
+    else:
+        last_x, last_y = event.x, event.y
+    
+
+
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -160,6 +186,10 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))  # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
+    elif brush_mode == "double_line": #브러쉬 모드가 double_line 면
+        canvas.bind("<B1-Motion>", lambda event: double_line_paint(event, canvas))#이중 실선 브러쉬로 변경
+        canvas.bind("<Button-1>", start_new_line)
+
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -289,6 +319,12 @@ def setup_paint_app(window):
     button_dotted.pack()
     button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_double_line = Button(button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas,"double_line"))
+    button_double_line.pack() 
+    button_double_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_double_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
