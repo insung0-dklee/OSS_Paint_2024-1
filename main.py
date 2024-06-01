@@ -247,6 +247,8 @@ TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 def set_brush_color(color):
     global brush_color
     brush_color = color
+    # spray_brush의 색상 변경을 위한 코드 추가
+    spray_brush.set_brush_color(brush_color)
 
 # 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
 def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
@@ -387,7 +389,8 @@ def setup_paint_app(window):
     button_grid_settings.pack()
 
     #spray 인스턴스 생성 
-    spray_brush = SprayBrush(canvas, "black")
+    global spray_brush
+    spray_brush = SprayBrush(canvas, brush_color)
     # 스프레이 버튼
     button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
     button_spray.pack(side=LEFT)
