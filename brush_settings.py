@@ -87,3 +87,5 @@ def dotted_paint(event, canvas):
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
+
+
