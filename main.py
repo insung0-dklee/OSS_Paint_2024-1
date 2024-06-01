@@ -338,6 +338,10 @@ def setup_paint_app(window):
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
     button_choose_shape.pack(side=LEFT)
 
+    # 무작위 그리기 버튼 추가
+    button_random = Button(window, text="Random Draw", command=random_draw)
+    button_random.pack()  # 추가된 부분
+
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
 
@@ -509,7 +513,24 @@ def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
         strokes.append(last_redo_stroke)
         for line in last_redo_stroke:
             canvas.create_line(*line, fill=brush_color, width=brush_size)
-
+            
+"""
+random_draw : 무작위 색상, 무작위 크기, 무작위 위치에서 무작위 도형(원 또는 사각형)을 그리는 기능
+button_random : random_draw의 버튼
+"""            
+            
+# 무작위 그리기 기능 추가
+def random_draw():
+    shape = random.choice(['oval', 'rectangle'])  # 무작위 도형 선택
+    x1 = random.randint(0, canvas.winfo_width())
+    y1 = random.randint(0, canvas.winfo_height())
+    x2 = x1 + random.randint(10, 100)
+    y2 = y1 + random.randint(10, 100)
+    color = "#%06x" % random.randint(0, 0xFFFFFF)  # 무작위 색상
+    if shape == 'oval':
+        canvas.create_oval(x1, y1, x2, y2, fill=color, outline=color)
+    else:
+        canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color)
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
