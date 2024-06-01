@@ -864,6 +864,54 @@ editor = ImageEditor(canvas)
 timer_label = Label(window, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
 
+#텍스트 박스 추가 기능
+# 문자열을 드래그하기 위한 변수
+drag_data = {"item": None, "x": 0, "y": 0}
+
+def open_text_input_window():
+    # 문자열을 입력할 새로운 창 생성
+    text_input_window = Toplevel(window)
+    text_input_window.title("Text Input")
+    
+    # 텍스트 입력 창 생성
+    text_input = Text(text_input_window, width=30, height=5)
+    text_input.pack()
+
+    # 확인 버튼 생성 및 클릭 이벤트 핸들러 설정
+    confirm_button = Button(text_input_window, text="확인", command=lambda: add_text_to_canvas(text_input.get("1.0", "end-1c")))
+    confirm_button.pack()
+
+def add_text_to_canvas(text):
+    if text.strip():  # 입력된 텍스트가 공백이 아닌 경우에만 캔버스에 추가
+        text_item = canvas.create_text(100, 100, text=text, fill="black", font=('Arial', 12))
+        canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
+        canvas.tag_bind(text_item, "<B1-Motion>", drag)
+        canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
+
+# 문자열 드래그 시작
+def start_drag(event):
+    drag_data["item"] = canvas.find_closest(event.x, event.y)[0]
+    drag_data["x"] = event.x
+    drag_data["y"] = event.y
+
+# 문자열 드래그 중
+def drag(event):
+    if drag_data["item"]:
+        dx = event.x - drag_data["x"]
+        dy = event.y - drag_data["y"]
+        canvas.move(drag_data["item"], dx, dy)
+        drag_data["x"] = event.x
+        drag_data["y"] = event.y
+
+# 문자열 드래그 종료
+def end_drag(event):
+    drag_data["item"] = None
+    drag_data["x"] = 0
+    drag_data["y"] = 0
+
+# "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
+text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
+text_box_button.pack()
 
 
 # 에어브러쉬 속성 변수 생성
