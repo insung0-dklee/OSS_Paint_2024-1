@@ -32,6 +32,13 @@ spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
 
+# 터틀의 선 색상을 변경하는 함수
+def change_turtle_color():
+    color = askcolor()[1]
+    if color:
+        turtle_obj.pencolor(color) #turtle 객체의 색상 변경
+
+
 # 터틀을 회전시키는 함수
 def rotate_turtle():
     turtle_obj.right(90)
@@ -60,6 +67,9 @@ def run_turtle():
 
     button_forward = Button(turtle_screen._root, text="Move Forward", command=move_forward) # turtle 직진
     button_forward.pack(side=LEFT)
+
+    button_change_color = Button(turtle_screen._root, text="Change Color", command=change_turtle_color) # 색상 변경 버튼
+    button_change_color.pack(side=LEFT)
 
     turtle_screen.mainloop()
 
