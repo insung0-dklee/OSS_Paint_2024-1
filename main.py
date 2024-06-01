@@ -14,6 +14,7 @@ from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가�
 from tkinter import filedialog
 from tkinter import PhotoImage
 from tkinter import messagebox
+import os
 import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
@@ -318,6 +319,35 @@ def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
     if file_path:
         canvas.postscript(file=file_path)
+
+def get_image_size(file_path):
+    # 파일 경로가 주어졌을 때 해당 파일의 용량을 반환합니다.
+    # 파일이 존재하지 않을 경우 0을 반환합니다.
+    if os.path.exists(file_path):
+        size = os.path.getsize(file_path)
+        return size
+    else:
+        print("File not found.")
+        return 0
+
+def get_canvas_size(canvas):
+    # 캔버스를 PostScript 파일로 저장하여 용량을 측정합니다.
+    temp_file = "temp_canvas.ps"
+    canvas.postscript(file=temp_file)
+    size = get_image_size(temp_file)
+    os.remove(temp_file)  # 임시 파일 삭제
+    return size
+
+def print_image_size(file_path):
+    # 이미지 파일의 경로가 주어졌을 때 해당 이미지 파일의 용량을 출력합니다.
+    size = get_image_size(file_path)
+    print("Image size:", size, "bytes")
+
+def print_canvas_size(canvas):
+    # 캔버스의 용량을 출력하는 함수입니다.
+    size = get_canvas_size(canvas)
+    print("Canvas size:", size, "bytes")
+
 
 def reset_brush(canvas):
     global brush_size, brush_color
