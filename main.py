@@ -96,6 +96,26 @@ def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas))
 # brush_settings.initialize_globals(globals())
 
+def draw_grid(canvas, step):
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+    for x in range(0, width, step):
+        canvas.create_line(x, 0, x, height, fill="lightgray", tags="grid_line")
+    for y in range(0, height, step):
+        canvas.create_line(0, y, width, y, fill="lightgray", tags="grid_line")
+
+def toggle_grid(canvas):
+    if canvas.find_withtag("grid_line"):
+        canvas.delete("grid_line")
+    else:
+        draw_grid(canvas, 50)
+
+def change_grid_spacing(value):
+    draw_grid(canvas, value)
+
+def change_grid_spacing(value):
+    draw_grid(canvas, value)
+
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
     canvas.bind("<B1-Motion>", paint_airbrush)
 
@@ -160,6 +180,38 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))  # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
+
+class GridDialog:
+    def __init__(self, window):
+        self.top = Toplevel(window)
+        self.top.title("Grid scale")
+
+        Label(self.top, text="그리드 간격:").pack()
+        self.gridscale_slider = Scale(self.top, from_=50, to=100, resolution=5, orient=HORIZONTAL)
+        self.gridscale_slider.set(50)
+        self.gridscale_slider.pack()
+
+        self.ok_button = Button(self.top, text="OK", command=self.ok)
+        self.ok_button.pack()
+
+        self.cancel_button = Button(self.top, text="Cancel", command=self.cancel)
+        self.cancel_button.pack()
+
+        self.result = None
+
+    def ok(self):
+        self.result = self.gridscale_slider.get()
+        self.top.destroy()
+
+    def cancel(self):
+        self.top.destroy()
+
+def open_grid_dialog():
+    dialog = GridDialog(window)  # GridDialog 인스턴스 생성
+    window.wait_window(dialog.top)  # 다이얼로그 창이 닫힐 때까지 대기
+    grid_spacing = dialog.result  # 사용자가 선택한 그리드 간격 가져오기
+    if grid_spacing is not None:
+        draw_grid(canvas, grid_spacing)  # 사용자가 선택한 그리드 간격으로 그리드 다시 그리기
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -315,6 +367,14 @@ def setup_paint_app(window):
     button_flip.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
+
+    # 보조선을 토글하는 버튼
+    button_toggle_grid = Button(window, text="Grid on/off", command=lambda: toggle_grid(canvas))
+    button_toggle_grid.pack(side=LEFT)
+
+    # 보조선 크기 설정
+    button_grid_settings = Button(window, text="Grid setting", command=open_grid_dialog)
+    button_grid_settings.pack()
 
     button_bg_color = Button(window, text="Change Background Color", command=lambda: change_bg_color(canvas))
     button_bg_color.pack(side=LEFT)
