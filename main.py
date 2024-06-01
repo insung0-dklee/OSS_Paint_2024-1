@@ -99,12 +99,11 @@ def bind_shortcuts():
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
     canvas.bind("<B1-Motion>", paint_airbrush)
 
-def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능 
-    canvas.bind("<B1-Motion>", paint)
-
-# 마우스 움직임에 따라 도형을 그리는 함수
-def set_paint_mode_normal(canvas):
-    canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
+def set_paint_mode_normal(canvas, set_origin_mode=False):
+    canvas.bind("<B1-Motion>", paint_stroke)
+    if set_origin_mode:
+        # 추가적인 원점 모드 설정 코드
+        pass
     
 def set_paint_mode_pressure(canvas):
     canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
@@ -391,7 +390,8 @@ def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
     new_window.title("새 그림판")
     new_window.geometry("800x600+200+200")
-    new_window.configure(bg="sky blue")#구별하기 위한 버튼 영역 색 변경
+    new_window.configure(bg="sky blue")  # 구별하기 위한 버튼 영역 색 변경
+    new_window.minsize(1300,400)  # 최소 크기 설정
     setup_paint_app(new_window)
 
 # 마우스 커서를 연필 형태로 변경하기
@@ -527,15 +527,15 @@ window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
 window.geometry("800x600+200+200")
+window.minsize(1300, 400)  # 최소 크기 설정
 window.resizable(True, True)
-window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
+window.configure(bg="sky blue") # 구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
 editor = ImageEditor(canvas)
 
 # 타이머 라벨
 timer_label = Label(window, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
-
 
 
 # 에어브러쉬 속성 변수 생성
