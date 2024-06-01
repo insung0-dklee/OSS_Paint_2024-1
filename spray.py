@@ -4,12 +4,16 @@ class SprayBrush:
     def __init__(self, canvas, brush_color):
         self.canvas = canvas
         self.brush_color = brush_color
+        self.brush_size = 10
 
     def set_brush_color(self, brush_color):
         self.brush_color = brush_color
 
+    def set_brush_size(self, brush_size):
+        self.brush_size = brush_size
+
     def spray_paint(self, event):
-        radius = 10  
+        radius = self.brush_size  
         dot = 50  
         for _ in range(dot):
             offset_x = random.randint(-radius, radius)
