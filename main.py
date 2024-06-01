@@ -136,13 +136,13 @@ def paint(event, canvas):
 # 점선 브러쉬 함수
 def dotted_paint(event, canvas):
     global last_x, last_y
-    spacing = brush_size  # 점 사이의 간격을 브러시 크기로 설정
+    spacing = 10 + brush_size  # 점 사이의 간격을 브러시 크기로 설정
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x - 1, event.y - 1, event.x + 1, event.y + 1, fill=brush_color, outline=brush_color)
+            canvas.create_oval(event.x-brush_size / 2, event.y-brush_size / 2, event.x+brush_size / 2, event.y+brush_size / 2, fill=brush_color, outline=brush_color)
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
@@ -214,7 +214,7 @@ def change_bg_color(canvas):
     bg_color = askcolor()
     canvas.config(bg=bg_color[1])
 
-def change_brush_color():
+def change_brush_color(canvas):
     global brush_color
     brush_color = askcolor()[1]
 
