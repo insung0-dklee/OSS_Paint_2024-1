@@ -37,6 +37,15 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+#+=================================================================================
+def close_program(): #프로그램을 종료하는 기능
+    if messagebox.askokcancel("Quit", "Do you want to quit?"): #프로그램을 종료할 것인지 확인 매시지를 띄움
+        window.destroy() #확인 클릭시 프로그램을 종료
+
+def show_info_window(): #정보를 표시하는 기능
+    messagebox.showinfo("Info", "OSS_Paint_2024\n 그림판 v1.0.0")
+#+=================================================================================
+
 #이미지 파일 불러오기 
 def open_image():
     file_path = filedialog.askopenfilename()
@@ -348,6 +357,7 @@ def setup_paint_app(window):
     brush_color = "black"  # 초기 브러시 색상
 
     global canvas
+
     canvas = Canvas(window, bg="white")
     canvas.pack(fill="both", expand=True)
 
@@ -364,8 +374,8 @@ def setup_paint_app(window):
     button_marker.bind("<Leave>", on_leave)
 
     # 팔레트 설정 버튼 생성 및 버튼 프레임에 추가
-    button_palette = Button(button_frame, text="Set Palette", command=lambda: setup_palette(window))
-    button_palette.pack(side=LEFT)
+    # button_palette = Button(button_frame, text="Set Palette", command=lambda: setup_palette(window))
+    # button_palette.pack(side=LEFT)
 
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
@@ -379,12 +389,12 @@ def setup_paint_app(window):
     start_button.pack(side = RIGHT)
 
     # 보조선을 토글하는 버튼
-    button_toggle_grid = Button(window, text="Grid on/off", command=lambda: toggle_grid(canvas))
-    button_toggle_grid.pack(side=LEFT)
+    #button_toggle_grid = Button(window, text="Grid on/off", command=lambda: toggle_grid(canvas))
+    #button_toggle_grid.pack(side=LEFT)
 
     # 보조선 크기 설정
-    button_grid_settings = Button(window, text="Grid setting", command=open_grid_dialog)
-    button_grid_settings.pack()
+    #button_grid_settings = Button(window, text="Grid setting", command=open_grid_dialog)
+    #button_grid_settings.pack()
 
     #spray 인스턴스 생성 
     spray_brush = SprayBrush(canvas, "black")
@@ -450,22 +460,22 @@ def setup_paint_app(window):
 
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
-    button_bg_color = Button(window, text="Change Background Color", command=lambda: change_bg_color(canvas))
-    button_bg_color.pack(side=LEFT)
-    button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    #button_bg_color = Button(window, text="Change Background Color", command=lambda: change_bg_color(canvas))
+    #button_bg_color.pack(side=LEFT)
+    #button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    #button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color())
-    button_brush_color.pack(side=LEFT)
-    button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    #button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color())
+    #button_brush_color.pack(side=LEFT)
+    #button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    #button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 버튼 프레임에 저장 버튼 추가
-    button_save = Button(window, text="Save", command=lambda: save_canvas(canvas))
-    button_save.pack(side=LEFT)
+    #button_save = Button(window, text="Save", command=lambda: save_canvas(canvas))
+    #button_save.pack(side=LEFT)
 
-    button_upload_image = Button(window, text="Upload Image", command=upload_image)
-    button_upload_image.pack(side=LEFT)
+    #button_upload_image = Button(window, text="Upload Image", command=upload_image)
+    #button_upload_image.pack(side=LEFT)
 
     #도형 모양 선택하는 버튼 생성
     button_choose_shape = Button(window, text="shape", command=choose_shape)
@@ -517,8 +527,39 @@ def setup_paint_app(window):
 
     set_paint_mode_normal(canvas)
 
-    button_new_window = Button(window, text="새 창 열기", command=create_new_window)
-    button_new_window.pack(side=LEFT)
+#+=================================================================================
+    menu_bar = Menu(window) # 메뉴 바 생성
+    window.config(menu=menu_bar) # 윈도우에 매뉴바를 menu_bar로 설정
+
+    file_menu = Menu(menu_bar, tearoff=0)  # 메뉴 바에 파일 관련 메뉴를 추가
+    color_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 색 관련 메뉴를 추가
+    tool_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도구 관련 메뉴를 추가
+    help_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도움 관련 메뉴를 추가
+
+    menu_bar.add_cascade(label="File", menu=file_menu) # 'File' 메뉴를 매뉴바에 생성
+    menu_bar.add_cascade(label="Color", menu=color_menu) # 'Color' 메뉴를 매뉴바에 생성
+    menu_bar.add_cascade(label="Tools", menu=tool_menu) # 'Tools' 메뉴를 매뉴바에 생성
+    menu_bar.add_cascade(label="Help", menu=help_menu) # 'Help' 메뉴를 매뉴바에 생성
+
+    file_menu.add_command(label="Open New Window", command=create_new_window) # File 메뉴에 Open New Window 기능 버튼 추가
+    file_menu.add_command(label="Add Image", command=upload_image) # File 메뉴에 Add Image 기능 버튼 추가
+    file_menu.add_command(label="Save", command=lambda: save_canvas(canvas)) # File 메뉴에 Save 기능 버튼 추가
+    file_menu.add_command(label="Exit", command=close_program) # File 메뉴에 Exit 기능 버튼 추가
+
+    color_menu.add_command(label="Set Palette", command=lambda: setup_palette(window)) # Color 메뉴에 Set Palette 기능 버튼 추가
+    color_menu.add_command(label="Change Background Color", command=lambda: change_bg_color(canvas)) # Color 메뉴에 Change Background Color 기능 버튼 추가
+    color_menu.add_command(label="Change Brush Color", command=lambda: change_brush_color()) # Color 메뉴에 Change Brush Color 기능 버튼 추가
+
+    tool_menu.add_command(label="Toggle FullScreen", command=toggle_fullscreen) # Tools 메뉴에 Toggle FullScreen 기능 버튼 추가
+    tool_menu.add_command(label="Toggle Ruler", command=toggle_ruler) # Tools 메뉴에 Toggle Ruler 기능 버튼 추가
+    tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas)) # Tools 메뉴에 Toggle Grid 기능 버튼 추가
+    tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
+
+    help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
+#+=================================================================================
+
+    #button_new_window = Button(window, text="새 창 열기", command=create_new_window)
+    #button_new_window.pack(side=LEFT)
 
 # 새 창 열기 생성
 def create_new_window():
@@ -884,8 +925,8 @@ ruler_on = False
 ruler_lines = []
 ruler_texts = []
 
-toggle_button = Button(window, text="Ruler", command=toggle_ruler)
-toggle_button.pack()
+#toggle_button = Button(window, text="Ruler", command=toggle_ruler)
+#toggle_button.pack()
 
 # 눈금자 간격 입력 레이블
 interval_label = Label(window, text="Ruler Interval:")
