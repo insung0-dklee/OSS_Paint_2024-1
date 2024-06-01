@@ -9,6 +9,7 @@ button_delete : clear_paint의 버튼
 from tkinter import *
 import webbrowser
 
+
 def paint(event):
     x1, y1 = ( event.x-1 ), ( event.y-1 )
     x2, y2 = ( event.x+1 ), ( event.y+1 )
@@ -27,7 +28,6 @@ button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
 
 window.mainloop()
-
 
 # 사용자에게 입력을 받아 링크를 여는 함수
 def openLink():
@@ -48,3 +48,6 @@ open_button = Button(root, text="Open Link", command=openLink)
 canvas.create_window(200, 250, window=open_button)
 
 root.mainloop()
+
+
+
