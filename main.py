@@ -99,12 +99,14 @@ def bind_shortcuts():
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
     canvas.bind("<B1-Motion>", paint_airbrush)
 
-def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능 
-    canvas.bind("<B1-Motion>", paint)
+def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능
+    canvas.bind("<B1-Motion>", paint_stroke)
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal(canvas):
-    canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
+    canvas.bind("<Button-1>", lambda event: paint_start(event))
+    canvas.bind("<B1-Motion>", lambda event: paint_stroke(event, canvas))
+
     
 def set_paint_mode_pressure(canvas):
     canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
@@ -122,16 +124,17 @@ def paint_pressure(event, canvas):
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
-def paint_start(event):
-    global last_x, last_y
-    last_x, last_y = event.x, event.y
-    canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
+def paint_start(event): #획 시작
+    global x1, y1, current_stroke
+    x1, y1 = event.x, event.y
+    current_stroke = []
 
-def paint(event, canvas):
-    global last_x, last_y
-    if last_x and last_y:
-        canvas.create_line(last_x, last_y, event.x, event.y, fill=brush_color, width=brush_size, capstyle=ROUND, smooth=TRUE)
-    last_x, last_y = event.x, event.y
+def paint_stroke(event, canvas): #획 그림
+    global x1, y1, current_stroke
+    x2, y2 = event.x, event.y
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size, capstyle=ROUND, smooth=TRUE)
+    current_stroke.append((x1, y1, x2, y2))
+    x1, y1 = x2, y2
 
 # 점선 브러쉬 함수
 def dotted_paint(event, canvas):
@@ -157,7 +160,7 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     global brush_mode
     brush_mode = mode
     if brush_mode == "solid":  # 브러쉬 모드가 solid면
-        canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))  # 실선(기본) 브러쉬로 변경
+        canvas.bind("<B1-Motion>", lambda event: paint_stroke(event, canvas))  # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
 
@@ -229,7 +232,7 @@ def reset_brush(canvas):
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
     change_brush_size(brush_size)  # 브러시 크기 조정
-    canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))  # 브러시 모드 초기화
+    canvas.bind("<B1-Motion>", lambda event: paint_stroke(event, canvas))  # 브러시 모드 초기화
 
 
 def setup_reset_brush_button(window, canvas):
@@ -321,7 +324,7 @@ def setup_paint_app(window):
     button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color(canvas))
+    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color())
     button_brush_color.pack(side=LEFT)
     button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
@@ -478,18 +481,7 @@ strokes = [] #획을 담아 둠
 current_stroke = []
 redo_strokes = []
 
-def paint_start(event): #획 시작
-    global x1, y1, current_stroke
-    x1, y1 = event.x, event.y
-    current_stroke = []
 
-def paint_stroke(event): #획 그림
-    print("Asdf")
-    global x1, y1, current_stroke
-    x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
-    current_stroke.append((x1, y1, x2, y2))
-    x1, y1 = x2, y2
 
 def paint_end(event): #획 끝
     global current_stroke
