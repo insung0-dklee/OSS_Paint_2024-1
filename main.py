@@ -277,17 +277,24 @@ def setup_paint_app(window):
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
+    button_stop_timer.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_stop_timer.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     #타이머 리셋 버튼
     button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
     button_reset_timer.pack(side=RIGHT)
-
+    button_reset_timer.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_reset_timer.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     
     button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
     button_erase_last_stroke.pack(side=LEFT)
+    button_erase_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_erase_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_redo_last_stroke = Button(button_frame, text="Rewrite Last Stroke", command=rewrite_last_stroke)
     button_redo_last_stroke.pack(side=LEFT)
+    button_redo_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_redo_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_clear = Button(button_frame, text="All Clear", command=lambda: clear_paint(canvas))
     button_clear.pack(side=LEFT)
@@ -349,14 +356,20 @@ def setup_paint_app(window):
     # 버튼 프레임에 저장 버튼 추가
     button_save = Button(window, text="Save", command=lambda: save_canvas(canvas))
     button_save.pack(side=LEFT)
+    button_save.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_save.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_upload_image = Button(window, text="Upload Image", command=upload_image)
     button_upload_image.pack(side=LEFT)
+    button_upload_image.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_upload_image.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     #도형 모양 선택하는 버튼 생성
     button_choose_shape = Button(window, text="shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
     button_choose_shape.pack(side=LEFT)
+    button_choose_shape.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_choose_shape.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
@@ -396,6 +409,8 @@ def setup_paint_app(window):
 
     button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
     button_paint.pack(side=RIGHT)
+    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
@@ -405,14 +420,17 @@ def setup_paint_app(window):
 
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
+    button_new_window.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_new_window.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
 # 새 창 열기 생성
 def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
     new_window.title("새 그림판")
-    new_window.geometry("1200x600+200+200")#모든 버튼들이 보이도록 gui 개선 (800->1200)
+    new_window.geometry("1250x600+200+200")#모든 버튼들이 보이도록 gui 개선 (800->1200->1250)
     new_window.configure(bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     setup_paint_app(new_window)   
+
     
 # 마우스 커서를 연필 형태로 변경하기
 def change_cursor(event):
@@ -436,15 +454,19 @@ def show_coordinates(event):
 def hide_coordinates(event):
     canvas.delete("coord_text")
 
+
 #사각형 그리기    
 def create_rectangle(event):
     canvas.bind("<Button-1>", start_rectangle)
+    
 #삼각형 그리기
 def create_triangle(event):
     canvas.bind("<Button-1>", start_triangle)
+    
 #원형 그리기
 def create_circle(event):
     canvas.bind("<Button-1>", start_circle)
+    
 
 #사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
@@ -534,7 +556,7 @@ def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
-window.geometry("1200x600+200+200") #모든 버튼들이 보이도록 gui 개선 (800->1200)
+window.geometry("1250x600+200+200") #모든 버튼들이 보이도록 gui 개선 (800->1200->1250)
 window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
