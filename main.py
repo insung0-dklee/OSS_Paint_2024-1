@@ -141,7 +141,18 @@ def paint_pressure(event, canvas):
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
+#+==================================================================================
+def set_paint_mode_rainbow(canvas): # 무지개 브러쉬 모드로 전환하는 기능
+    canvas.bind('<B1-Motion>', lambda event: paint_rainbow(event, canvas))
 
+def paint_rainbow(event, canvas): # 무지개 브러쉬로 그림을 그릴 수 있는 기능
+    r = (math.sin(time.time()) + 1) / 2  
+    g = (math.sin(time.time() + 2) + 1) / 2 
+    b = (math.sin(time.time() + 4) + 1) / 2 
+    # 시간에 따라 RGB값이 변경 -> R,G,B가 시간에 따라 색이 바뀌는 속도에 차이를 주어서 무지개 패턴을 표현
+    color = "#%02x%02x%02x" % (int(r*255), int(g*255), int(b*255))  # RGB 색상 코드로 변환후 사용될 색상 변수에 저장
+    canvas.create_oval(event.x-brush_size, event.y-brush_size, event.x+brush_size, event.y+brush_size, fill=color, outline=color)
+#+==================================================================================
 
 # 점선 브러쉬 함수
 def dotted_paint(event, canvas):
@@ -437,6 +448,13 @@ def setup_paint_app(window):
     button_paint.pack(side=RIGHT)
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+#+==================================================================================
+    button_paint = Button(window, text="rainbow", command=lambda: set_paint_mode_rainbow(canvas))
+    button_paint.pack(side=RIGHT)
+    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+#+==================================================================================
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
