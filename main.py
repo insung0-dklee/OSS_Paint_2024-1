@@ -17,6 +17,7 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
+from PIL import Image, ImageFilte
 
 
 # 초기 설정 값들
@@ -509,6 +510,38 @@ def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
         strokes.append(last_redo_stroke)
         for line in last_redo_stroke:
             canvas.create_line(*line, fill=brush_color, width=brush_size)
+
+def apply_blur_effect(image_path, radius=2):
+    """
+    이미지에 가우시안 블러 효과를 적용하는 함수
+    :param image_path: 적용할 이미지 파일 경로
+    :param radius: 블러 반경 (기본값은 2)
+    :return: 블러 효과가 적용된 이미지 객체
+    """
+    # 이미지 열기
+    image = Image.open(image_path)
+
+    # 가우시안 블러 필터 적용
+    blurred_image = image.filter(ImageFilter.GaussianBlur(radius))
+
+    return blurred_image
+
+def blur_image(canvas):
+    """
+    캔버스에 그려진 이미지를 블러 처리하는 함수
+    :param canvas: 이미지가 그려진 캔버스 객체
+    """
+    # 캔버스 이미지를 임시 파일로 저장
+    file_path = "temp_image.png"
+    canvas.postscript(file=file_path)
+
+    # 블러 효과 적용
+    blurred_image = apply_blur_effect(file_path)
+
+    # 블러 처리된 이미지를 캔버스에 표시
+    canvas.delete("all")
+    canvas.image = blurred_image
+    canvas.create_image(0, 0, anchor=NW, image=blurred_image)
 
 
 window = Tk()
