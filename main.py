@@ -723,6 +723,7 @@ def double_line_paint(event, canvas):
         last_x, last_y = event.x, event.y
 
 def draw_grid(canvas, step):
+    canvas.delete("grid_line") #새로 grid를 그리기 위해 기존 grid를 삭제
     width = canvas.winfo_width()
     height = canvas.winfo_height()
     for x in range(0, width, step):
@@ -772,8 +773,20 @@ def open_grid_dialog():
     window.wait_window(dialog.top)  # 다이얼로그 창이 닫힐 때까지 대기
     grid_spacing = dialog.result  # 사용자가 선택한 그리드 간격 가져오기
     if grid_spacing is not None:
-        draw_grid(canvas, grid_spacing)  # 사용자가 선택한 그리드 간격으로 그리드 다시 그리기
+        global grid_spacing_global # 전역 변수로 그리드 간격 설정 (수정)
+        grid_spacing_global = grid_spacing
+        window.bind("<Configure>", on_window_grid) # 윈도우 크기 변경 이벤트 핸들러 등록
+"""
+on_window_grid : 윈도우 크기가 변경될 때마다 호출되는 이벤트 핸들러
 
+@Param
+    event : 이벤트 객체 (윈도우 크기 변경 이벤트에 반응)
+@Return
+    None
+"""
+def on_window_grid(event):
+    global grid_spacing_global  # 전역 변수로부터 그리드 간격 가져오기
+    draw_grid(canvas, grid_spacing_global)  # 윈도우 크기가 변경될 때마다 그리드 다시 그리기
 
 """
 눈금자를 그리는 기능
