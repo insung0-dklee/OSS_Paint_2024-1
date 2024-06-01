@@ -17,6 +17,7 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
+import turtle #turtle 그래픽 모듈
 
 
 # 초기 설정 값들
@@ -31,7 +32,36 @@ spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
 
+# 터틀을 회전시키는 함수
+def rotate_turtle():
+    turtle_obj.right(90)
 
+# 터틀을 직진시키는 함수
+def move_forward():
+    turtle_obj.forward(100)
+
+def run_turtle():
+    global turtle_obj #turtle 객체
+    """
+    800*600 turtle graphics 생성
+    그 후, title 설정하고, turtle을 화면에 배치시킴
+    turtle의 속도와, 모양을 설정함
+    """
+    turtle_screen = turtle.Screen()
+    turtle_screen.title("Turtle Graphics")
+    turtle_screen.setup(width=800, height=600)
+    turtle_obj = turtle.Turtle()
+    turtle_obj.shape("turtle")
+    turtle_obj.speed(1)
+
+    # Turtle 화면 위에 Tkinter 버튼 추가
+    button_rotate = Button(turtle_screen._root, text="Rotate Turtle", command=rotate_turtle) # turtle 90도 회전
+    button_rotate.pack(side=LEFT)
+
+    button_forward = Button(turtle_screen._root, text="Move Forward", command=move_forward) # turtle 직진
+    button_forward.pack(side=LEFT)
+
+    turtle_screen.mainloop()
 
 #이미지 파일 불러오기 
 def open_image():
@@ -291,6 +321,9 @@ def setup_paint_app(window):
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
+
+    button_turtle = Button(button_frame, text="Run Turtle", command=run_turtle) 
+    button_turtle.pack(side=LEFT)
 
 
 
