@@ -98,3 +98,47 @@ def run_paint_app():
 
 if __name__ == "__main__":
     run_paint_app()
+
+
+# 색상추출 기능
+import tkinter as tk
+from tkinter import filedialog
+from PIL import Image, ImageTk
+
+def open_image():
+    file_path = filedialog.askopenfilename()
+    if file_path:
+        image = Image.open(file_path)
+        show_image(image)
+
+def show_image(image):
+    # 이미지 크기 조정
+    image.thumbnail((300, 300))
+    photo = ImageTk.PhotoImage(image)
+    canvas.create_image(0, 0, anchor=tk.NW, image=photo)
+    canvas.image = photo  # 이미지가 garbage-collected 되는 것을 방지하기 위해 저장
+    return image
+
+def extract_color(event):
+    x, y = event.x, event.y
+    rgb_color = current_image.getpixel((x, y))
+    hex_color = '#{:02x}{:02x}{:02x}'.format(rgb_color[0], rgb_color[1], rgb_color[2])
+    color_label.config(text=f"Color: {hex_color}")
+
+root = tk.Tk()
+root.title("Color Extractor")
+
+canvas = tk.Canvas(root, width=300, height=300)
+canvas.pack()
+
+open_button = tk.Button(root, text="Open Image", command=open_image)
+open_button.pack()
+
+color_label = tk.Label(root, text="Color: ")
+color_label.pack()
+
+current_image = None  # 현재 이미지를 저장할 변수
+
+canvas.bind("<Button-1>", extract_color)
+
+root.mainloop()
