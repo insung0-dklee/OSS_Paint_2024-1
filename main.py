@@ -954,3 +954,19 @@ def gradient_brush(event, canvas):
 def set_paint_mode_gradient(canvas):
     canvas.bind("<B1-Motion>", lambda event: gradient_brush(event, canvas)) #마우스 왼쪽 버트 누른채 마우스 이동하면 그라데이션 브러시가 그려짐
 
+layers = [] #레이어 관련 변수들
+current_layer = None 
+
+# 레이어 추가 함수
+def add_layer(): 
+    layer_canvas = Canvas(canvas, bg="white", width=canvas.winfo_width(), height=canvas.winfo_height())
+    # 레이어를 나타내는 새로운 캔버스가 생성됨. 하얀색 배경의 현재 캔버스의 너비와 높이와 같은 크기로 설정됨
+    layer_canvas.pack(fill="both", expand=True) #레이어 캔버스가 현재 캔버스에 채워짐
+    layers.append(layer_canvas) #리스트에 새로운 레이어 캔버스가 추가됨
+    layer_select.insert(END, f"Layer {len(layers)}") #위젯에 레이어가 추가됨 사용자가 생성된 레이어 선택 가능
+
+#레이어 선택 함수
+def select_layer(event):
+    global current_layer #전역변수 함수 내에서 변경 가능해짐
+    index = layer_select.curselection()[0] # 현재 선택된 레이어의 인덱스 가져옴
+    current_layer = layers[index] #레이어 리스트에서 해당 인덱스에 있는 레이어를 가져옴
