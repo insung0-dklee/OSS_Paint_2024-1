@@ -899,6 +899,26 @@ canvas.bind("<Configure>", on_resize)
 
 bind_shortcuts_window(window)
 
+undo_button = Button(window, text="Undo", command=erase_last_stroke)
+undo_button.pack(side=LEFT)
+
+# 그림 그리기 함수 수정
+def paint_stroke(event):
+    global x1, y1, current_stroke
+    x2, y2 = event.x, event.y
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
+    current_stroke.append((x1, y1, x2, y2))
+    x1, y1 = x2, y2
+
+# 되돌리기 함수 추가
+def erase_last_stroke():
+    global current_stroke
+    if current_stroke:
+        last_stroke = current_stroke.pop()
+        canvas.delete("temp_shape")
+        for line in last_stroke:
+            canvas.create_line(*line, fill="white", width=brush_size)
+
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
