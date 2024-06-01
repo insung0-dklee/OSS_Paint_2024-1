@@ -254,6 +254,10 @@ def setup_paint_app(window):
     button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
 
+    # 팔레트 설정 버튼 생성 및 버튼 프레임에 추가
+    button_palette = Button(button_frame, text="Set Palette", command=lambda: setup_palette(window))
+    button_palette.pack(side=LEFT)
+    
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
@@ -510,7 +514,75 @@ def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
         for line in last_redo_stroke:
             canvas.create_line(*line, fill=brush_color, width=brush_size)
 
+# 브러시 색상을 설정하는 함수
+def set_brush_color(color):
+    global brush_color
+    brush_color = color
 
+# 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
+def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
+    try:
+        # R, G, B 값을 입력받아 정수로 변환
+        r = int(r_entry.get())
+        g = int(g_entry.get())
+        b = int(b_entry.get())
+
+        # R, G, B 값이 0에서 255 사이인지 확인
+        if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
+            # R, G, B 값을 16진수로 변환하여 색상 코드 생성
+            color = f'#{r:02x}{g:02x}{b:02x}'
+            set_brush_color(color)  # 브러시 색상 설정 함수 호출
+
+            # 사용자 정의 색상을 팔레트에 동적으로 추가
+            button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
+            button.pack(side=LEFT, padx=2, pady=2)
+        else:
+            print("RGB 값은 0에서 255 사이여야 합니다.")
+    except ValueError:
+        print("유효한 RGB 값을 입력하세요.")
+
+# 팔레트 설정 함수
+def setup_palette(window):
+    # 새로운 창 생성
+    palette_window = Toplevel(window)
+    palette_window.title("팔레트 설정")
+
+    # 팔레트 프레임 생성 및 추가
+    palette_frame = Frame(palette_window)
+    palette_frame.pack(pady=10)
+
+    # 미리 정의된 색상 목록
+    colors = [
+        'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'white', 'pink', 'brown', 'grey'
+    ]
+
+    # 색상 버튼 생성 및 팔레트 프레임에 추가
+    for color in colors:
+        button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
+        button.pack(side=LEFT, padx=2, pady=2)
+
+    # 사용자 정의 색상 입력창 생성 및 추가
+    custom_color_frame = Frame(palette_window)
+    custom_color_frame.pack(pady=10)
+
+    # R 값 입력 라벨과 입력창 생성 및 추가
+    Label(custom_color_frame, text="R:").grid(row=0, column=0)
+    r_entry = Entry(custom_color_frame, width=3)
+    r_entry.grid(row=0, column=1)
+
+    # G 값 입력 라벨과 입력창 생성 및 추가
+    Label(custom_color_frame, text="G:").grid(row=0, column=2)
+    g_entry = Entry(custom_color_frame, width=3)
+    g_entry.grid(row=0, column=3)
+
+    # B 값 입력 라벨과 입력창 생성 및 추가
+    Label(custom_color_frame, text="B:").grid(row=0, column=4)
+    b_entry = Entry(custom_color_frame, width=3)
+    b_entry.grid(row=0, column=5)
+
+    # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
+    Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
+    
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
