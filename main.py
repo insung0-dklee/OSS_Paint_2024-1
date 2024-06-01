@@ -17,6 +17,7 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
+from tkinter import filedialog, messagebox
 
 
 # 초기 설정 값들
@@ -48,6 +49,12 @@ def on_leave(event):
 def upload_image():
     path = filedialog.askopenfilename()
     if path:
+        # 업로드 파일이 PNG파일인지 확인
+        if not path.lower().endswith('.png'):
+            messagebox.showerror("Invalid File", "PNG 파일만 업로드할 수 있습니다.")
+            return
+        
+        # 업로드 파일이 PNG일 때 업로드 성공
         image = PhotoImage(file=path)
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
