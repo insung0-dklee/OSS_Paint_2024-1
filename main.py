@@ -545,3 +545,79 @@ timer.start()
 update_timer()
 
 window.mainloop()
+
+import tkinter as tk
+from tkinter import Canvas
+from PIL import Image, ImageTk, ImageDraw
+
+class Layer:
+    def __init__(self, name, width, height):
+        # 레이어 이름과 크기를 받아 초기화합니다.
+        self.name = name
+        self.image = Image.new("RGBA", (width, height), (0, 0, 0, 0))  # 투명한 배경을 가지는 새로운 이미지를 생성합니다.
+        self.draw = ImageDraw.Draw(self.image)  # 이미지를 그릴 수 있는 도구를 초기화합니다.
+
+class PaintApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Python Paint with Layers")
+        
+        self.width = 800  # 캔버스의 너비
+        self.height = 600  # 캔버스의 높이
+        
+        self.layers = []  # 레이어들을 저장할 리스트
+        self.active_layer = None  # 현재 활성화된 레이어
+        
+        # 캔버스를 초기화하고 창에 추가합니다.
+        self.canvas = Canvas(root, bg="white", width=self.width, height=self.height)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        
+        # 버튼들을 추가할 프레임을 초기화합니다.
+        self.button_frame = tk.Frame(root)
+        self.button_frame.pack(fill=tk.X)
+        
+        # 레이어 추가 버튼을 생성하고 프레임에 추가합니다.
+        self.add_layer_button = tk.Button(self.button_frame, text="Add Layer", command=self.add_layer)
+        self.add_layer_button.pack(side=tk.LEFT)
+        
+        # 레이어 삭제 버튼을 생성하고 프레임에 추가합니다.
+        self.delete_layer_button = tk.Button(self.button_frame, text="Delete Layer", command=self.delete_layer)
+        self.delete_layer_button.pack(side=tk.LEFT)
+        
+        # 캔버스에서 마우스를 드래그할 때 그림을 그리는 이벤트를 바인딩합니다.
+        self.canvas.bind("<B1-Motion>", self.paint)
+        
+    def add_layer(self):
+        # 새로운 레이어를 생성하고 활성 레이어로 설정합니다.
+        name = f"Layer {len(self.layers) + 1}"
+        new_layer = Layer(name, self.width, self.height)
+        self.layers.append(new_layer)
+        self.active_layer = new_layer
+        self.update_canvas()  # 캔버스를 업데이트합니다.
+        
+    def delete_layer(self):
+        # 현재 활성화된 레이어를 삭제합니다.
+        if self.active_layer:
+            self.layers.remove(self.active_layer)
+            self.active_layer = self.layers[-1] if self.layers else None  # 레이어가 남아있다면 마지막 레이어를 활성화합니다.
+            self.update_canvas()  # 캔버스를 업데이트합니다.
+        
+    def paint(self, event):
+        # 마우스를 드래그할 때 활성 레이어에 그림을 그립니다.
+        if self.active_layer:
+            x, y = event.x, event.y
+            self.active_layer.draw.ellipse((x-5, y-5, x+5, y+5), fill="black")  # 마우스 위치에 검은색 점을 그립니다.
+            self.update_canvas()  # 캔버스를 업데이트합니다.
+        
+    def update_canvas(self):
+        # 모든 레이어를 캔버스에 그립니다.
+        self.canvas.delete("all")  # 기존의 모든 그림을 삭제합니다.
+        for layer in self.layers:
+            tk_image = ImageTk.PhotoImage(layer.image)  # 각 레이어의 이미지를 Tkinter 이미지로 변환합니다.
+            self.canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)  # 캔버스에 이미지를 추가합니다.
+            self.canvas.image = tk_image  # 이미지가 가비지 컬렉션 되지 않도록 참조를 유지합니다.
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PaintApp(root)
+    root.mainloop()  # Tkinter 이벤트 루프를 시작합니다.
