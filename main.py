@@ -224,23 +224,25 @@ def save_canvas(canvas):
     if file_path:
         canvas.postscript(file=file_path)
 
-def reset_brush(canvas):
-    global brush_size, brush_color
-    brush_size = 1  # 초기 브러시 크기
-    brush_color = "black"  # 초기 브러시 색상
-    change_brush_size(brush_size)  # 브러시 크기 조정
-    canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))  # 브러시 모드 초기화
-
-
-def setup_reset_brush_button(window, canvas):
-    button_reset = Button(window, text="Reset Brush", command=lambda: reset_brush(canvas))
-    button_reset.pack(side=LEFT)
-    button_reset.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_reset.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
 def setup_paint_app(window):
     global brush_size, brush_color
+#___________________________________________
+    def reset_brush_size(canvas):
+        global brush_size
+        change_brush_size(1)
+        brush_size_slider.set(1)
+    
 
+    def reset_brush_color(canvas):
+        global brush_color
+        brush_color = "black"
+
+
+    def reset_brush(canvas):
+        reset_brush_size(canvas)
+        reset_brush_color(canvas)
+        canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
+#__________________________________________  
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
 
@@ -290,7 +292,10 @@ def setup_paint_app(window):
     button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
+    button_reset = Button(window, text="Reset Brush", command=lambda: reset_brush(canvas))
+    button_reset.pack(side=LEFT)
+    button_reset.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_reset.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
 
 
