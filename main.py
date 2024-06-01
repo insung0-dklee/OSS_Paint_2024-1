@@ -15,7 +15,6 @@ from tkinter import filedialog, PhotoImage  # 파일 대화 상자 및 사진 �
 from fun_timer import Timer  # Timer 모듈 임포트
 from picture import ImageEditor  # 이미지 모듈을 가져옴
 
-
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
 brush_size = 1  # 초기 브러시 크기
@@ -138,20 +137,23 @@ def paint(event, canvas):
 
 # 점선 브러쉬 함수
 def dotted_paint(event, canvas):
-    global last_x, last_y, current_stroke
-    spacing = brush_size  # 점 사이의 간격을 브러시 크기로 설정
+    global last_x, last_y, current_stroke, brush_size
+    spacing = dot_distance.get()  # 점 사이의 간격을 dot_distance 변수로 설정
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x - 1, event.y - 1, event.x + 1, event.y + 1, fill=brush_color, outline=brush_color)
-            current_stroke.append((event.x - 1, event.y - 1, event.x + 1, event.y + 1, brush_color))
+            radius = brush_size // 2  # 브러시 크기에 맞춰 반지름 설정
+            canvas.create_oval(event.x - radius, event.y - radius, event.x + radius, event.y + radius, fill=brush_color, outline=brush_color)
+            current_stroke.append((event.x - radius, event.y - radius, event.x + radius, event.y + radius, brush_color))
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
-        canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
-        current_stroke.append((last_x - 1, last_y - 1, last_x + 1, last_y + 1, brush_color))
+        radius = brush_size // 2  # 브러시 크기에 맞춰 반지름 설정
+        canvas.create_oval(last_x - radius, last_x - radius, last_x + radius, last_x + radius, fill=brush_color, outline=brush_color)
+        current_stroke.append((last_x - radius, last_x - radius, last_x + radius, last_x + radius, brush_color))
+
 
 def set_brush_mode(canvas, mode):  # 브러쉬 모드를 변경하는 함수
     global brush_mode
@@ -283,9 +285,6 @@ def setup_paint_app(window):
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
 
-    button_color = Button(button_frame, text="Color", command=choose_color)
-    button_color.pack(side=LEFT)
-
     button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
     button_solid.pack()
     button_solid.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
@@ -325,7 +324,7 @@ def setup_paint_app(window):
     button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color(canvas))
+    button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
     button_brush_color.pack(side=LEFT)
     button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
@@ -388,6 +387,16 @@ def setup_paint_app(window):
 
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
+
+    # 격자 그리기 버튼 추가
+    button_draw_grid = Button(window, text="격자 생성", command=lambda: draw_grid(canvas, grid_spacing.get()))
+    button_draw_grid.pack(side=LEFT)
+    button_remove_grid = Button(window, text="격자 전체 제거", command=lambda: remove_grid(canvas))
+    button_remove_grid.pack(side=LEFT)
+
+    # 격자 간격 조절 슬라이더 추가
+    grid_spacing_slider = Scale(window, from_=10, to=100, orient=HORIZONTAL, label="격자 간격 조절", variable=grid_spacing)
+    grid_spacing_slider.pack(side=LEFT)
 
 # 새 창 열기 생성
 def create_new_window():
@@ -522,12 +531,28 @@ def rewrite_last_stroke():  # 마지막으로 지운 획을 다시 그림
                 x1, y1, x2, y2, color, size = line
                 canvas.create_line(x1, y1, x2, y2, fill=color, width=size)
 
+# 격자 그리기 함수
+def draw_grid(canvas, spacing=20):
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+
+    for i in range(0, width, spacing):
+        canvas.create_line([(i, 0), (i, height)], tag='grid_line', fill='gray')
+
+    for i in range(0, height, spacing):
+        canvas.create_line([(0, i), (width, i)], tag='grid_line', fill='gray')
+
+def remove_grid(canvas):
+    canvas.delete('grid_line')
+
 window = Tk()
 # Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
 window.geometry("800x600+200+200")
 window.resizable(True, True)
 window.configure(bg="sky blue")  # 구별하기 위한 버튼 영역 색 변경
+grid_spacing = IntVar()
+grid_spacing.set(20)
 setup_paint_app(window)
 editor = ImageEditor(canvas)
 
