@@ -94,10 +94,13 @@ def decrease_dot_distance():
     # 맞춤형 단축키 기능 추가
 def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas))
+    window.bind("<Control-s>", lambda event: save_canvas(canvas))
+    window.bind("<f>", toggle_fullscreen)
+    
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
-    canvas.bind("<B1-Motion>", paint_airbrush)
+    canvas.bind("<B1-Motion>", lambda event: paint_airbrush(event, canvas))
 
 def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능 
     canvas.bind("<B1-Motion>", paint)
@@ -181,11 +184,10 @@ def clear_paint(canvas):
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
 
-def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
+#텍스트 입력 기능 추가
+def add_text(event, canvas, text_box):
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
 
 def toggle_fullscreen(event):
     window.state = not window.state
@@ -216,7 +218,9 @@ def change_bg_color(canvas):
 
 def change_brush_color():
     global brush_color
-    brush_color = askcolor()[1]
+    color = askcolor()
+    if color[1]:  # 색상이 선택되었는지 확인
+        brush_color = color[1]
 
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
@@ -321,7 +325,7 @@ def setup_paint_app(window):
     button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color(canvas))
+    button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
     button_brush_color.pack(side=LEFT)
     button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
@@ -360,8 +364,6 @@ def setup_paint_app(window):
 
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
-
-
 
     # 에어브러쉬 속성 조절 버튼 추가
     Button(frame_distance, text="+", command=increase_dot_distance).pack(side=RIGHT)
@@ -446,7 +448,11 @@ def start_triangle(event):
 def draw_triangle(event): 
     global start_x, start_y
     canvas.delete("temp_shape")
-    canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
+    # 삼각형의 세 꼭지점을 정의합니다.
+    x1, y1 = start_x, start_y
+    x2, y2 = event.x, event.y
+    x3, y3 = start_x + (event.x - start_x), start_y
+    canvas.create_polygon(x1, y1, x2, y2, x3, y3, outline="black", fill="white", tags="temp_shape")
 
 #원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
@@ -524,8 +530,6 @@ editor = ImageEditor(canvas)
 timer_label = Label(window, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
 
-
-
 # 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
 dot_count.set(10)
@@ -538,7 +542,6 @@ frame_distance.pack(side=RIGHT)
 
 frame_count = Frame(window)
 frame_count.pack(side=RIGHT)
-
 
 #프로그램 시작 시 타이머 시작
 timer.start()
