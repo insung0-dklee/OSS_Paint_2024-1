@@ -706,3 +706,29 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PaintApp(root)
     root.mainloop()  # Tkinter 이벤트 루프를 시작합니다.
+
+def apply_blur_effect(input_image_path, output_image_path, blur_radius):
+    """
+    주어진 이미지에 흐림 효과를 적용하고 결과를 저장합니다.
+
+    :param input_image_path: 입력 이미지 파일의 경로
+    :param output_image_path: 결과 이미지를 저장할 파일 경로
+    :param blur_radius: 흐림 효과의 강도 (반지름)
+    """
+    try:
+        # 이미지를 엽니다
+        original_image = Image.open(input_image_path)
+        print(f"이미지를 성공적으로 열었습니다: {input_image_path}")
+
+        # 흐림 효과를 적용합니다
+        blurred_image = original_image.filter(ImageFilter.GaussianBlur(blur_radius))
+        print(f"흐림 효과를 적용했습니다. 반지름: {blur_radius}")
+
+        # 결과 이미지를 저장합니다
+        blurred_image.save(output_image_path)
+        print(f"결과 이미지를 저장했습니다: {output_image_path}")
+
+    except Exception as e:
+        print(f"오류 발생: {e}")
+
+
