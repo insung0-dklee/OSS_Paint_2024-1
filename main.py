@@ -13,6 +13,8 @@ from brush_settings import change_brush_size, change_bg_color, change_brush_colo
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 from tkinter import filedialog
 from tkinter import PhotoImage
+import tkinter as tk
+from tkinter import colorchooser
 import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
@@ -216,7 +218,9 @@ def change_bg_color(canvas):
 
 def change_brush_color():
     global brush_color
-    brush_color = askcolor()[1]
+    color = colorchooser.askcolor()[1]
+    if color:
+        brush_color = color
 
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
@@ -321,8 +325,8 @@ def setup_paint_app(window):
     button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color(canvas))
-    button_brush_color.pack(side=LEFT)
+    button_brush_color = tk.Button(window, text="Change Brush Color", command=change_brush_color)
+    button_brush_color.pack(side=tk.LEFT)
     button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
