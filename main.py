@@ -33,7 +33,7 @@ x1, y1 = None, None
 
 
 
-#이미지 파일 불러오기 
+#이미지 파일 불러오기
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -54,7 +54,7 @@ def upload_image():
 
 #타이머 기능 추가
 timer = Timer()
-#타이머의 경과시간 업데이트 
+#타이머의 경과시간 업데이트
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
@@ -96,10 +96,14 @@ def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas))
 # brush_settings.initialize_globals(globals())
 
+def bind_shortcuts_window(window):
+    window.bind("<Alt-Return>", toggle_fullscreen)  # Alt + Enter (Windows/Linux)
+    window.bind("<Command-Return>", toggle_fullscreen)  # Command + Enter (Mac)
+
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
     canvas.bind("<B1-Motion>", paint_airbrush)
 
-def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능 
+def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능
     canvas.bind("<B1-Motion>", paint)
 
 # 마우스 움직임에 따라 도형을 그리는 함수
@@ -187,9 +191,10 @@ def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와�
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
    
 
-def toggle_fullscreen(event):
-    window.state = not window.state
-    window.attributes("-fullscreen", window.state)
+# 전체화면 토글 함수
+def toggle_fullscreen(event=None):
+    global window
+    window.attributes("-fullscreen", not window.attributes("-fullscreen"))
 
 # 좌우 반전 기능 추가
 def flip_horizontal(canvas):
@@ -416,7 +421,7 @@ def show_coordinates(event):
 def hide_coordinates(event):
     canvas.delete("coord_text")
 
-#사각형 그리기    
+#사각형 그리기
 def create_rectangle(event):
     canvas.bind("<Button-1>", start_rectangle)
 #삼각형 그리기
@@ -443,7 +448,7 @@ def start_triangle(event):
     start_x, start_y = event.x, event.y
     canvas.bind("<B1-Motion>", lambda event: draw_triangle(event))
 #삼각형 생성하기
-def draw_triangle(event): 
+def draw_triangle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
@@ -519,6 +524,10 @@ window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
 editor = ImageEditor(canvas)
+
+# 단축키 바인딩
+bind_shortcuts_window(window)
+
 
 # 타이머 라벨
 timer_label = Label(window, text="Time: 0 s")
