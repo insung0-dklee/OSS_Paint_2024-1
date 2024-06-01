@@ -6,6 +6,15 @@ button_delete : clear_paint의 버튼
 
 """
 
+
+"""
+직선을 그릴 수 있게 해주는 함수 추가
+x1,y1 마우스를  클릭한 위치
+x2,y2 마우스에서 클릭을 땐 위치
+
+line 그 두점을 이어주는 함수
+"""
+
 from tkinter import *
 import time #시간 계산을 위한 모듈
 import brush_settings  # brush_settings 모듈 임포트
@@ -30,7 +39,6 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
-
 
 
 #이미지 파일 불러오기 
@@ -160,6 +168,8 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))  # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
+    elif brush_mode == "line":
+        canvas.bind("<B1-Motion>",lambda event:set_paint_mode_line(canvas)) #직선으로 변경
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -289,6 +299,11 @@ def setup_paint_app(window):
     button_dotted.pack()
     button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_line = Button(button_frame, text="line", command=lambda: set_brush_mode(canvas, "line")) # 직선을 위한 버튼 생성
+    button_line.pack()
+    button_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
@@ -538,6 +553,23 @@ frame_distance.pack(side=RIGHT)
 
 frame_count = Frame(window)
 frame_count.pack(side=RIGHT)
+
+def set_paint_mode_line(canvas): #직선을 그려주기 위한 함수 모듈"
+
+    canvas.pack()
+    canvas.bind("<Button-1>",clicked) # 버튼이 눌렸을때 실행
+    canvas.bind("<ButtonRelease-1>",unclicked)#버튼을 땠을때 실행
+
+def clicked(event):
+    global x1,y1 # x1,y1 값 저장
+    x1,y1=event.x,event.y 
+
+def unclicked(event):
+    global x2,y2#x2,y2 값 저장
+    x2,y2=event.x,event.y
+    canvas.create_line(x1,y1,x2,y2, width=brush_size, fill=brush_color) #저장한 두점을 이어준다
+
+
 
 
 #프로그램 시작 시 타이머 시작
