@@ -544,4 +544,23 @@ frame_count.pack(side=RIGHT)
 timer.start()
 update_timer()
 
+# 현재 브러시 크기를 나타내는 라벨
+brush_size_label = Label(window, text="Brush Size: 1")
+brush_size_label.pack(side=LEFT, padx=10)
+
+# 현재 선택된 색상을 나타내는 라벨
+color_label = Label(window, text="Color: Black")
+color_label.pack(side=LEFT, padx=10)
+
+def update_status():
+    tool_label.config(text=f"Current Tool: {selected_shape}")
+    brush_size_label.config(text=f"Brush Size: {brush_size}")
+    color_label.config(text=f"Color: {brush_color}")
+    window.after(100, update_status)  # 0.1초마다 업데이트
+
+tool_label = Label(window, text="Current Tool: ", bg="sky blue")
+tool_label.pack(side=BOTTOM)
+
+update_status()
+
 window.mainloop()
