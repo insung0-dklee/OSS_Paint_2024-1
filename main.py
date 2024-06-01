@@ -9,7 +9,7 @@ from fun_timer import Timer
 from picture import ImageEditor
 
 # 초기 설정 값들
-global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas, strokes, current_stroke, redo_strokes, selected_shape
+global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas, strokes, current_stroke, redo_strokes, selected_shape, text_mode
 brush_size = 1
 brush_color = "black"
 brush_mode = "solid"
@@ -19,6 +19,7 @@ strokes = []
 current_stroke = []
 redo_strokes = []
 selected_shape = None
+text_mode = False
 
 # 타이머 객체 생성
 timer = Timer()
@@ -81,36 +82,8 @@ def setup_paint_app(window):
     button_brush.bind("<Enter>", on_enter)
     button_brush.bind("<Leave>", on_leave)
 
-    text_box = Entry(window)
-    text_box.pack(side=LEFT)
-    canvas.bind("<Button-3>", lambda event: add_text(event, canvas, text_box))
-    window.bind("<F11>", toggle_fullscreen)
-
-    button_flip = Button(window, text="Flip Horizontal", command=lambda: flip_horizontal(canvas))
-    button_flip.pack(side=LEFT)
-    button_flip.bind("<Enter>", on_enter)
-    button_flip.bind("<Leave>", on_leave)
-
-    canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
-
-    button_bg_color = Button(window, text="Change Background Color", command=lambda: change_bg_color(canvas))
-    button_bg_color.pack(side=LEFT)
-    button_bg_color.bind("<Enter>", on_enter)
-    button_bg_color.bind("<Leave>", on_leave)
-
-    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color(canvas))
-    button_brush_color.pack(side=LEFT)
-    button_brush_color.bind("<Enter>", on_enter)
-    button_brush_color.bind("<Leave>", on_leave)
-
-    button_save = Button(window, text="Save", command=lambda: save_canvas(canvas))
-    button_save.pack(side=LEFT)
-
-    button_upload_image = Button(window, text="Upload Image", command=upload_image)
-    button_upload_image.pack(side=LEFT)
-
-    button_choose_shape = Button(window, text="Shape", command=choose_shape)
-    button_choose_shape.pack(side=LEFT)
+    button_add_text = Button(window, text="Add Text", command=lambda: enable_text_mode(canvas))
+    button_add_text.pack(side=LEFT)
 
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
@@ -391,9 +364,32 @@ def clear_paint(canvas):
     global last_x, last_y
     last_x, last_y = None, None
 
-def add_text(event, canvas, text_box):
-    text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
+def enable_text_mode(canvas):
+    global text_mode
+    text_mode = True
+    canvas.bind("<Button-1>", lambda event: add_text(event, canvas))
+
+def add_text(event, canvas):
+    global text_mode
+    if not text_mode:
+        return
+    
+    # 텍스트 입력 팝업 창 생성
+    text_popup = Toplevel(window)
+    text_popup.title("텍스트 입력")
+    text_popup.geometry("200x100")
+    text_entry = Entry(text_popup)
+    text_entry.pack(fill=BOTH, expand=True)
+
+    def submit_text():
+        global text_mode
+        text = text_entry.get()
+        canvas.create_text(event.x, event.y, text=text, fill=brush_color, font=('Arial', 12))
+        text_popup.destroy()
+        text_mode = False
+
+    submit_button = Button(text_popup, text="확인", command=submit_text)
+    submit_button.pack()
 
 def toggle_fullscreen(event):
     window.state = not window.state
