@@ -32,8 +32,19 @@ last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 �
 x1, y1 = None, None
 
 
+text_color = "black"
 
-#이미지 파일 불러오기 
+# 텍스트 색상 변경 함수
+def change_text_color():
+    global text_color
+    text_color = askcolor()[1]
+
+
+
+
+
+
+#이미지 파일 불러오기
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -54,7 +65,7 @@ def upload_image():
 
 #타이머 기능 추가
 timer = Timer()
-#타이머의 경과시간 업데이트 
+#타이머의 경과시간 업데이트
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
@@ -99,7 +110,7 @@ def bind_shortcuts():
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
     canvas.bind("<B1-Motion>", paint_airbrush)
 
-def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능 
+def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능
     canvas.bind("<B1-Motion>", paint)
 
 # 마우스 움직임에 따라 도형을 그리는 함수
@@ -181,10 +192,14 @@ def clear_paint(canvas):
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
 
-def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
+    
+# 텍스트를 추가하는 함수
+def add_text(event, canvas, text_box):
+    global text_color
     text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
+    canvas.create_text(event.x, event.y, text=text, fill=text_color, font=('Arial', 12))
+
    
 
 def toggle_fullscreen(event):
@@ -360,6 +375,10 @@ def setup_paint_app(window):
 
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
+    
+    # 텍스트 색상 버튼 추가
+    text_color_button = Button(window, text="텍스트 색상 선택", command=change_text_color)
+    text_color_button.pack(side=RIGHT)
 
 
 
@@ -416,7 +435,7 @@ def show_coordinates(event):
 def hide_coordinates(event):
     canvas.delete("coord_text")
 
-#사각형 그리기    
+#사각형 그리기
 def create_rectangle(event):
     canvas.bind("<Button-1>", start_rectangle)
 #삼각형 그리기
@@ -443,7 +462,7 @@ def start_triangle(event):
     start_x, start_y = event.x, event.y
     canvas.bind("<B1-Motion>", lambda event: draw_triangle(event))
 #삼각형 생성하기
-def draw_triangle(event): 
+def draw_triangle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
@@ -525,7 +544,6 @@ timer_label = Label(window, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
 
 
-
 # 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
 dot_count.set(10)
@@ -538,6 +556,7 @@ frame_distance.pack(side=RIGHT)
 
 frame_count = Frame(window)
 frame_count.pack(side=RIGHT)
+
 
 
 #프로그램 시작 시 타이머 시작
