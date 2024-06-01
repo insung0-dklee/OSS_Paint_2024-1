@@ -428,37 +428,50 @@ def create_circle(event):
 
 #사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
-    global start_x, start_y
+    global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
+    current_shape = None
     canvas.bind("<B1-Motion>", lambda event: draw_rectangle(event))
 #사각형 생성하기
 def draw_rectangle(event):
-    global start_x, start_y
-    canvas.delete("temp_shape")
-    canvas.create_rectangle(start_x, start_y, event.x, event.y, outline="black", fill="white", tags="temp_shape")
+    global start_x, start_y, current_shape
+    canvas.delete(current_shape)
+    current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, outline="black", fill="white")
 
 #삼각형 그릴 위치 정하고 생성하는 함수 호출
 def start_triangle(event):
-    global start_x, start_y
+    global start_x, start_y, current_triangle
     start_x, start_y = event.x, event.y
-    canvas.bind("<B1-Motion>", lambda event: draw_triangle(event))
+    current_triangle = None
+    canvas.bind("<B1-Motion>", draw_triangle)
+    canvas.bind("<ButtonRelease-1>", finish_triangle)
 #삼각형 생성하기
-def draw_triangle(event): 
-    global start_x, start_y
-    canvas.delete("temp_shape")
-    canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
+def draw_triangle(event):
+    global start_x, start_y, current_triangle
+    if current_triangle:
+        canvas.delete(current_triangle)
+    current_triangle = canvas.create_polygon(start_x, start_y, event.x, start_y, event.x, event.y, outline="black", fill="white")
+#삼각형 그리기 종료
+def finish_triangle(event):
+    global current_triangle
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_triangle:
+        canvas.delete(current_triangle)
+        canvas.create_polygon(start_x, start_y, event.x, start_y, event.x, event.y, outline="black", fill="white")
 
 #원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
-    global start_x, start_y
+    global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
+    current_shape = None
     canvas.bind("<B1-Motion>", lambda event: draw_circle(event))
 #원형 생성하기
 def draw_circle(event):
-    global start_x, start_y
-    canvas.delete("temp_shape")
+    global start_x, start_y, current_shape
+    canvas.delete(current_shape)
     r = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
-    canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline="black", fill="white", tags="temp_shape")
+    current_shape = canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline="black", fill="white")
 
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
@@ -484,7 +497,6 @@ def paint_start(event): #획 시작
     current_stroke = []
 
 def paint_stroke(event): #획 그림
-    print("Asdf")
     global x1, y1, current_stroke
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
