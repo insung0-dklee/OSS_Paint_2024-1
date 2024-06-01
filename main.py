@@ -11,13 +11,12 @@ import time #시간 계산을 위한 모듈
 import brush_settings  # brush_settings 모듈 임포트
 from brush_settings import change_brush_size, change_bg_color, change_brush_color, set_brush_mode, set_paint_mode_normal, set_paint_mode_pressure, paint_start, paint, dotted_paint
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
-from tkinter import filedialog
-from tkinter import PhotoImage
+from tkinter import filedialog, simpledialog, Toplevel, Scale, HORIZONTAL, Button, Label, PhotoImage
 import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
-
+from Watermark import apply_watermark
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -68,6 +67,52 @@ def reset_timer():
     if not timer.running:
         timer.start()
 
+
+
+# 캔버스를 파일로 저장하는 함수
+def save_canvas(canvas):
+    file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
+    if file_path:
+        canvas.postscript(file=file_path)
+
+class BrightnessTransparencyDialog:
+    def __init__(self, parent):
+        self.top = Toplevel(parent)
+        self.top.title("Brightness and Transparency")
+
+        Label(self.top, text="Brightness:").pack()
+        self.brightness_slider = Scale(self.top, from_=1.0, to=3.0, resolution=0.1, orient=HORIZONTAL)
+        self.brightness_slider.set(1.0)
+        self.brightness_slider.pack()
+
+        Label(self.top, text="Transparency:").pack()
+        self.transparency_slider = Scale(self.top, from_=0.0, to=1.0, resolution=0.1, orient=HORIZONTAL)
+        self.transparency_slider.set(1.0)
+        self.transparency_slider.pack()
+
+        self.ok_button = Button(self.top, text="OK", command=self.ok)
+        self.ok_button.pack()
+
+        self.cancel_button = Button(self.top, text="Cancel", command=self.cancel)
+        self.cancel_button.pack()
+
+        self.result = None
+
+    def ok(self):
+        self.result = (self.brightness_slider.get(), self.transparency_slider.get())
+        self.top.destroy()
+
+    def cancel(self):
+        self.top.destroy()
+
+def add_watermark():
+    file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg;*.jpeg;*.png;*.gif"), ("All files", "*.*")])
+    if file_path:
+        dialog = BrightnessTransparencyDialog(window)
+        window.wait_window(dialog.top)
+        if dialog.result:
+            brightness, transparency = dialog.result
+            apply_watermark(canvas, file_path, alpha=transparency, brightness=brightness)
 
 def paint_airbrush(event, canvas):
     for _ in range(dot_count.get()):  # 에어브러쉬 효과를 위해 여러 개의 작은 점을 그림
@@ -279,6 +324,9 @@ def setup_paint_app(window):
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
 
+
+    button_add_watermark = Button(window, text="Add Watermark", command=add_watermark)
+    button_add_watermark.pack(side=LEFT)
 
     button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
     button_solid.pack()
