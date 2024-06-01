@@ -74,27 +74,12 @@ def setup_paint_app(window):
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
 
-    button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
-    button_solid.pack()
-    button_solid.bind("<Enter>", on_enter)
-    button_solid.bind("<Leave>", on_leave)
-
-    button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode(canvas, "dotted"))
-    button_dotted.pack()
-    button_dotted.bind("<Enter>", on_enter)
-    button_dotted.bind("<Leave>", on_leave)
-
     setup_reset_brush_button(window, canvas)
 
-    button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)
-    button_paint.bind("<Leave>", on_leave)
-
-    button_paint_pressure = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint_pressure.pack(side=RIGHT)
-    button_paint_pressure.bind("<Enter>", on_enter)
-    button_paint_pressure.bind("<Leave>", on_leave)
+    button_brush = Button(window, text="Brush", command=choose_brush)
+    button_brush.pack(side=RIGHT)
+    button_brush.bind("<Enter>", on_enter)
+    button_brush.bind("<Leave>", on_leave)
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
@@ -124,7 +109,7 @@ def setup_paint_app(window):
     button_upload_image = Button(window, text="Upload Image", command=upload_image)
     button_upload_image.pack(side=LEFT)
 
-    button_choose_shape = Button(window, text="shape", command=choose_shape)
+    button_choose_shape = Button(window, text="Shape", command=choose_shape)
     button_choose_shape.pack(side=LEFT)
 
     canvas.bind("<Enter>", change_cursor)
@@ -157,7 +142,7 @@ def setup_paint_app(window):
     Label(frame_count, textvariable=dot_count).pack(side=RIGHT)
     Button(frame_count, text="-", command=decrease_dot_count).pack(side=RIGHT)
 
-    button_paint_airbrush = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas))
+    button_paint_airbrush = Button(window, text="Airbrush", command=lambda: set_paint_mode_airbrush(canvas))
     button_paint_airbrush.pack(side=RIGHT)
 
     canvas.bind("<Button-1>", paint_start)
@@ -198,6 +183,15 @@ def show_coordinates(event):
 # 우클릭을 떼면 좌표값 삭제
 def hide_coordinates(event):
     canvas.delete("coord_text")
+
+# 브러시 선택하는 팝업 메뉴
+def choose_brush():
+    popup = Menu(window, tearoff=0)
+    popup.add_command(label="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
+    popup.add_command(label="Dotted Brush", command=lambda: set_brush_mode(canvas, "dotted"))
+    popup.add_command(label="Pressure Brush", command=lambda: set_paint_mode_pressure(canvas))
+    popup.add_command(label="Normal Brush", command=lambda: set_paint_mode_normal(canvas))
+    popup.post(window.winfo_pointerx(), window.winfo_pointery())
 
 # 사각형 그리기
 def create_rectangle():
@@ -332,7 +326,17 @@ def set_paint_mode_airbrush(canvas):
     canvas.bind("<B1-Motion>", lambda event: paint_airbrush(event, canvas))
 
 def set_paint_mode_normal(canvas):
-    canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
+    canvas.bind("<Button-1>", paint_start)
+    canvas.bind("<B1-Motion>", paint_stroke)
+    canvas.bind("<ButtonRelease-1>", paint_end)
+
+def set_brush_mode(canvas, mode):
+    global brush_mode
+    brush_mode = mode
+    if brush_mode == "solid":
+        canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
+    elif brush_mode == "dotted":
+        canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))
 
 def set_paint_mode_pressure(canvas):
     canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
