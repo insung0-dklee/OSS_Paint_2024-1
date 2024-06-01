@@ -17,6 +17,7 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
+from PIL import Image
 
 
 # 초기 설정 값들
@@ -218,11 +219,20 @@ def change_brush_color():
     global brush_color
     brush_color = askcolor()[1]
 
-# 캔버스를 파일로 저장하는 함수
+# 캔버스를 사진파일로 저장하는 함수
 def save_canvas(canvas):
-    file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")])
     if file_path:
-        canvas.postscript(file=file_path)
+        # 캔버스를 PostScript 파일로 저장
+        canvas.postscript(file="temp.ps", colormode="color")
+        
+        # PostScript 파일을 이미지 파일로 변환
+        img = Image.open("temp.ps")
+        img.save(file_path)
+        
+        # 임시 PostScript 파일 삭제
+        import os
+        os.remove("temp.ps")
 
 def reset_brush(canvas):
     global brush_size, brush_color
