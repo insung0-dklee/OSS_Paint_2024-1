@@ -97,7 +97,7 @@ def bind_shortcuts():
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
-    canvas.bind("<B1-Motion>", paint_airbrush)
+    canvas.bind("<B1-Motion>", lambda event: paint_airbrush(event, canvas))
 
 def set_paint_mode_normal(canvas): #기본 그리기 모드로 전환하는 기능 
     canvas.bind("<B1-Motion>", paint)
