@@ -1,37 +1,34 @@
-import time
 from tkinter.colorchooser import askcolor
+import time
+import random
+import math
 
-def initialize_globals(main_globals):
-    global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1
-    brush_size = main_globals['brush_size']
-    brush_color = main_globals['brush_color']
-    brush_mode = main_globals['brush_mode']
-    last_x = main_globals['last_x']
-    last_y = main_globals['last_y']
-    x1 = main_globals['x1']
-    y1 = main_globals['y1']
+# 초기 설정 값들
+global brush_size, brush_color, brush_mode, last_x, last_y
+brush_size = 1
+brush_color = "black"
+brush_mode = "solid"
+last_x, last_y = None, None
 
-# 슬라이더를 통해 펜 굵기를 변경하는 함수
+# 브러시 크기 변경
 def change_brush_size(new_size):
     global brush_size
     brush_size = int(new_size)
 
+# 배경 색상 변경
 def change_bg_color(canvas):
     bg_color = askcolor()
-    if bg_color[1]:  # 색상이 선택된 경우에만 변경
+    if bg_color[1]:
         canvas.config(bg=bg_color[1])
 
+# 브러시 색상 변경
 def change_brush_color():
     global brush_color
-    color = askcolor()[1]
-    if color:  # 색상이 선택된 경우에만 변경
-        brush_color = color
+    color = askcolor()
+    if color[1]:
+        brush_color = color[1]
 
-"""
-set_brush_mode: 브러쉬 모드를 변경하는 함수
-실선 브러쉬와 점선 브러쉬로 전환한다.
-매개변수: mode - 브러쉬 모드를 나타내는 문자열 ("solid" 또는 "dotted")
-"""
+# 브러시 모드 설정
 def set_brush_mode(canvas, mode):
     global brush_mode
     brush_mode = mode
@@ -40,50 +37,53 @@ def set_brush_mode(canvas, mode):
     elif brush_mode == "dotted":
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))
 
-# 마우스 움직임에 따라 도형을 그리는 함수
+# 일반 그리기 모드 설정
 def set_paint_mode_normal(canvas):
     canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
 
+# 압력 그리기 모드 설정
 def set_paint_mode_pressure(canvas):
-    canvas.bind("<Button-1>", lambda event: start_paint_pressure(event))
+    canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
     canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
 
-def start_paint_pressure(event):
+# 압력 페인팅 시작
+def start_paint_pressure(event, canvas):
     global start_time
     start_time = time.time()
 
+# 압력 페인팅
 def paint_pressure(event, canvas):
-    global start_time, brush_color
+    global start_time
     elapsed_time = time.time() - start_time
     radius = min(max(int(elapsed_time * 5), 1), 5)
     x1, y1 = (event.x - radius), (event.y - radius)
     x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
-def paint_start(event, canvas):
-    global x1, y1, brush_size
-    x1, y1 = (event.x, event.y)
+# 페인팅 시작
+def paint_start(event):
+    global last_x, last_y
+    last_x, last_y = event.x, event.y
+    canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
 
+# 페인팅
 def paint(event, canvas):
-    global x1, y1, brush_size, brush_color
-    x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
-    x1, y1 = x2, y2
+    global last_x, last_y
+    if last_x and last_y:
+        canvas.create_line(last_x, last_y, event.x, event.y, fill=brush_color, width=brush_size, capstyle=ROUND, smooth=TRUE)
+    last_x, last_y = event.x, event.y
 
-"""
-dotted_paint: 점선 브러쉬 함수
-이벤트가 발생한 위치에 검은색 원을 일정한 간격으로 그린다.
-매개변수: event - 마우스 이벤트 객체로, 마우스의 현재 좌표를 포함
-"""
+# 점선 페인팅
 def dotted_paint(event, canvas):
     global last_x, last_y
-    spacing = 10
+    spacing = brush_size
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x - 1, event.y - 1, event.x + 1, event.y + 1, fill="black", outline="black")
+            canvas.create_oval(event.x - 1, event.y - 1, event.x + 1, event.y + 1, fill=brush_color, outline=brush_color)
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
+        canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
