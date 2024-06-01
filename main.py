@@ -922,4 +922,35 @@ def draw_triangle(event):
     canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill=brush_color, outline=brush_color)  # 계산된 좌표를 사용하여 캔버스에 삼각형을 그림
 
 
+previous_x, previous_y, previous_time = None, None, None #전역변수 초기화
+brush_size = 10
+brush_color = "blue"
+
+def gradient_brush(event, canvas):
+    global previous_x, previous_y, previous_time # 첫 번째 움직임이 일어날 경우 위치와 시간을 저장만 함
+    if previous_x is None or previous_y is None:
+        previous_x, previous_y, previous_time = event.x, event.y, time.time()
+        return
+
+    elapsed_time = time.time() - previous_time # 현재와 이전 이벤트 사이 경과 시간을 나타냄
+    distance = ((event.x - previous_x) ** 2 + (event.y - previous_y) ** 2) ** 0.5 # 현재와 이전 이벤트 사이 거리를 피타고라스를 이용하여 계산함
+    step = distance / brush_size  #거리를 브러시의 크기로 나눈 값
+    r1, g1, b1 = canvas.winfo_rgb(brush_color) #현재 브러시 색상 가져옴
+    r2, g2, b2 = canvas.winfo_rgb("white") #흰색 가져옴
+
+    for i in range(int(step)):
+        r = int(r1 + (r2 - r1) * (i / step)) // 256 #빨강값
+        g = int(g1 + (g2 - g1) * (i / step)) // 256 #녹색값
+        b = int(b1 + (b2 - b1) * (i / step)) // 256 #파란색 값
+        color = f'#{r:02x}{g:02x}{b:02x}' #최종 색상 코드
+
+        x = int(previous_x + (event.x - previous_x) * (i / step)) #현재 위치의 x좌표
+        y = int(previous_y + (event.y - previous_y) * (i / step)) #현재 위치의 y좌표
+
+        canvas.create_oval(x - brush_size, y - brush_size, x + brush_size, y + brush_size, fill=color, outline=color) #계산된 현재 위치를 이용하여 캔버스에 원 그림
+
+    previous_x, previous_y, previous_time = event.x, event.y, time.time() # 이전 위치와 시간을 현재 위치와 시간으로 갱신
+    
+def set_paint_mode_gradient(canvas):
+    canvas.bind("<B1-Motion>", lambda event: gradient_brush(event, canvas)) #마우스 왼쪽 버트 누른채 마우스 이동하면 그라데이션 브러시가 그려짐
 
