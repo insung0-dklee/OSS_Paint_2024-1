@@ -420,8 +420,10 @@ def hide_coordinates(event):
 def create_rectangle(event):
     canvas.bind("<Button-1>", start_rectangle)
 #삼각형 그리기
-def create_triangle(event):
-    canvas.bind("<Button-1>", start_triangle)
+def create_isosceles_triangle(event):
+    canvas.bind("<Button-1>", start_isosceles_triangle)
+def create_right_triangle(event):
+    canvas.bind("<Button-1>", start_right_triangle)
 #원형 그리기
 def create_circle(event):
     canvas.bind("<Button-1>", start_circle)
@@ -438,15 +440,27 @@ def draw_rectangle(event):
     canvas.create_rectangle(start_x, start_y, event.x, event.y, outline="black", fill="white", tags="temp_shape")
 
 #삼각형 그릴 위치 정하고 생성하는 함수 호출
-def start_triangle(event):
+def start_isosceles_triangle(event):
     global start_x, start_y
     start_x, start_y = event.x, event.y
-    canvas.bind("<B1-Motion>", lambda event: draw_triangle(event))
-#삼각형 생성하기
-def draw_triangle(event): 
+    canvas.bind("<B1-Motion>", lambda event: draw_isosceles_triangle(event))
+
+# 이등변 삼각형 생성하기
+def draw_isosceles_triangle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
-    canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
+    canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (start_x - event.x), event.y, outline="black", fill="white", tags="temp_shape")
+
+def start_right_triangle(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", lambda event: draw_right_triangle(event))
+
+# 직각삼각형 생성하기
+def draw_right_triangle(event):
+    global start_x, start_y
+    canvas.delete("temp_shape")
+    canvas.create_polygon(start_x, start_y, start_x, event.y, event.x, event.y, outline="black", fill="white", tags="temp_shape")
 
 #원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
@@ -464,7 +478,8 @@ def draw_circle(event):
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
     popup.add_command(label="Rectangle", command=lambda: create_rectangle(event))
-    popup.add_command(label="Triangle", command=lambda: create_triangle(event))
+    popup.add_command(label="Isosceles_Triangle", command=lambda: create_isosceles_triangle(event))
+    popup.add_command(label="Right_Triangle", command=lambda: create_right_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
