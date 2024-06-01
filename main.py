@@ -128,6 +128,8 @@ def paint_start(event): #획 시작
     global x1, y1, current_stroke
     x1, y1 = event.x, event.y
     current_stroke = []
+    if not brush_mode == "dotted":
+        canvas.create_line(x1, y1, x1+0.5, y1, fill=brush_color, width=brush_size, capstyle=ROUND)
 
 def paint_stroke(event, canvas): #획 그림
     global x1, y1, current_stroke
