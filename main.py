@@ -94,6 +94,9 @@ def decrease_dot_distance():
     # 맞춤형 단축키 기능 추가
 def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas))
+    window.bind("<Control-s>", lambda event: save_canvas(canvas))
+    window.bind("<f>", toggle_fullscreen)
+    
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
