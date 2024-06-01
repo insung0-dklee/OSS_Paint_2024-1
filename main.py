@@ -416,14 +416,30 @@ def show_coordinates(event):
 def hide_coordinates(event):
     canvas.delete("coord_text")
 
-#사각형 그리기    
+"""
+shape로 그릴 도형을 선택할 시 호출되어 윤곽선, 내부 색 선택이 가능하게 해주는 함수
+
+shape_outline_color : 도형의 윤곽선 색
+shape_fill_color : 도형의 내부 색
+
+"""
+
+def select_shape_color():
+    global shape_outline_color, shape_fill_color
+    shape_outline_color = askcolor()[1]  # 윤곽선 색상 선택
+    shape_fill_color = askcolor()[1]  # 내부 색상 선택
+
+#사각형 그리기
 def create_rectangle(event):
+    select_shape_color()
     canvas.bind("<Button-1>", start_rectangle)
 #삼각형 그리기
 def create_triangle(event):
+    select_shape_color()
     canvas.bind("<Button-1>", start_triangle)
 #원형 그리기
 def create_circle(event):
+    select_shape_color()
     canvas.bind("<Button-1>", start_circle)
 
 #사각형 그릴 위치 정하고 생성하는 함수 호출
@@ -435,18 +451,19 @@ def start_rectangle(event):
 def draw_rectangle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
-    canvas.create_rectangle(start_x, start_y, event.x, event.y, outline="black", fill="white", tags="temp_shape")
-
+    canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    paint_start(event)
 #삼각형 그릴 위치 정하고 생성하는 함수 호출
 def start_triangle(event):
     global start_x, start_y
     start_x, start_y = event.x, event.y
     canvas.bind("<B1-Motion>", lambda event: draw_triangle(event))
 #삼각형 생성하기
-def draw_triangle(event): 
+def draw_triangle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
-    canvas.create_polygon(start_x, start_y, event.x, event.y, start_x + (event.x - start_x), event.y, outline="black", fill="white", tags="temp_shape")
+    # 삼각형 함수 변경
+    canvas.create_polygon(start_x, start_y, event.x, event.y, (start_x-event.x)+start_x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 #원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
@@ -458,7 +475,7 @@ def draw_circle(event):
     global start_x, start_y
     canvas.delete("temp_shape")
     r = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
-    canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline="black", fill="white", tags="temp_shape")
+    canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
