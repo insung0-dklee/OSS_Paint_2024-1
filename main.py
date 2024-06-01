@@ -214,9 +214,11 @@ def change_bg_color(canvas):
     bg_color = askcolor()
     canvas.config(bg=bg_color[1])
 
-def change_brush_color():
+# 버그 수정
+def change_brush_color(self):
     global brush_color
     brush_color = askcolor()[1]
+
 
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
@@ -543,5 +545,8 @@ frame_count.pack(side=RIGHT)
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
+
+
+
 
 window.mainloop()
