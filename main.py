@@ -10,6 +10,7 @@ import time  # 시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
 from PIL import ImageGrab  # 화면 캡처를 위한 모듈
+from tkinter import filedialog  # 파일 저장을 위한 모듈
 
 # 초기 설정 값들
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
@@ -176,6 +177,16 @@ def take_screenshot():
     y1 = y + canvas.winfo_height()
     ImageGrab.grab().crop((x, y, x1, y1)).save("screenshot.png")
 
+# 그림 저장 기능 추가
+def save_paint():
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
+    if file_path:
+        x = window.winfo_rootx() + canvas.winfo_x()
+        y = window.winfo_rooty() + canvas.winfo_y()
+        x1 = x + canvas.winfo_width()
+        y1 = y + canvas.winfo_height()
+        ImageGrab.grab().crop((x, y, x1, y1)).save(file_path)
+
 window = Tk()
 # Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
@@ -253,6 +264,10 @@ button_redo.pack(side=LEFT)
 # 스크린샷 버튼 추가
 button_screenshot = Button(window, text="Take Screenshot", command=take_screenshot)
 button_screenshot.pack(side=LEFT)
+
+# 그림 저장 버튼 추가
+button_save = Button(window, text="Save", command=save_paint)
+button_save.pack(side=LEFT)
 
 set_paint_mode_normal()  # 프로그램 시작 시 기본 그리기 모드 설정
 
