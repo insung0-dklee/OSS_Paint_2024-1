@@ -17,7 +17,9 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
-
+import tkinter as tk
+import json
+import time
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -51,6 +53,31 @@ def upload_image():
         image = PhotoImage(file=path)
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
+
+def save_canvas():
+    # 캔버스의 현재 상태를 저장합니다.
+    with open("canvas_state.json", "w") as file:
+        json.dump(canvas.state(), file)
+
+def auto_save():
+    # 주기적으로 자동 저장합니다.
+    save_canvas()
+    # 10초마다 저장합니다. 원하는 시간 간격으로 조정 가능합니다.
+    window.after(10000, auto_save)
+
+# Tkinter 윈도우 생성
+window = tk.Tk()
+window.title("자동 저장 그림판")
+
+# 캔버스 생성
+canvas = tk.Canvas(window, width=400, height=400, bg="white")
+canvas.pack()
+
+# 자동 저장 시작
+auto_save()
+
+# 윈도우 실행
+window.mainloop()
 
 #타이머 기능 추가
 timer = Timer()
