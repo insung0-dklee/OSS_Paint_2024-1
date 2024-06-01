@@ -19,6 +19,7 @@ import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
+from PIL import Image, ImageTk  #PIL(Pillow) 라이브러리를 사용
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -36,6 +37,9 @@ x1, y1 = None, None
 dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
+
+# 백그라운드 이미지 설정
+background_image = None
 
 #이미지 파일 불러오기 
 def open_image():
@@ -341,13 +345,32 @@ def flood_fill(event):
     if target:
         canvas.itemconfig(target, fill=fill_color)
 
+# 백그라운드 이미지 설정
+def upload_background_image():
+    global background_image
+    path = filedialog.askopenfilename()
+    if path:
+        # 업로드 파일이 PNG 파일인지 확인
+        if not path.lower().endswith('.png'):
+            messagebox.showerror("Invalid File", "PNG 파일만 업로드할 수 있습니다.")
+            return
+
+        # PIL을 사용하여 이미지를 열고, 캔버스 크기에 맞게 리사이즈
+        pil_image = Image.open(path)
+        canvas_width = canvas.winfo_width()
+        canvas_height = canvas.winfo_height()
+        pil_image = pil_image.resize((canvas_width, canvas_height), Image.Resampling.LANCZOS)
+
+        background_image = ImageTk.PhotoImage(pil_image)
+        canvas.create_image(0, 0, anchor=NW, image=background_image)
+        canvas.image = background_image
+
 def setup_paint_app(window):
     global brush_size, brush_color
-
+    global canvas  # canvas 변수를 전역으로 선언
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
 
-    global canvas
     canvas = Canvas(window, bg="white")
     canvas.pack(fill="both", expand=True)
 
@@ -356,6 +379,10 @@ def setup_paint_app(window):
 
     button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
+
+    # 백그라운드 이미지 버튼
+    button_upload_background = Button(window, text="Upload Background", command=upload_background_image)
+    button_upload_background.pack(side=LEFT)
 
     # setup_paint_app 함수에 마커 모드 버튼 추가
     button_marker = Button(button_frame, text="Marker Mode", command=lambda: set_paint_mode_marker(canvas))
