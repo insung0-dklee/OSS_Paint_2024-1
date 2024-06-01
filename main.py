@@ -215,10 +215,17 @@ def change_bg_color(canvas):
     bg_color = askcolor()
     canvas.config(bg=bg_color[1])
 
-def change_brush_color():
+def change_brush_color(evnet = None):
     global brush_color
-    brush_color = askcolor()[1]
-
+    selected_color = askcolor()[1]
+    if selected_color:
+        brush_color = selected_color
+"""
+TypeError: change_brush_color() takes 0 positional arguments but 1 was given
+함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
+해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다. 
+인자를 받지 않기 위해 None로 설정
+"""
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
