@@ -141,7 +141,12 @@ def paint_pressure(event, canvas):
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
-
+#solid 브러쉬 함수(solid 브러쉬 버튼 클릭시, reset brush 클릭 시 그림판에 아무것도 안 나오는 오류 해결) 
+def paint(event, canvas):
+    global x1, y1, brush_size, brush_color
+    x2, y2 = event.x, event.y
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
+    x1, y1 = x2, y2
 
 # 점선 브러쉬 함수
 def dotted_paint(event, canvas):
