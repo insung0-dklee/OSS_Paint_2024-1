@@ -321,7 +321,7 @@ def setup_paint_app(window):
     button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color(canvas))
+    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color())
     button_brush_color.pack(side=LEFT)
     button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
