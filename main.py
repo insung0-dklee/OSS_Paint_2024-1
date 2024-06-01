@@ -12,7 +12,7 @@ import brush_settings  # brush_settings 모듈 임포트
 from brush_settings import change_brush_size, change_bg_color, change_brush_color, set_brush_mode, set_paint_mode_normal, set_paint_mode_pressure, paint_start, paint, dotted_paint
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 from tkinter import filedialog
-from tkinter import PhotoImage
+import image_upload
 import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
@@ -32,25 +32,11 @@ last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 �
 x1, y1 = None, None
 
 
-
-#이미지 파일 불러오기 
-def open_image():
-    file_path = filedialog.askopenfilename()
-    if file_path:
-        editor.open_image(file_path)
-
 def on_enter(event):
     event.widget.config(bg="light blue")
 
 def on_leave(event):
     event.widget.config(bg="SystemButtonFace")
-
-def upload_image():
-    path = filedialog.askopenfilename()
-    if path:
-        image = PhotoImage(file=path)
-        canvas.create_image(0, 0, anchor=NW, image=image)
-        canvas.image = image
 
 #타이머 기능 추가
 timer = Timer()
@@ -330,7 +316,8 @@ def setup_paint_app(window):
     button_save = Button(window, text="Save", command=lambda: save_canvas(canvas))
     button_save.pack(side=LEFT)
 
-    button_upload_image = Button(window, text="Upload Image", command=upload_image)
+    # 이미지 업로드 버튼 추가
+    button_upload_image = Button(window, text="Upload Image", command=lambda: image_upload.upload_image(window, canvas))
     button_upload_image.pack(side=LEFT)
 
     #도형 모양 선택하는 버튼 생성
