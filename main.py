@@ -178,6 +178,8 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
 def change_brush_size(new_size):
     global brush_size
     brush_size = int(new_size)
+    # spray의 크기를 변경하는 기능
+    spray_brush.set_brush_size(brush_size)
 
 # 화면 확대 및 축소 기능 추가
 def zoom(event):
@@ -386,7 +388,8 @@ def setup_paint_app(window):
     button_grid_settings = Button(window, text="Grid setting", command=open_grid_dialog)
     button_grid_settings.pack()
 
-    #spray 인스턴스 생성 
+    #spray 인스턴스 생성
+    global spray_brush 
     spray_brush = SprayBrush(canvas, "black")
     # 스프레이 버튼
     button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
