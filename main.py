@@ -17,6 +17,8 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
+from tkinter import messagebox
+
 
 
 # 초기 설정 값들
@@ -67,6 +69,24 @@ def reset_timer():
     timer.reset()
     if not timer.running:
         timer.start()
+
+def on_closing(): #창 닫기 gui 
+    response = messagebox.askyesnocancel("종료 확인", "변경 내용을 제목 없음에 저장하시겠습니까?", 
+                                         default=messagebox.CANCEL)
+    if response is None:
+        return  # 취소 버튼을 누르면 아무것도 하지 않음
+    elif response:  # 저장 버튼을 누르거나 's'를 누르면
+        if save_canvas(canvas):
+            window.destroy()
+    else:  # 저장 안함 버튼을 누르거나 'n'을 누르면
+        window.destroy()
+
+def key_event_handler(event):
+    if event.keysym.lower() == 's':
+        if save_canvas(canvas):
+            window.destroy()
+    elif event.keysym.lower() == 'n':
+        window.destroy()
 
 
 def paint_airbrush(event, canvas):
@@ -390,10 +410,10 @@ def setup_paint_app(window):
 def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
     new_window.title("새 그림판")
-    new_window.geometry("800x600+200+200")
+    new_window.geometry("1200x600+200+200")#모든 버튼들이 보이도록 gui 개선 (800->1200)
     new_window.configure(bg="sky blue")#구별하기 위한 버튼 영역 색 변경
-    setup_paint_app(new_window)
-
+    setup_paint_app(new_window)   
+    
 # 마우스 커서를 연필 형태로 변경하기
 def change_cursor(event):
     canvas.config(cursor="pencil")
@@ -514,7 +534,7 @@ def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
-window.geometry("800x600+200+200")
+window.geometry("1200x600+200+200") #모든 버튼들이 보이도록 gui 개선 (800->1200)
 window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
@@ -544,4 +564,9 @@ frame_count.pack(side=RIGHT)
 timer.start()
 update_timer()
 
+# 창 닫기 버튼을 눌렀을 때 on_closing 함수를 호출
+window.protocol("WM_DELETE_WINDOW", on_closing)
+
+# 키 이벤트를 처리
+window.bind("<Key>", key_event_handler)
 window.mainloop()
