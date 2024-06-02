@@ -259,14 +259,35 @@ def change_brush_size(new_size):
     # spray의 크기를 변경하는 기능
     spray_brush.set_brush_size(brush_size)
 
-# 화면 확대 및 축소 기능 추가
-def zoom(event):
-    scale = 1.0
-    if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
-        scale = 1.1
-    elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
-        scale = 0.9
-    canvas.scale("all", event.x, event.y, scale, scale)
+def zoom_scroll(event):
+    # Ctrl 키가 눌려있는지 확인
+    if event.state & 0x0004:
+        scale = 1.0
+        if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
+            scale = 1.1
+        elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
+            scale = 0.9
+        canvas.scale("all", event.x, event.y, scale, scale)
+        canvas.configure(scrollregion=canvas.bbox("all"))
+    else:
+        # Ctrl 키가 눌려있지 않으면 스크롤
+        if event.delta > 0:
+            canvas.yview_scroll(-1, "units")  # 위로 스크롤
+        elif event.delta < 0:
+            canvas.yview_scroll(1, "units")  # 아래로 스크롤
+
+def horizontal_scroll(event):
+    if event.delta > 0:
+        canvas.xview_scroll(-1, "units")  # 왼쪽으로 스크롤
+    elif event.delta < 0:
+        canvas.xview_scroll(1, "units")  # 오른쪽으로 스크롤
+
+def on_button_press(event):
+    canvas.scan_mark(event.x, event.y)
+
+def on_mouse_drag(event):
+    canvas.scan_dragto(event.x, event.y, gain=1)
+
 
 #all clear 기능 추가
 def clear_paint(canvas):
@@ -696,7 +717,11 @@ def setup_paint_app(window):
     canvas.bind("<Button-3>", show_coordinates)
     canvas.bind("<ButtonRelease-3>", hide_coordinates)
 
-    canvas.bind("<MouseWheel>", zoom)
+    canvas.bind("<MouseWheel>", zoom_scroll)  # 마우스 휠 이벤트에 zoom 함수 바인딩
+    canvas.bind("<Shift-MouseWheel>", horizontal_scroll)  # Shift 키와 마우스 휠 이벤트에 horizontal_scroll 함수 바인딩
+    canvas.bind("<ButtonPress-2>", on_button_press)  # 마우스 중간 버튼 클릭 이벤트
+    canvas.bind("<B2-Motion>", on_mouse_drag)  # 마우스 중간 버튼 드래그 이벤트
+    canvas.configure(scrollregion=canvas.bbox("all"))
 
     bind_shortcuts()
 
@@ -1184,12 +1209,12 @@ redo_strokes = []
 
 def paint_start(event): #획 시작
     global x1, y1, current_stroke
-    x1, y1 = event.x, event.y
+    x1, y1 = canvas.canvasx(event.x), canvas.canvasy(event.y)
     current_stroke = []
 
 def paint_stroke(event): #획 그림
     global x1, y1, current_stroke
-    x2, y2 = event.x, event.y
+    x2, y2 = canvas.canvasx(event.x), canvas.canvasy(event.y)
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size, capstyle=ROUND)
     current_stroke.append((x1, y1, x2, y2))
     x1, y1 = x2, y2
