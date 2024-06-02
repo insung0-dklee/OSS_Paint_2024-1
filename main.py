@@ -64,22 +64,31 @@ def toggle_dark_mode(): # 다크 모드를 토글하는 함수
         apply_dark_mode() # 다크 모드 적용
     is_dark_mode = not is_dark_mode # 다크 모드 상태 변경
 
-def apply_light_mode(): # 라이트 모드 적용(기본)
-    window.config(bg="sky blue") # 윈도우 배경색
-    canvas.config(bg="white") # 캔버스 배경색
-    button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
-        widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
-    timer_label.config(bg="white", fg="black") # 타이머 라벨 배경색, 글자색
-
-def apply_dark_mode(): # 다크 모드 적용
-    window.config(bg="grey20") # 윈도우 배경색
-    canvas.config(bg="grey30") # 캔버스 배경색
-    button_frame.config(bg="grey20") # 버튼 프레임 배경색
+def apply_light_mode():
+    window.config(bg="sky blue")
+    canvas.config(bg="white")
+    button_frame.config(bg="sky blue")
+    style = ttk.Style()
+    style.configure("TCombobox", fieldbackground="light grey", background="light grey", foreground="black")
     for widget in button_frame.winfo_children():
-        widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
-    timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
+        if isinstance(widget, ttk.Combobox):
+            widget.config(style="TCombobox")
+        else:
+            widget.config(bg="light grey", fg="black")
+    timer_label.config(bg="white", fg="black")
 
+def apply_dark_mode():
+    window.config(bg="grey20")
+    canvas.config(bg="grey30")
+    button_frame.config(bg="grey20")
+    style = ttk.Style()
+    style.configure("TCombobox", fieldbackground="light grey", background="light grey", foreground="black")
+    for widget in button_frame.winfo_children():
+        if isinstance(widget, ttk.Combobox):
+            widget.config(style="TCombobox")
+        else:
+            widget.config(bg="light grey", fg="black")
+    timer_label.config(bg="white", fg="black")
 #이미지 파일 불러오기 
 def open_image():
     file_path = filedialog.askopenfilename()
@@ -811,7 +820,7 @@ def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
     new_window.title("새 그림판")
     new_window.geometry("800x600+200+200")
-    new_window.configure(bg="sky blue")#구별하기 위한 버튼 영역 색 변경
+    new_window.configure(bg="sky blue")  # 구별하기 위한 버튼 영역 색 변경
     setup_paint_app(new_window)
 
 # 마우스 커서를 연필 형태로 변경하기
