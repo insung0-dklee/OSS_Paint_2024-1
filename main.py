@@ -148,6 +148,7 @@ def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas)) #clear 단축키 c
     window.bind("<Control-s>", save_canvas) #save 단축키 crtl+s
     window.bind("<Control-z>", erase_last_stroke) #undo 단축키 crtl+z
+    window.bind("d", lambda event: toggle_dark_mode()) #dark 모드 단축키 d
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
