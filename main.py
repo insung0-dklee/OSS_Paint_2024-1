@@ -846,6 +846,53 @@ def select_shape_color():
     global shape_outline_color, shape_fill_color
     shape_outline_color = askcolor()[1]  # 윤곽선 색상 선택
     shape_fill_color = askcolor()[1]  # 내부 색상 선택
+    
+#+==================================================================================
+def create_curve(event=None): #곡선을 생성하는 기능
+    select_shape_color()
+    canvas.bind("<Button-1>", start_curve)
+
+def start_curve(event): # 곡선 그리기를 시작하는 기능
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+
+    canvas.bind("<B1-Motion>", draw_curve_only_line)  # 곡선을 그림
+    canvas.bind("<ButtonRelease-1>", finish_line_without_curve)  # 마우스 버튼을 때면 곡선을 그리기전의 직선 그리기를 마침
+
+def draw_curve_only_line(event):  # 곡선을 만들기 위한 직선을 만들어 그리는 기능
+    global start_x, start_y, last_x, last_y, current_shape
+    canvas.delete("temp_shape")
+    current_shape = canvas.create_line(start_x, start_y, event.x, event.y, fill=shape_outline_color, tags="temp_shape")
+    last_x, last_y = event.x, event.y
+
+def draw_curve(event):  # 곡선을 그리는 기능
+    global start_x, start_y, last_x, last_y, current_shape
+    canvas.delete("temp_shape")
+    current_shape = canvas.create_line(start_x, start_y, event.x, event.y, last_x, last_y, fill=shape_outline_color, smooth=True, tags="temp_shape")
+    # 시작점 ,중간점, 끝점을 바탕으로 곡선을 그림
+
+def finish_line_without_curve(event): # 그려진 직선을 변형하여 곡선을 그림
+    canvas.unbind("<Button-1>")
+    canvas.bind("<Motion>", draw_curve) # 곡선을 그림   
+    window.bind("<Button-1>", finish_curve) # 마우스 버튼을 누르면 곡선 그리기를 마침
+    canvas.bind("<Leave>", finish_curve) # 마우스가 캔버스 밖을 나가면 곡선 그리기를 마침
+
+def finish_curve(event):  # 곡선 그리기를 마침
+    global current_shape, last_x, last_y
+    last_x, last_y = None, None
+
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+        window.unbind("<Button-1>")
+        canvas.unbind("<Button-1>")
+        canvas.unbind("<Motion>")
+        canvas.unbind("<B1-Motion>")
+        canvas.unbind("<ButtonRelease-1>")
+        canvas.unbind("<Leave>")
+        canvas.bind("<Button-1>", start_curve)
+    #입력 바인딩 해제
+#+==================================================================================
 
 # 사각형 그리기
 def create_rectangle(event=None):
@@ -1169,6 +1216,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Curve", command=lambda: create_curve(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
