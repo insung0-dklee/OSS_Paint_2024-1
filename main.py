@@ -561,6 +561,13 @@ def choose_use_case_element(event=None):
 
 
 
+def create_transformation_menu(event):
+    popup = Menu(window, tearoff=0)
+    popup.add_command(label="Flip Horizontal", command=transformation_handler.flip_horizontal)
+    popup.add_command(label="Flip Vertical", command=transformation_handler.flip_vertical)
+    popup.add_command(label="Rotate 90 Degrees", command=transformation_handler.rotate_90)
+    popup.post(event.x_root, event.y_root)
+
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame
 
@@ -570,6 +577,9 @@ def setup_paint_app(window):
     global canvas
     canvas = Canvas(window, bg="white")
     canvas.pack(fill="both", expand=True)
+
+    global transformation_handler
+    transformation_handler = TransformationHandler(canvas)
 
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
