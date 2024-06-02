@@ -58,21 +58,23 @@ def toggle_dark_mode(): # 다크 모드를 토글하는 함수
         apply_dark_mode() # 다크 모드 적용
     is_dark_mode = not is_dark_mode # 다크 모드 상태 변경
 
-def apply_light_mode(): # 라이트 모드 적용(기본)
-    window.config(bg="sky blue") # 윈도우 배경색
-    canvas.config(bg="white") # 캔버스 배경색
-    button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
-        widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
-    timer_label.config(bg="sky blue", fg="black") # 타이머 라벨 배경색, 글자색
+def apply_light_mode():  # 라이트 모드 적용(기본)
+    window.config(bg="sky blue")  # 윈도우 배경색
+    canvas.config(bg="white")  # 캔버스 배경색
+    button_frame.config(bg="sky blue")  # 버튼 프레임 배경색
+    brush_button_frame.config(bg="sky blue")  # 브러쉬 버튼 프레임 배경색
+    for widget in brush_button_frame.winfo_children():
+        widget.config(bg="light grey", fg="black")  # 브러쉬 버튼 프레임 안의 모든 버튼들 배경색, 글자색
+    timer_label.config(bg="sky blue", fg="black")  # 타이머 라벨 배경색, 글자색
 
-def apply_dark_mode(): # 다크 모드 적용
-    window.config(bg="grey20") # 윈도우 배경색
-    canvas.config(bg="grey30") # 캔버스 배경색
-    button_frame.config(bg="grey20") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children():
-        widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
-    timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
+def apply_dark_mode():  # 다크 모드 적용
+    window.config(bg="grey20")  # 윈도우 배경색
+    canvas.config(bg="grey30")  # 캔버스 배경색
+    button_frame.config(bg="grey20")  # 버튼 프레임 배경색
+    brush_button_frame.config(bg="grey20")  # 브러쉬 버튼 프레임 배경색
+    for widget in brush_button_frame.winfo_children():
+        widget.config(bg="light grey", fg="black")  # 브러쉬 버튼 프레임 안의 모든 버튼들 배경색, 글자색
+    timer_label.config(bg="grey20", fg="white")  # 타이머 라벨 배경색, 글자색
 
 #이미지 파일 불러오기 
 def open_image():
@@ -510,7 +512,7 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame
+    global brush_size, brush_color, button_frame, brush_button_frame
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
@@ -522,39 +524,34 @@ def setup_paint_app(window):
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
-    button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
+    button_frame = Frame(window, bg="sky blue")  # 구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
 
-    button_toggle_mode = Button(window, text="Toggle Dark Mode", command=toggle_dark_mode)
-    button_toggle_mode.pack(side=LEFT) # 다크 모드 토글 버튼을 윈도우에 배치
+    brush_button_frame = Frame(button_frame, bg="sky blue")  # 브러쉬 관련 버튼들을 모을 프레임 생성
+    brush_button_frame.pack(side=LEFT, padx=5)
 
-    # setup_paint_app 함수에 마커 모드 버튼 추가
-    button_marker = Button(button_frame, text="Marker Mode", command=lambda: set_paint_mode_marker(canvas))
-    button_marker.pack(side=LEFT)
-    button_marker.bind("<Enter>", on_enter)
-    button_marker.bind("<Leave>", on_leave)
+    button_toggle_mode = Button(button_frame, text="Toggle Dark Mode", command=toggle_dark_mode)
+    button_toggle_mode.pack(side=LEFT)  # 다크 모드 토글 버튼을 윈도우에 배치
 
     button_use_case = Button(window, text="Use Case Diagram", command=choose_use_case_element)
-    button_use_case.pack(side=LEFT) # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
+    button_use_case.pack(side=LEFT)  # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
 
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
 
-    #타이머 리셋 버튼
+    # 타이머 리셋 버튼
     button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
     button_reset_timer.pack(side=RIGHT)
 
     start_button = Button(button_frame, text="Start", command=start_stop)
-    start_button.pack(side = RIGHT)
+    start_button.pack(side=RIGHT)
 
-    
-
-    #spray 인스턴스 생성 
+    # spray 인스턴스 생성
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
     # 스프레이 버튼
-    button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
+    button_spray = Button(brush_button_frame, text="Spray", command=lambda: set_paint_mode_spray(canvas))
     button_spray.pack(side=LEFT)
 
     button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
@@ -568,40 +565,39 @@ def setup_paint_app(window):
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-
-    brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
+    brush_size_slider = Scale(brush_button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
 
-
-    button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
+    button_solid = Button(brush_button_frame, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
     button_solid.pack()
     button_solid.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_solid.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode(canvas, "dotted"))
+    button_dotted = Button(brush_button_frame, text="Dotted Brush", command=lambda: set_brush_mode(canvas, "dotted"))
     button_dotted.pack()
     button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_double_line = Button(button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas,"double_line"))
-    button_double_line.pack() 
+    button_double_line = Button(brush_button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas, "double_line"))
+    button_double_line.pack()
     button_double_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_double_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
-
-
-    button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
-    button_paint.pack(side=RIGHT)
+    button_paint = Button(brush_button_frame, text="Normal", command=lambda: set_paint_mode_normal(canvas))
+    button_paint.pack(side=LEFT)
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint.pack(side=RIGHT)
+    button_paint = Button(brush_button_frame, text="Pressure", command=lambda: set_paint_mode_pressure(canvas))
+    button_paint.pack(side=LEFT)
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_paint = Button(brush_button_frame, text="Airbrush", command=lambda: set_paint_mode_airbrush(canvas))  # 에어브러쉬 그리기 모드로 전환하는 기능
+    button_paint.pack(side=LEFT)
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
@@ -615,11 +611,8 @@ def setup_paint_app(window):
 
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
-
-    # 
-
-    #도형 모양 선택하는 버튼 생성
-    button_choose_shape = Button(window, text="shape", command=choose_shape)
+    # 도형 모양 선택하는 버튼 생성
+    button_choose_shape = Button(window, text="Shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
     button_choose_shape.pack(side=LEFT)
 
@@ -646,8 +639,6 @@ def setup_paint_app(window):
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
 
-
-
     # 에어브러쉬 속성 조절 버튼 추가
     Button(frame_distance, text="+", command=increase_dot_distance).pack(side=RIGHT)
     Label(frame_distance, text="Distance").pack(side=RIGHT)
@@ -659,14 +650,12 @@ def setup_paint_app(window):
     Label(frame_count, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
     Button(frame_count, text="-", command=decrease_dot_count).pack(side=RIGHT)
 
-    button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
-    button_paint.pack(side=RIGHT)
-
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
     set_paint_mode_normal(canvas)
+
 
     
 
@@ -1211,7 +1200,7 @@ window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 version = "1.0.0"  # 프로그램 버전
 window.title(f"그림판 v{version}")
-window.geometry("800x600+200+200")
+window.geometry("1400x900+200+200")
 window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
