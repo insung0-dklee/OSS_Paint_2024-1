@@ -1158,6 +1158,50 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 육각형 도형 그리기
+def create_hexagon(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_hexagon)
+
+# 육각형 도형 시작점 지정 및 그리기 함수 호출
+def start_hexagon(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_hexagon(event))
+    canvas.bind("<ButtonRelease-1>", finish_hexagon)
+
+"""
+육각형 그리기 함수
+mid_x : 각 변의 중점의 x 좌표
+mid_y : 각 변의 중점의 y 좌표
+x : 각 꼭짓점의 x 좌표
+y : 각 꼭짓점의 y 좌표
+"""
+def draw_hexagon(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    mid_x = (start_x + event.x) / 2
+    mid_y = (start_y + event.y) / 2
+
+    # 육각형 꼭짓점 계산
+    points = []
+    for i in range(6):
+        angle = (2 * math.pi / 6) * i
+        x = mid_x + math.cos(angle) * (event.x - start_x) / 2
+        y = mid_y + math.sin(angle) * (event.y - start_y) / 2
+        points.extend([x, y])
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 육각형 그리기 종료
+def finish_hexagon(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -1169,6 +1213,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Hexagon", command=lambda: create_hexagon(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
