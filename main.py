@@ -510,6 +510,22 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
+
+# 우클릭을 누르면 좌표값을 표시
+    def show_coordinates(event):
+        canvas.delete("coord_text")  # 이전 좌표값 삭제
+        width = canvas.winfo_width()
+        height = canvas.winfo_height()
+        x_percent = (event.x / width) * 100
+        y_percent = (event.y / height) * 100
+        coord_text = f"<{x_percent:.1f}% / {100-y_percent:.1f}%>"
+        coord_label.config(text=coord_text)
+
+
+# 우클릭을 떼면 좌표값 삭제
+    def hide_coordinates(event):
+        canvas.delete("coord_text")
+    
     global brush_size, brush_color, button_frame
 
     brush_size = 1  # 초기 브러시 크기
@@ -614,7 +630,8 @@ def setup_paint_app(window):
     button_flip.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
-
+    coord_label = Label(window, text="", font=("Arial", 8), bg="white", anchor="nw")
+    coord_label.place(x=0, y=0)
 
     # 
 
@@ -626,8 +643,8 @@ def setup_paint_app(window):
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
 
-    canvas.bind("<Button-3>", show_coordinates)
-    canvas.bind("<ButtonRelease-3>", hide_coordinates)
+    canvas.bind("<Motion>", show_coordinates)
+
 
     canvas.bind("<MouseWheel>", zoom)
 
@@ -753,19 +770,7 @@ def change_cursor(event):
 def default_cursor(event):
     canvas.config(cursor="")
 
-# 우클릭을 누르면 우측 상단에 x, y 좌표값을 백분율로 표시
-def show_coordinates(event):
-    canvas.delete("coord_text")  # 이전 좌표값 삭제
-    width = canvas.winfo_width()
-    height = canvas.winfo_height()
-    x_percent = (event.x / width) * 100
-    y_percent = (event.y / height) * 100
-    coord_text = f"<{x_percent:.1f}% / {100-y_percent:.1f}%>"
-    canvas.create_text(10, 10, text=coord_text, anchor="nw", tags="coord_text")
 
-# 우클릭을 떼면 좌표값 삭제
-def hide_coordinates(event):
-    canvas.delete("coord_text")
 
 """
 shape로 그릴 도형을 선택할 시 호출되어 윤곽선, 내부 색 선택이 가능하게 해주는 함수
@@ -1309,5 +1314,4 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
 
