@@ -5,7 +5,6 @@ clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
 
 """
-
 from tkinter import *
 from tkinter import ttk
 import time #시간 계산을 위한 모듈
@@ -55,6 +54,13 @@ def show_info_window(): #정보를 표시하는 기능
 #+=================================================================================
 
 is_dark_mode = False  # 기본 모드는 라이트 모드
+
+#그림판의 밝기 조절 기능(오직 흰 도화지 사용 시) 
+def change_background_brightness(slider_value):
+    brightness_factor = int(slider_value) / 100  # 슬라이더 값을 정수로 변환하여 0~1 사이의 값으로 변환
+    new_color = "#%02x%02x%02x" % (int(255 * brightness_factor), int(255 * brightness_factor), int(255 * brightness_factor))
+    canvas.config(bg=new_color)  # 배경색 변경
+
 
 def toggle_dark_mode(): # 다크 모드를 토글하는 함수
     global is_dark_mode
@@ -631,7 +637,9 @@ def setup_paint_app(window):
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
     
-
+    brightness_slider = Scale(button_frame, from_=0, to=100, orient=HORIZONTAL, label="Background Brightness", command=change_background_brightness)
+    brightness_slider.set(100)  # 초기 백그라운드 명도를 최대로 설정
+    brightness_slider.pack(side=LEFT)
     
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
