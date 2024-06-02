@@ -33,6 +33,8 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+scale = 1.0
+canvas_scale_factor = 1.0
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -62,7 +64,7 @@ def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
     canvas.config(bg="white") # 캔버스 배경색
     button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
+    for widget in button_frame.winfo_children():
         widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="sky blue", fg="black") # 타이머 라벨 배경색, 글자색
 
@@ -74,7 +76,7 @@ def apply_dark_mode(): # 다크 모드 적용
         widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
-#이미지 파일 불러오기 
+#이미지 파일 불러오기
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -101,7 +103,7 @@ def upload_image():
 
 #타이머 기능 추가
 timer = Timer()
-#타이머의 경과시간 업데이트 
+#타이머의 경과시간 업데이트
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
@@ -220,12 +222,21 @@ def change_brush_size(new_size):
 
 # 화면 확대 및 축소 기능 추가
 def zoom(event):
+    global canvas_scale_factor
     scale = 1.0
-    if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
-        scale = 1.1
-    elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
-        scale = 0.9
+    if event.delta < 0:  # 마우스 휠을 위로 스크롤하면 확대
+        if event.state == 4:  # Shift 키를 누른 상태에서 스크롤하면 더 큰 단계로 확대
+            scale = 1.1
+    elif event.delta > 0:  # 마우스 휠을 아래로 스크롤하면 축소
+        if event.state == 4:  # Shift 키를 누른 상태에서 스크롤하면 더 큰 단계로 축소
+            scale = 0.9
+    # Shift 키를 누르지 않은 경우에는 확대/축소 동작을 수행하지 않음
+    if event.state != 4:
+        return
     canvas.scale("all", event.x, event.y, scale, scale)
+    canvas_scale_factor *= scale
+    # scale 변환을 반영하여 현재 scale을 적용
+    canvas.itemconfigure("all", width=int(1.0/canvas_scale_factor))
 
 #all clear 기능 추가
 def clear_paint(canvas):
@@ -279,7 +290,7 @@ def change_brush_color(event=None):
 """
 TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
-해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다. 
+해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다.
 인자를 받지 않기 위해 None로 설정
 """
 
@@ -440,7 +451,7 @@ def draw_relationship_preview(event):
 def draw_relationship_end(event, relationship_type):
     """
     draw_relationship_end: 관계 그리기를 종료하는 함수
-    드래그 종료 지점에서 실제 선을 그린다. 
+    드래그 종료 지점에서 실제 선을 그린다.
     관계 유형에 따라 화살표와 텍스트를 추가한다.
     """
     global x1, y1, preview_line
@@ -550,7 +561,7 @@ def setup_paint_app(window):
 
     
 
-    #spray 인스턴스 생성 
+    #spray 인스턴스 생성
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
     # 스프레이 버튼
@@ -585,7 +596,7 @@ def setup_paint_app(window):
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_double_line = Button(button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas,"double_line"))
-    button_double_line.pack() 
+    button_double_line.pack()
     button_double_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_double_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
@@ -616,7 +627,7 @@ def setup_paint_app(window):
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
 
-    # 
+    #
 
     #도형 모양 선택하는 버튼 생성
     button_choose_shape = Button(window, text="shape", command=choose_shape)
@@ -826,7 +837,7 @@ def start_triangle(event):
 
 # 삼각형 생성하기
 def draw_triangle(event):
-    global start_x, start_y, current_shape 
+    global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     x2, y2 = event.x, event.y
 
@@ -1266,6 +1277,26 @@ def end_drag(event):
     drag_data["x"] = 0
     drag_data["y"] = 0
 
+    
+def zoom(event):
+    global canvas_scale_factor
+    scale = 1.0
+    if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
+        scale = 1.1
+    elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
+        scale = 0.9
+    canvas.scale("all", event.x, event.y, scale, scale)
+    canvas_scale_factor *= scale
+    # scale 변환을 반영하여 현재 scale을 적용
+    canvas.itemconfigure("all", width=int(1.0/canvas_scale_factor))
+
+# Shift 키와 함께 마우스 휠 동작을 처리하는 함수
+def handle_mouse_wheel(event):
+    if event.state == 0x1:  # Shift 키가 눌려있을 때
+        zoom(event)
+        
+canvas.bind("<MouseWheel>", handle_mouse_wheel)
+        
 # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
