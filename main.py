@@ -187,6 +187,18 @@ def save_paint():
         y1 = y + canvas.winfo_height()
         ImageGrab.grab().crop((x, y, x1, y1)).save(file_path)
 
+# 원 삽입 기능 추가
+def insert_circle(event):
+    radius = 20  # 원의 반지름 크기 설정
+    x1, y1 = (event.x - radius), (event.y - radius)
+    x2, y2 = (event.x + radius), (event.y + radius)
+    action = canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+    actions.append((action, "oval", (x1, y1, x2, y2, brush_color)))  # 작업 기록 저장
+    redo_actions.clear()  # Redo 스택 초기화
+
+def set_insert_circle_mode():
+    canvas.bind("<Button-1>", insert_circle)
+
 window = Tk()
 # Tk 객체를 생성하여 주 윈도우를 만들기
 window.title("그림판")
@@ -268,6 +280,10 @@ button_screenshot.pack(side=LEFT)
 # 그림 저장 버튼 추가
 button_save = Button(window, text="Save", command=save_paint)
 button_save.pack(side=LEFT)
+
+# 원 삽입 모드 버튼 추가
+button_insert_circle = Button(window, text="Insert Circle", command=set_insert_circle_mode)
+button_insert_circle.pack(side=LEFT)
 
 set_paint_mode_normal()  # 프로그램 시작 시 기본 그리기 모드 설정
 
