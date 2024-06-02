@@ -37,6 +37,7 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+is_shift_pressed = False # 쉬프트 키가 눌렸는지 확인하는 함수
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -847,6 +848,62 @@ def select_shape_color():
     shape_outline_color = askcolor()[1]  # 윤곽선 색상 선택
     shape_fill_color = askcolor()[1]  # 내부 색상 선택
 
+#+============================================================
+def shift_press(event): # 쉬프트 키를 눌렀는지 판별하는 기능
+    global is_shift_pressed
+    if event.keysym in 'Shift_L':
+        is_shift_pressed = True
+    elif event.keysym in 'Shift_R':
+        is_shift_pressed = True
+
+def shift_release(event):  # 쉬프트 키를 눌렀는지 판별하는 기능
+    global is_shift_pressed
+    if event.keysym in 'Shift_L':
+        is_shift_pressed = False
+    elif event.keysym in 'Shift_R':
+        is_shift_pressed = False
+
+def create_line(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_line)
+
+def start_line(event): # 그리려는 선의 시작점을 잡아주고 그리기를 시작하는 기능
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+
+    window.bind("<KeyPress>", shift_press)
+    window.bind("<KeyRelease>", shift_release)
+    #쉬프트 키가 눌려 있는지 확인
+
+    if is_shift_pressed:  # 쉬프트 키가 눌려 있는지 확인
+        canvas.bind("<B1-Motion>", lambda event: draw_line_45_degree(event)) #선을 45도 각도로 그림
+    else:
+        canvas.bind("<B1-Motion>", lambda event: draw_line(event)) #선을 그림
+    canvas.bind("<ButtonRelease-1>", finish_line) # 마우스 버튼을 떼면 선 그리기 종료
+
+def draw_line(event): # 선을 그리는 기능
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    current_shape = canvas.create_line(start_x, start_y, event.x, event.y, fill=shape_outline_color, tags="temp_shape")
+
+# 45도 간격으로 선 그리기 # 선을 45도 각도로 그리는 기능
+def draw_line_45_degree(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    angle = math.atan2(event.y - start_y, event.x - start_x) #시작점과 끝점이 바라보는 각도를 계산
+    angle = round(angle / (math.pi / 4)) * (math.pi / 4)  # 각도를 45도 간격으로 조정
+    end_x = start_x + math.cos(angle) * math.hypot(event.x - start_x, event.y - start_y)
+    end_y = start_y + math.sin(angle) * math.hypot(event.x - start_x, event.y - start_y)
+    current_shape = canvas.create_line(start_x, start_y, end_x, end_y, fill=shape_outline_color, tags="temp_shape")
+
+def finish_line(event): # 선 그리기를 마치는 기능
+    global current_shape
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+        canvas.unbind("<B1-Motion>")
+#+============================================================
+
 # 사각형 그리기
 def create_rectangle(event=None):
     select_shape_color()
@@ -1161,6 +1218,7 @@ def finish_diamond(event):
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
+    popup.add_command(label="Line", command=lambda: create_line(event))
     popup.add_command(label="Rectangle", command=lambda: create_rectangle(event))
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
