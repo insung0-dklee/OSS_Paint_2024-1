@@ -194,6 +194,29 @@ def set_paint_mode_normal(canvas, set_origin_mode=False):
         pass
 
 
+def wave_paint(event):
+    global last_x, last_y
+    if event.type == '4':  # 마우스 클릭 이벤트 (ButtonPress)
+        last_x, last_y = event.x, event.y
+    elif event.type == '6':  # 마우스 드래그 이벤트 (B1-Motion)
+        if last_x is not None and last_y is not None:
+            wave_length = 40  # 물결의 주기
+            amplitude = 15  # 물결의 진폭
+
+            prev_x, prev_y = last_x, last_y  # 이전 좌표를 저장할 변수
+            points = []
+
+            for i in range(-20, 20):
+                x = event.x + i
+                y = event.y + amplitude * math.sin(i / wave_length * 2 * math.pi)
+                points.append((x, y))
+
+            canvas.create_line(points, fill=brush_color, width=2)
+
+        last_x, last_y = event.x, event.y
+
+
+
 def start_paint_pressure(event, canvas):
     global start_time
     start_time = time.time() #마우스를 클릭한 시간을 변수에 저장
@@ -737,7 +760,8 @@ def setup_paint_app(window):
 
     set_paint_mode_normal(canvas)
 
-    
+    button_wave = Button(window, text="Activate Wave Mode", command=lambda: canvas.bind("<B1-Motion>", wave_paint))
+    button_wave.pack(side=LEFT)
 
 #+=================================================================================
     menu_bar = Menu(window) # 메뉴 바 생성
