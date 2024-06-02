@@ -13,6 +13,7 @@ from brush_settings import change_brush_size, change_bg_color, change_brush_colo
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 from tkinter import filedialog
 from tkinter import PhotoImage
+from tkinter import colorchooser
 import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
@@ -31,7 +32,56 @@ spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
 
+def get_color():
+    # 사용자에게 색상 대화상자를 표시하고 선택한 색상을 반환합니다.
+    color = colorchooser.askcolor(title="Choose Color")
+    return color[0]  # 선택한 색상의 RGB 값을 반환합니다.
 
+def create_gradient_canvas(canvas, color1, color2, angle):
+
+    # 각도를 라디안으로 변환합니다.
+    angle_rad = math.radians(angle)
+    
+    clear_paint(canvas)
+
+    # 그라디언트 생성
+    for y in range(300):
+        for x in range(300):
+            # 회전된 좌표를 계산합니다.
+            x_rotated = (x - 150) * math.cos(angle_rad) - (y - 150) * math.sin(angle_rad) + 150
+
+            # 좌우 방향의 그라디언트를 생성합니다.
+            ratio = x_rotated / 300
+            r = int((1 - ratio) * color1[0] + ratio * color2[0])
+            g = int((1 - ratio) * color1[1] + ratio * color2[1])
+            b = int((1 - ratio) * color1[2] + ratio * color2[2])
+            color = '#{:02x}{:02x}{:02x}'.format(r, g, b)
+            canvas.create_line(x, y, x+1, y, fill=color)
+
+
+def select_colors():
+    # 색상 선택 버튼을 눌렀을 때 실행되는 함수
+
+    # 첫 번째 색상 선택
+    color1 = get_color()
+    # 두 번째 색상 선택
+    color2 = get_color()
+
+    # 각도 입력 위젯
+    angle_label = tkinter.Label(window, text="Enter Angle (0-360):")
+    angle_label.pack()
+    angle_entry = tkinter.Entry(window)
+    angle_entry.pack()
+
+    def create_gradient_with_angle():
+        angle = float(angle_entry.get())
+        create_gradient_canvas(color1, color2, angle)
+        
+# 출력 버튼 생성
+    button = tkinter.Button(window, text="Generate Gradient", command=create_gradient_with_angle)
+    button.pack()
+
+    window.mainloop()
 
 #이미지 파일 불러오기 
 def open_image():
@@ -337,6 +387,10 @@ def setup_paint_app(window):
     button_choose_shape = Button(window, text="shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
     button_choose_shape.pack(side=LEFT)
+    
+    #캔버스에 그라디언트 생성하는 버튼 추가
+    button_generate_gradient = window.Button(window, text="Select Colors", command=select_colors)
+    button_generate_gradient.pack(side=LEFT)
 
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
@@ -523,7 +577,6 @@ editor = ImageEditor(canvas)
 # 타이머 라벨
 timer_label = Label(window, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
-
 
 
 # 에어브러쉬 속성 변수 생성
