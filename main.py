@@ -370,25 +370,37 @@ def setup_paint_app(window):
     # 팔레트 설정 버튼 생성 및 버튼 프레임에 추가
     button_palette = Button(button_frame, text="Set Palette", command=lambda: setup_palette(window))
     button_palette.pack(side=LEFT)
+    button_palette.bind("<Enter>", on_enter)
+    button_palette.bind("<Leave>", on_leave)
 
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
+    button_stop_timer.bind("<Enter>", on_enter)
+    button_stop_timer.bind("<Leave>", on_leave)
 
     # 타이머 리셋 버튼
     button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
     button_reset_timer.pack(side=RIGHT)
+    button_reset_timer.bind("<Enter>", on_enter)
+    button_reset_timer.bind("<Leave>", on_leave)
 
     start_button = Button(button_frame, text="Start", command=start_stop)
     start_button.pack(side = RIGHT)
+    start_button.bind("<Enter>", on_enter)
+    start_button.bind("<Leave>", on_leave)
 
     # 보조선을 토글하는 버튼
     button_toggle_grid = Button(window, text="Grid on/off", command=lambda: toggle_grid(canvas))
     button_toggle_grid.pack(side=LEFT)
+    button_toggle_grid.bind("<Enter>", on_enter)
+    button_toggle_grid.bind("<Leave>", on_leave)
 
     # 보조선 크기 설정
     button_grid_settings = Button(window, text="Grid setting", command=open_grid_dialog)
     button_grid_settings.pack()
+    button_grid_settings.bind("<Enter>", on_enter)
+    button_grid_settings.bind("<Leave>", on_leave)
 
     # spray 인스턴스 생성 
     global spray_brush
@@ -397,12 +409,18 @@ def setup_paint_app(window):
     # 스프레이 버튼
     button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
     button_spray.pack(side=LEFT)
+    button_spray.bind("<Enter>", on_enter)
+    button_spray.bind("<Leave>", on_leave)
 
     button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
     button_erase_last_stroke.pack(side=LEFT)
+    button_erase_last_stroke.bind("<Enter>", on_enter)
+    button_erase_last_stroke.bind("<Leave>", on_leave)
 
     button_redo_last_stroke = Button(button_frame, text="Rewrite Last Stroke", command=rewrite_last_stroke)
     button_redo_last_stroke.pack(side=LEFT)
+    button_redo_last_stroke.bind("<Enter>", on_enter)
+    button_redo_last_stroke.bind("<Leave>", on_leave)
 
     button_clear = Button(button_frame, text="All Clear", command=lambda: clear_paint(canvas))
     button_clear.pack(side=LEFT)
@@ -469,14 +487,20 @@ def setup_paint_app(window):
     # 버튼 프레임에 저장 버튼 추가
     button_save = Button(window, text="Save", command=lambda: save_canvas(canvas))
     button_save.pack(side=LEFT)
+    button_save.bind("<Enter>", on_enter)
+    button_save.bind("<Leave>", on_leave)
 
     button_upload_image = Button(window, text="Upload Image", command=upload_image)
     button_upload_image.pack(side=LEFT)
+    button_upload_image.bind("<Enter>", on_enter)
+    button_upload_image.bind("<Leave>", on_leave)
 
     # 도형 모양 선택하는 버튼 생성
     button_choose_shape = Button(window, text="shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
     button_choose_shape.pack(side=LEFT)
+    button_choose_shape.bind("<Enter>", on_enter)
+    button_choose_shape.bind("<Leave>", on_leave)
 
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
@@ -516,6 +540,8 @@ def setup_paint_app(window):
 
     button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
     button_paint.pack(side=RIGHT)
+    button_paint.bind("<Enter>", on_enter)
+    button_paint.bind("<Leave>", on_leave)
 
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
@@ -525,6 +551,8 @@ def setup_paint_app(window):
 
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
+    button_new_window.bind("<Enter>", on_enter)
+    button_new_window.bind("<Leave>", on_leave)
 
     
 
@@ -543,6 +571,12 @@ def change_cursor(event):
 # 연필 형태 커서를 원래대로 변경하기
 def default_cursor(event):
     canvas.config(cursor="")
+
+def on_enter(event):
+    event.widget.config(bg="light blue", cursor="hand2")
+
+def on_leave(event):
+    event.widget.config(bg="SystemButtonFace", cursor="")
 
 # 우클릭을 누르면 우측 상단에 x, y 좌표값을 백분율로 표시
 def show_coordinates(event):
