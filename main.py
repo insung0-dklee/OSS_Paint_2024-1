@@ -1158,6 +1158,53 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 화살표 모양 그리기
+def create_arrow(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_arrow)
+
+# 화살표 모양 그릴 위치 정하고 생성하는 함수 호출
+def start_arrow(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_arrow(event))
+    canvas.bind("<ButtonRelease-1>", finish_arrow)
+
+# 화살표 모양 생성하기
+def draw_arrow(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    end_x, end_y = event.x, event.y
+    
+    arrow_length = ((start_x - end_x)**2 + (start_y - end_y)**2)**0.5
+    arrow_width = arrow_length / 5
+    
+    angle = math.atan2(end_y - start_y, end_x - start_x)
+    arrow_head_length = arrow_width * 2
+    arrow_shaft_width = arrow_width / 2
+    
+    # 화살표의 점들을 계산
+    points = [
+        start_x - arrow_shaft_width * math.sin(angle), start_y + arrow_shaft_width * math.cos(angle),
+        end_x - arrow_head_length * math.cos(angle) - arrow_shaft_width * math.sin(angle), end_y - arrow_head_length * math.sin(angle) + arrow_shaft_width * math.cos(angle),
+        end_x - arrow_head_length * math.cos(angle) - arrow_width * math.sin(angle), end_y - arrow_head_length * math.sin(angle) + arrow_width * math.cos(angle),
+        end_x, end_y,
+        end_x - arrow_head_length * math.cos(angle) + arrow_width * math.sin(angle), end_y - arrow_head_length * math.sin(angle) - arrow_width * math.cos(angle),
+        end_x - arrow_head_length * math.cos(angle) + arrow_shaft_width * math.sin(angle), end_y - arrow_head_length * math.sin(angle) - arrow_shaft_width * math.cos(angle),
+        start_x + arrow_shaft_width * math.sin(angle), start_y - arrow_shaft_width * math.cos(angle)
+    ]
+    
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 화살표 모양 그리기 종료
+def finish_arrow(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -1169,6 +1216,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Arrow", command=lambda: create_arrow(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
