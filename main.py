@@ -1158,6 +1158,44 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 정오각형 그리기
+def create_pentagon(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_pentagon)
+
+# 정오각형 시작 지점 설정 및 함수 호출
+def start_pentagon(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_pentagon(event))
+    canvas.bind("<ButtonRelease-1>", finish_pentagon)
+
+"""
+radius : 오각형의 중심으로 부터 꼭짓점까지의 거리
+angle : 오각형의 각 꼭짓점을 찾기 위해 사용하는 각도의 값
+"""
+# 정오각형 그리기 함수
+def draw_pentagon(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    radius = math.sqrt((event.x - start_x)**2 + (event.y - start_y)**2)
+    points = []
+    for i in range(5):
+        angle = 2 * math.pi / 5 * i + 60
+        x = start_x + radius * math.cos(angle)
+        y = start_y + radius * math.sin(angle)
+        points.extend([x, y])
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 정오각형 그리기 종료
+def finish_pentagon(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -1169,8 +1207,8 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
-
 
 """
 그림그리는 것을 획 단위로 그리도록 개선, 획 단위로 지우는 지우개 기능 추가, 지웠던 획을 다시 되돌리는 기능 추가
