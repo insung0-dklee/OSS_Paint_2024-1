@@ -25,9 +25,12 @@ from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
 from datetime import datetime, date
+from tkinter import ttk
+from datetime import datetime
+
 
 # 초기 설정 값들
-global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
+global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas, selected_date
 brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
@@ -1518,17 +1521,26 @@ def end_drag(event):
 def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
     return f"{hours:02}:{minutes:02}"
 
-current_time_label = Label(window, text="")
-current_time_label.pack()
 
-# 현재 시간, 날짜를 나타내는 기능
-def update_current_time():
-    now = datetime.now()
-    current_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
-    current_time_label.config(text=f"Current Time: {current_time_str}")
-    window.after(1000, update_current_time)  # 1초마다 현재 시간 갱신
+# 날짜 선택 함수
+def select_date():
+    selected_date = simpledialog.askstring("날짜 선택", "원하는 날짜를 입력하세요(YYYY-MM-DD):", parent=window)
+    if selected_date:
+        try:
+            # 입력된 문자열을 날짜로 변환
+            formatted_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+            selected_date_label.config(text=f"선택된 날짜: {formatted_date}")
+        except ValueError:
+            messagebox.showerror("오류", "올바른 날짜 형식을 입력하세요(YYYY-MM-DD).")
 
-update_current_time()
+# 날짜 선택 버튼 생성
+select_date_button = ttk.Button(window, text="날짜 선택", command=select_date)
+select_date_button.pack()
+
+# 선택된 날짜를 표시할 레이블 생성
+selected_date_label = ttk.Label(window, text="선택된 날짜: ")
+selected_date_label.pack()
+
 
 
 
@@ -1582,5 +1594,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
