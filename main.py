@@ -217,6 +217,48 @@ def select_object(event):
     if current_object:
         selected_object = current_object
         canvas.itemconfig(selected_object, outline="red")
+        
+    #star라는 문자열을 입력시에 자동으로 별모양이 캔버스에 그려지는 함수
+    #사용자가 "star"를 입력하도록 한 Entry 필드에"star"를 입력하면 마우스 클릭 시 별 모양이 그려집니다.
+def draw(event):
+    global current_object
+    if drawing:
+        if current_object:
+            canvas.delete(current_object)
+        x1, y1 = (event.x - 1), (event.y - 1)
+        x2, y2 = (event.x + 1), (event.y + 1)
+        current_object = canvas.create_rectangle(x1, y1, x2, y2, outline="black")
+
+def draw_star(event):
+    global current_object
+    if drawing and user_input.get() == "star":
+        if current_object:
+            canvas.delete(current_object)
+        x, y = event.x, event.y
+        size = 50  # 별의 크기
+        points = [
+            x, y - size,
+            x + size * 0.588, y - size * 0.809,
+            x + size, y - size * 0.309,
+            x + size * 0.809, y + size * 0.309,
+            x + size * 0.309, y + size * 0.809,
+            x, y + size,
+            x - size * 0.309, y + size * 0.809,
+            x - size * 0.809, y + size * 0.309,
+            x - size, y - size * 0.309,
+            x - size * 0.588, y - size * 0.809
+        ]
+        current_object = canvas.create_polygon(points, outline="black", fill="")
+
+def start_drawing():
+    global start_time
+    start_time = time.time()
+
+def select_object(event):
+    global selected_object
+    if current_object:
+        selected_object = current_object
+        canvas.itemconfig(selected_object, outline="red")
 
 
 
