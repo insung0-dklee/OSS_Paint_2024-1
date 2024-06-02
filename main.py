@@ -1266,6 +1266,42 @@ def end_drag(event):
     drag_data["x"] = 0
     drag_data["y"] = 0
 
+# 비율 가이드 구현
+def draw_proportion_guide(canvas):
+    canvas.delete("proportion_line")
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+
+    # 예시로 인체 비율 가이드 라인 생성
+    head_height = height // 8
+    for i in range(9):
+        y = i * head_height
+        canvas.create_line(0, y, width, y, fill="lightgray", tag="proportion_line")
+        canvas.create_text(10, y, text=f"{i}", anchor=NW, fill="lightgray", tag="proportion_line")
+
+def toggle_proportion_guide(canvas):
+    if canvas.find_withtag("proportion_line"):
+        canvas.delete("proportion_line")
+    else:
+        draw_proportion_guide(canvas)
+
+def on_canvas_resize(event):
+    draw_proportion_guide(canvas)
+
+window = Tk()
+window.title("Proportion Guide Example")
+window.geometry("800x600")
+
+canvas = Canvas(window, bg="white")
+canvas.pack(fill=BOTH, expand=True)
+
+# 윈도우 크기가 변경될 때 비율 가이드를 다시 그립니다.
+canvas.bind("<Configure>", on_canvas_resize)
+
+# 비율 가이드 토글 버튼 추가
+toggle_proportion_button = Button(window, text="Toggle Proportion Guide", command=lambda: toggle_proportion_guide(canvas))
+toggle_proportion_button.pack()
+
 # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
