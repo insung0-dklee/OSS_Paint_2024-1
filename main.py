@@ -167,6 +167,9 @@ def redo_action():
         elif action_type == "text":
             x, y, text, color, font_family, font_size = params
             action = canvas.create_text(x, y, text=text, fill=color, font=(font_family, font_size))
+        elif action_type == "rectangle":
+            x1, y1, x2, y2, color = params
+            action = canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color)
         actions.append((action, action_type, params))  # Undo 스택에 다시 추가
 
 # 스크린샷 기능 추가
@@ -188,16 +191,28 @@ def save_paint():
         ImageGrab.grab().crop((x, y, x1, y1)).save(file_path)
 
 # 원 삽입 기능 추가
-def insert_circle(event):
-    radius = 20  # 원의 반지름 크기 설정
-    x1, y1 = (event.x - radius), (event.y - radius)
-    x2, y2 = (event.x + radius), (event.y + radius)
-    action = canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
-    actions.append((action, "oval", (x1, y1, x2, y2, brush_color)))  # 작업 기록 저장
-    redo_actions.clear()  # Redo 스택 초기화
-
 def set_insert_circle_mode():
     canvas.bind("<Button-1>", insert_circle)
+
+def insert_circle(event):
+    radius = 20  # 원의 반지름 설정
+    x1, y1 = (event.x - radius), (event.y - radius)
+    x2, y2 = (event.x + radius), (event.y + radius)
+    action = canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
+    actions.append((action, "oval", (x1, y1, x2, y2, "black")))  # 작업 기록 저장
+    redo_actions.clear()  # Redo 스택 초기화
+
+# 네모 삽입 기능 추가
+def set_insert_rectangle_mode():
+    canvas.bind("<Button-1>", insert_rectangle)
+
+def insert_rectangle(event):
+    width, height = 40, 20  # 네모의 너비와 높이 설정
+    x1, y1 = (event.x - width // 2), (event.y - height // 2)
+    x2, y2 = (event.x + width // 2), (event.y + height // 2)
+    action = canvas.create_rectangle(x1, y1, x2, y2, fill="black", outline="black")
+    actions.append((action, "rectangle", (x1, y1, x2, y2, "black")))  # 작업 기록 저장
+    redo_actions.clear()  # Redo 스택 초기화
 
 window = Tk()
 # Tk 객체를 생성하여 주 윈도우를 만들기
@@ -281,9 +296,13 @@ button_screenshot.pack(side=LEFT)
 button_save = Button(window, text="Save", command=save_paint)
 button_save.pack(side=LEFT)
 
-# 원 삽입 모드 버튼 추가
+# 원 삽입 버튼 추가
 button_insert_circle = Button(window, text="Insert Circle", command=set_insert_circle_mode)
 button_insert_circle.pack(side=LEFT)
+
+# 네모 삽입 버튼 추가
+button_insert_rectangle = Button(window, text="Insert Rectangle", command=set_insert_rectangle_mode)
+button_insert_rectangle.pack(side=LEFT)
 
 set_paint_mode_normal()  # 프로그램 시작 시 기본 그리기 모드 설정
 
