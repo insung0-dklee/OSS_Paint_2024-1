@@ -7,6 +7,7 @@ button_delete : clear_paint의 버튼
 """
 
 from tkinter import *
+from tkinter import ttk
 import time #시간 계산을 위한 모듈
 import brush_settings  # brush_settings 모듈 임포트
 from brush_settings import change_brush_size, change_bg_color, change_brush_color, set_brush_mode, set_paint_mode_normal, set_paint_mode_pressure, paint_start, paint, dotted_paint
@@ -25,6 +26,7 @@ import os
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
 brush_size = 1  # 초기 브러시 크기
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker"]
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
@@ -160,16 +162,9 @@ def set_paint_mode_normal(canvas, set_origin_mode=False):
         # 추가적인 원점 모드 설정 코드
         pass
 
-    
-    
-def set_paint_mode_pressure(canvas):
-    canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
-    canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
-
 def start_paint_pressure(event, canvas):
     global start_time
     start_time = time.time() #마우스를 클릭한 시간을 변수에 저장
-
 def paint_pressure(event, canvas):
     global start_time
     elapsed_time = time.time() - start_time  # 마우스를 클릭한 시간부터 지금까지의 시간을 계산
@@ -177,10 +172,6 @@ def paint_pressure(event, canvas):
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
-
-
-
-# 점선 브러쉬 함수
 def dotted_paint(event, canvas):
     global last_x, last_y
     spacing = 10 + brush_size  # 점 사이의 간격을 브러시 크기로 설정
@@ -194,7 +185,11 @@ def dotted_paint(event, canvas):
     else:
         last_x, last_y = event.x, event.y
         canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
-
+def paint_marker(event, canvas):
+    radius = brush_size
+    x1, y1 = (event.x - radius), (event.y - radius)
+    x2, y2 = (event.x + radius), (event.y + radius)
+    canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -210,6 +205,13 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     elif brush_mode == "double_line": #브러쉬 모드가 double_line 면
         canvas.bind("<B1-Motion>", lambda event: double_line_paint(event, canvas))#이중 실선 브러쉬로 변경
         canvas.bind("<Button-1>", start_new_line)
+    elif brush_mode == "pressure":
+        canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
+        canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
+    elif brush_mode == "marker":
+        canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
+        canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
+
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -528,12 +530,6 @@ def setup_paint_app(window):
     button_toggle_mode = Button(window, text="Toggle Dark Mode", command=toggle_dark_mode)
     button_toggle_mode.pack(side=LEFT) # 다크 모드 토글 버튼을 윈도우에 배치
 
-    # setup_paint_app 함수에 마커 모드 버튼 추가
-    button_marker = Button(button_frame, text="Marker Mode", command=lambda: set_paint_mode_marker(canvas))
-    button_marker.pack(side=LEFT)
-    button_marker.bind("<Enter>", on_enter)
-    button_marker.bind("<Leave>", on_leave)
-
     button_use_case = Button(window, text="Use Case Diagram", command=choose_use_case_element)
     button_use_case.pack(side=LEFT) # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
 
@@ -550,7 +546,7 @@ def setup_paint_app(window):
 
     
 
-    #spray 인스턴스 생성 
+    #spray 인스턴스 생성
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
     # 스프레이 버튼
@@ -574,34 +570,19 @@ def setup_paint_app(window):
     brush_size_slider.pack(side=LEFT)
 
 
-    button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
-    button_solid.pack()
-    button_solid.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_solid.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode(canvas, "dotted"))
-    button_dotted.pack()
-    button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    button_double_line = Button(button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas,"double_line"))
-    button_double_line.pack() 
-    button_double_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_double_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
-
+    brush_combobox = ttk.Combobox(button_frame, values=brush_modes, state="readonly")
+    brush_combobox.current(0)
+    brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
+    brush_combobox.pack(side=LEFT)
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
     button_paint.pack(side=RIGHT)
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
@@ -928,18 +909,6 @@ def choose_shape(event):
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
-
-
-# 마커 모드 추가
-def paint_marker(event, canvas):
-    radius = brush_size
-    x1, y1 = (event.x - radius), (event.y - radius)
-    x2, y2 = (event.x + radius), (event.y + radius)
-    canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
-
-def set_paint_mode_marker(canvas):
-    canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
-    canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
 
 """
 그림그리는 것을 획 단위로 그리도록 개선, 획 단위로 지우는 지우개 기능 추가, 지웠던 획을 다시 되돌리는 기능 추가
