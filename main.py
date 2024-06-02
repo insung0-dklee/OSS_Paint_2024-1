@@ -249,6 +249,18 @@ def toggle_fullscreen(event=None):
     global window
     window.attributes("-fullscreen", not window.attributes("-fullscreen"))
 
+
+def flip_vertical(canvas):
+    objects = canvas.find_all()
+    canvas.update()
+    canvas_height = canvas.winfo_height()
+    for obj in objects:
+        coords = canvas.coords(obj)
+        for i in range(len(coords)):
+            if i % 2 != 0:  # y 좌표를 반전시킵니다.
+                coords[i] = canvas_height - coords[i]
+        canvas.coords(obj, *coords)
+
 # 좌우 반전 기능 추가
 def flip_horizontal(canvas):
     objects = canvas.find_all()
@@ -533,7 +545,7 @@ def setup_paint_app(window):
     button_toggle_mode = Button(button_frame, text="Toggle Dark Mode", command=toggle_dark_mode)
     button_toggle_mode.pack(side=LEFT)  # 다크 모드 토글 버튼을 윈도우에 배치
 
-    button_use_case = Button(window, text="Use Case Diagram", command=choose_use_case_element)
+    button_use_case = Button(button_frame, text="Use Case Diagram", command=choose_use_case_element)
     button_use_case.pack(side=LEFT)  # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
 
     # 타이머 멈춤 버튼
@@ -609,6 +621,11 @@ def setup_paint_app(window):
     button_flip.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_flip.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
+    button_flip_vertical = Button(window, text="Flip Vertical", command=lambda: flip_vertical(canvas))
+    button_flip_vertical.pack(side=LEFT)
+    button_flip_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_flip_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
     # 도형 모양 선택하는 버튼 생성
@@ -655,7 +672,6 @@ def setup_paint_app(window):
     canvas.bind("<ButtonRelease-1>", paint_end)
 
     set_paint_mode_normal(canvas)
-
 
     
 
