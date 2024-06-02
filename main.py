@@ -38,6 +38,9 @@ spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
 
+shape_line_dotted_mode = False # 도형 외각선이 점선으로 설정 할 것인가를 판별하는 변수
+shape_line_size = 1; # 도형의 외각선의 크기를 저장하는 변수
+
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
 previous_time = None
@@ -55,6 +58,10 @@ def show_info_window(): #정보를 표시하는 기능
 #+=================================================================================
 
 is_dark_mode = False  # 기본 모드는 라이트 모드
+
+def toggle_dotted_mode(): # 생성되는 도형의 외각선을 점선으로 바꾸는 모드를 판별하는 변수인 shape_line_dotted_mode를 on/off하는 기능 
+    global shape_line_dotted_mode
+    shape_line_dotted_mode = not shape_line_dotted_mode
 
 def toggle_dark_mode(): # 다크 모드를 토글하는 함수
     global is_dark_mode
@@ -258,6 +265,11 @@ def change_brush_size(new_size):
     brush_size = int(new_size)
     # spray의 크기를 변경하는 기능
     spray_brush.set_brush_size(brush_size)
+
+# 도형의 외각선의 굵기를 변경하는 함수
+def set_shape_line_size(new_size):
+    global shape_line_size
+    shape_line_size = int(new_size)
 
 # 화면 확대 및 축소 기능 추가
 def zoom(event):
@@ -631,6 +643,18 @@ def setup_paint_app(window):
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
     
+#+===============================================================================================
+    shape_line_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Shape Line Size", command=set_shape_line_size)
+    shape_line_size_slider.set(shape_line_size)
+    shape_line_size_slider.pack(side=LEFT)
+    # 도형의 굵기를 설정하는 슬라이더 위젯 생성
+
+    global shape_line_dotted_mode
+    is_dotted_var = IntVar(value=shape_line_dotted_mode)
+    is_dotted_chkbox = Checkbutton(button_frame, text="Shape\nLine\nDotted\nOn", variable=is_dotted_var, command=toggle_dotted_mode)
+    is_dotted_chkbox.pack(side=LEFT)
+    # 도형의 외각선을 점선으로 할 것인지 변경하기 위한 체크박스 생성
+#+===============================================================================================
 
     
 
@@ -874,7 +898,10 @@ def start_rectangle(event):
 def draw_rectangle(event):
     global start_x, start_y, current_shape
     canvas.delete("temp_shape")
-    current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    if shape_line_dotted_mode:
+        current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, width=shape_line_size, dash=(shape_line_size, shape_line_size), outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    else: 
+        current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, width=shape_line_size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
     paint_start(event)
 
 # 사각형 그리기 종료
@@ -911,7 +938,10 @@ def draw_triangle(event):
     x4 = start_x + side_length * math.cos(angle)
     y4 = start_y + side_length * math.sin(angle)
 
-    current_shape = canvas.create_polygon(start_x, start_y, x2, y2, x3, y3, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    if shape_line_dotted_mode:
+        current_shape = canvas.create_polygon(start_x, start_y, x2, y2, x3, y3, width=shape_line_size, dash=(shape_line_size, shape_line_size), outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    else: 
+        current_shape = canvas.create_polygon(start_x, start_y, x2, y2, x3, y3, width=shape_line_size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 삼각형 그리기 종료
 def finish_triangle(event):
@@ -934,7 +964,10 @@ def draw_circle(event):
     global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     r = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
-    current_shape = canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    if shape_line_dotted_mode:
+        current_shape = canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, width=shape_line_size, dash=(shape_line_size, shape_line_size), outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    else: 
+        current_shape = canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, width=shape_line_size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 원형 그리기 종료
 def finish_circle(event):
@@ -979,7 +1012,10 @@ def draw_star(event):
         points.append(x_inner)
         points.append(y_inner)
     
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    if shape_line_dotted_mode:
+        current_shape = canvas.create_polygon(points, width=shape_line_size, dash=(shape_line_size, shape_line_size), outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    else: 
+        current_shape = canvas.create_polygon(points, width=shape_line_size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 별 모양 그리기 종료
 def finish_star(event):
@@ -1024,7 +1060,10 @@ def draw_six_pointed_star(event):
         points.append(x_inner)
         points.append(y_inner)
 
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    if shape_line_dotted_mode:
+        current_shape = canvas.create_polygon(points, width=shape_line_size, dash=(shape_line_size, shape_line_size), outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    else: 
+        current_shape = canvas.create_polygon(points, width=shape_line_size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 육각별 모양 그리기 종료
 def finish_six_pointed_star(event):
@@ -1065,7 +1104,11 @@ def draw_heart(event):
         points.append(x_scaled)
         points.append(y_scaled)
 
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    if shape_line_dotted_mode:
+        current_shape = canvas.create_polygon(points, width=shape_line_size, dash=(shape_line_size, shape_line_size), outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    else: 
+        current_shape = canvas.create_polygon(points, width=shape_line_size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
 # 하트 모양 그리기 종료
 def finish_heart(event):
     global current_shape
@@ -1111,7 +1154,10 @@ def draw_cross(event):
         start_x - cross_width, start_y - cross_width
     ]
 
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    if shape_line_dotted_mode:
+        current_shape = canvas.create_polygon(points, width=shape_line_size, dash=(shape_line_size, shape_line_size), outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    else: 
+        current_shape = canvas.create_polygon(points, width=shape_line_size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 십자형 도형 그리기 종료
 def finish_cross(event):
@@ -1149,7 +1195,10 @@ def draw_diamond(event):
         start_x - width, start_y  # 왼쪽 꼭짓점
     ]
 
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    if shape_line_dotted_mode:
+        current_shape = canvas.create_polygon(points, width=shape_line_size, dash=(shape_line_size, shape_line_size), outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    else: 
+        current_shape = canvas.create_polygon(points, width=shape_line_size, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 def finish_diamond(event):
     global current_shape
