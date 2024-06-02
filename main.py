@@ -65,20 +65,20 @@ def toggle_dark_mode(): # 다크 모드를 토글하는 함수
     is_dark_mode = not is_dark_mode # 다크 모드 상태 변경
 
 def apply_light_mode(): # 라이트 모드 적용(기본)
-    window.config(bg="sky blue") # 윈도우 배경색
-    canvas.config(bg="white") # 캔버스 배경색
-    button_frame.config(bg="sky blue") # 버튼 프레임 배경색
+    window.config(background="sky blue") # 윈도우 배경색
+    canvas.config(background="white") # 캔버스 배경색
+    button_frame.config(background="sky blue") # 버튼 프레임 배경색
     for widget in button_frame.winfo_children(): 
-        widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
-    timer_label.config(bg="white", fg="black") # 타이머 라벨 배경색, 글자색
+        widget.config(background="light grey", foreground="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
+    timer_label.config(background="white", foreground="black") # 타이머 라벨 배경색, 글자색
 
 def apply_dark_mode(): # 다크 모드 적용
-    window.config(bg="grey20") # 윈도우 배경색
-    canvas.config(bg="grey30") # 캔버스 배경색
-    button_frame.config(bg="grey20") # 버튼 프레임 배경색
+    window.config(background="grey20") # 윈도우 배경색
+    canvas.config(background="grey30") # 캔버스 배경색
+    button_frame.config(background="grey20") # 버튼 프레임 배경색
     for widget in button_frame.winfo_children():
-        widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
-    timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
+        widget.config(background="grey40", foreground="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
+    timer_label.config(background="grey20", foreground="white") # 타이머 라벨 배경색, 글자색
 
 #이미지 파일 불러오기 
 def open_image():
