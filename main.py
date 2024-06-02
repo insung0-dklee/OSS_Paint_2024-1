@@ -6,15 +6,6 @@ button_delete : clear_paint의 버튼
 
 """
 
-
-"""
-직선을 그릴 수 있게 해주는 함수 추가
-x1,y1 마우스를  클릭한 위치
-x2,y2 마우스에서 클릭을 땐 위치
-
-line 그 두점을 이어주는 함수
-"""
-
 from tkinter import *
 import time #시간 계산을 위한 모듈
 import brush_settings  # brush_settings 모듈 임포트
@@ -48,8 +39,6 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
-<<<<<<< HEAD
-=======
 #+=================================================================================
 def close_program(): #프로그램을 종료하는 기능
     if messagebox.askokcancel("Quit", "Do you want to quit?"): #프로그램을 종료할 것인지 확인 매시지를 띄움
@@ -85,7 +74,6 @@ def apply_dark_mode(): # 다크 모드 적용
         widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
->>>>>>> 94037f02749309e3a831ad2459671472421e1b19
 #이미지 파일 불러오기 
 def open_image():
     file_path = filedialog.askopenfilename()
@@ -202,10 +190,14 @@ def dotted_paint(event, canvas):
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
             canvas.create_oval(event.x-brush_size / 2, event.y-brush_size / 2, event.x+brush_size / 2, event.y+brush_size / 2, fill=brush_color, outline=brush_color)
+            canvas.coords(circle, event.x - brush_size/2+2, event.y- brush_size/2+2, event.x + brush_size/2+2, event.y + brush_size/2+2) #그리는 위치도 보여주기 위해 브러시 크기보다 조금더 크게 만들기
+    
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
         canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
+        canvas.coords(circle, event.x - brush_size/2+2, event.y- brush_size/2+2, event.x + brush_size/2+2, event.y + brush_size/2+2) #그리는 위치도 보여주기 위해 브러시 크기보다 조금더 크게 만들기
+    
 
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
@@ -219,14 +211,9 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
-<<<<<<< HEAD
-    elif brush_mode == "line":
-        canvas.bind("<B1-Motion>",lambda event:set_paint_mode_line(canvas)) #직선으로 변경
-=======
     elif brush_mode == "double_line": #브러쉬 모드가 double_line 면
         canvas.bind("<B1-Motion>", lambda event: double_line_paint(event, canvas))#이중 실선 브러쉬로 변경
         canvas.bind("<Button-1>", start_new_line)
->>>>>>> 94037f02749309e3a831ad2459671472421e1b19
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -287,12 +274,7 @@ def change_bg_color(canvas):
     bg_color = askcolor()
     canvas.config(bg=bg_color[1])
 
-<<<<<<< HEAD
-# 버그 수정
-def change_brush_color(self):
-=======
 def change_brush_color(event=None):
->>>>>>> line
     global brush_color
     selected_color = askcolor()[1]
     if selected_color:
@@ -375,7 +357,6 @@ def setup_palette(window):
 
     # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
     Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
-
 
 
 # 캔버스를 파일로 저장하는 함수
@@ -607,17 +588,10 @@ def setup_paint_app(window):
     button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-<<<<<<< HEAD
-    button_line = Button(button_frame, text="line", command=lambda: set_brush_mode(canvas, "line")) # 직선을 위한 버튼 생성
-    button_line.pack()
-    button_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-=======
     button_double_line = Button(button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas,"double_line"))
     button_double_line.pack() 
     button_double_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_double_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
->>>>>>> 94037f02749309e3a831ad2459671472421e1b19
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
@@ -662,6 +636,15 @@ def setup_paint_app(window):
     canvas.bind("<MouseWheel>", zoom)
 
     bind_shortcuts()
+
+    def show_size1(event):
+        global circle
+        canvas.coords(circle, event.x - brush_size/2+2, event.y- brush_size/2+2, event.x + brush_size/2+2, event.y + brush_size/2+2) #그리는 위치도 보여주기 위해 브러시 크기보다 조금더 크게 만들기
+        
+    #brush 크기를 보여주는 모듈 생성
+    canvas.bind("<Motion>",lambda event: show_size1(event)) # 움직일 때 따라 오게끔 만듬
+    global circle
+    circle = canvas.create_oval(190, 190, 210, 210, outline="black") # 원 만들어주기
 
     # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
@@ -991,6 +974,7 @@ def paint_stroke(event): #획 그림
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
     current_stroke.append((x1, y1, x2, y2))
+    canvas.coords(circle, event.x - brush_size/2+2, event.y- brush_size/2+2, event.x + brush_size/2+2, event.y + brush_size/2+2) #그리는 위치도 보여주기 위해 브러시 크기보다 조금더 크게 만들기
     x1, y1 = x2, y2
 
 def paint_end(event): #획 끝
@@ -1031,10 +1015,13 @@ def double_line_paint(event, canvas):
         canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color)
         # 두 번째 선 그리기
         canvas.create_line(last_x + dx, last_y + dy, event.x + dx, event.y + dy, width=brush_size, fill=brush_color)
-
+        canvas.coords(circle, event.x - brush_size, event.y- brush_size, event.x + brush_size, event.y + brush_size) #그리는 위치도 보여주기 위해 브러시 크기보다 조금더 크게 만들기(더블 라인의 경우 반지름 두배)
+    
         last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
+        canvas.coords(circle, event.x - brush_size, event.y- brush_size, event.x + brush_size, event.y + brush_size) #그리는 위치도 보여주기 위해 브러시 크기보다 조금더 크게 만들기(더블 라인의 경우 반지름 두배)
+    
 
 # 패턴을 그리는 함수들 추가
 def draw_tile_pattern(canvas, tile_size=50):
@@ -1313,25 +1300,6 @@ frame_distance.pack(side=RIGHT)
 frame_count = Frame(window)
 frame_count.pack(side=RIGHT)
 
-<<<<<<< HEAD
-def set_paint_mode_line(canvas): #직선을 그려주기 위한 함수 모듈"
-
-    canvas.pack()
-    canvas.bind("<Button-1>",clicked) # 버튼이 눌렸을때 실행
-    canvas.bind("<ButtonRelease-1>",unclicked)#버튼을 땠을때 실행
-
-def clicked(event):
-    global x1,y1 # x1,y1 값 저장
-    x1,y1=event.x,event.y 
-
-def unclicked(event):
-    global x2,y2#x2,y2 값 저장
-    x2,y2=event.x,event.y
-    canvas.create_line(x1,y1,x2,y2, width=brush_size, fill=brush_color) #저장한 두점을 이어준다
-
-
-
-=======
 # 눈금자 기본 설정
 ruler_on = False
 ruler_lines = []
@@ -1352,15 +1320,9 @@ canvas.bind("<Configure>", on_resize)
 bind_shortcuts_window(window)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
->>>>>>> 94037f02749309e3a831ad2459671472421e1b19
 
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
 
-
-
-
 window.mainloop()
-
-
