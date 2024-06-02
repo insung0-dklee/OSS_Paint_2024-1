@@ -21,6 +21,8 @@ from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
+import pytesseract
+from PIL import Image
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1259,6 +1261,20 @@ def drag(event):
         canvas.move(drag_data["item"], dx, dy)
         drag_data["x"] = event.x
         drag_data["y"] = event.y
+
+def recognize_handwriting(image_path):
+    # 이미지 열기
+    image = Image.open(image_path)
+
+    # OCR을 사용하여 이미지에서 텍스트 추출
+    text = pytesseract.image_to_string(image)
+
+    return text
+
+# 이미지에서 손글씨 인식하여 텍스트로 변환
+image_path = "handwriting_image.png"  # 손글씨 이미지의 경로
+text = recognize_handwriting(image_path)
+print("인식된 텍스트:", text)
 
 # 문자열 드래그 종료
 def end_drag(event):
