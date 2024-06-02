@@ -234,7 +234,6 @@ def clear_paint(canvas):
     last_x, last_y = None, None # 마지막 좌표 초기화
 
 def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
    
@@ -506,8 +505,19 @@ def choose_use_case_element(event=None):
         popup.post(event.x_root, event.y_root) # 마우스 위치에 팝업 메뉴 표시
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
+# 라인 브러쉬 기능 추가 
+def set_brush_mode_line(canvas):
+    canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
 
+def line_start(event, canvas):
+    global x1, y1
+    x1, y1 = event.x, event.y
+    canvas.bind("<Button-1>", lambda event: draw_line(event, canvas))
 
+def draw_line(event, canvas):
+    global x1, y1
+    canvas.create_line(x1, y1, x1, y1, event.x, event.y, fill=brush_color, width=2)
+    x1, y1 = event.x, event.y
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame
@@ -548,6 +558,10 @@ def setup_paint_app(window):
     start_button = Button(button_frame, text="Start", command=start_stop)
     start_button.pack(side = RIGHT)
 
+    button_line = Button(window, text="Line Brush", command=lambda: set_brush_mode_line(canvas))
+    button_line.pack()
+    button_line.bind("<Enter>", on_enter)  
+    button_line.bind("<Leave>", on_leave)  
     
 
     #spray 인스턴스 생성 
@@ -845,7 +859,7 @@ def draw_triangle(event):
     current_shape = canvas.create_polygon(start_x, start_y, x2, y2, x3, y3, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 삼각형 그리기 종료
-def finish_triangle(event):
+def finish_triangle(event): 
     global current_shape
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
@@ -1309,5 +1323,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
