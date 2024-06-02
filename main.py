@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import webbrowser
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -342,27 +343,36 @@ def set_brush_color(color):
     # spray_brush의 색상 변경을 위한 코드 추가
     spray_brush.set_brush_color(brush_color)
 
+
 # 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
-def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
+def set_custom_color(hex_entry, r_entry, g_entry, b_entry, palette_frame):
     try:
-        # R, G, B 값을 입력받아 정수로 변환
-        r = int(r_entry.get())
-        g = int(g_entry.get())
-        b = int(b_entry.get())
-
-        # R, G, B 값이 0에서 255 사이인지 확인
-        if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
-            # R, G, B 값을 16진수로 변환하여 색상 코드 생성
-            color = f'#{r:02x}{g:02x}{b:02x}'
-            set_brush_color(color)  # 브러시 색상 설정 함수 호출
-
-            # 사용자 정의 색상을 팔레트에 동적으로 추가
-            button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
-            button.pack(side=LEFT, padx=2, pady=2)
+        # 16진수 색상 값을 입력받아 확인
+        if hex_entry and hex_entry.get():
+            hex_color = hex_entry.get()
+            if len(hex_color) == 7 and hex_color[0] == '#':
+                color = hex_color
+            else:
+                print("유효한 16진수 색상 코드를 입력하세요. 예: #FF5733")
+                return
         else:
-            print("RGB 값은 0에서 255 사이여야 합니다.")
+            r = int(r_entry.get())
+            g = int(g_entry.get())
+            b = int(b_entry.get())
+            if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
+                color = f'#{r:02x}{g:02x}{b:02x}'
+            else:
+                print("RGB 값은 0에서 255 사이여야 합니다.")
+                return
+
+        set_brush_color(color)  # 브러시 색상 설정 함수 호출
+
+        # 사용자 정의 색상을 팔레트에 동적으로 추가
+        button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
+        button.pack(side=LEFT, padx=2, pady=2)
     except ValueError:
-        print("유효한 RGB 값을 입력하세요.")
+        print("유효한 색상 코드를 입력하세요. 예: #FF5733 또는 RGB(255, 87, 51)")
+
 
 # 팔레트 설정 함수
 def setup_palette(window):
@@ -384,28 +394,55 @@ def setup_palette(window):
         button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
         button.pack(side=LEFT, padx=2, pady=2)
 
-    # 사용자 정의 색상 입력창 생성 및 추가
-    custom_color_frame = Frame(palette_window)
-    custom_color_frame.pack(pady=10)
+    # 탭 추가
+    tab_control = ttk.Notebook(palette_window)
+    hex_tab = Frame(tab_control)
+    rgb_tab = Frame(tab_control)
+    tab_control.add(hex_tab, text="Hex")
+    tab_control.add(rgb_tab, text="RGB")
+    tab_control.pack(expand=1, fill="both")
 
-    # R 값 입력 라벨과 입력창 생성 및 추가
-    Label(custom_color_frame, text="R:").grid(row=0, column=0)
-    r_entry = Entry(custom_color_frame, width=3)
+    # Hex 입력창 생성 및 추가
+    hex_frame = Frame(hex_tab)
+    hex_frame.pack(pady=10)
+    Label(hex_frame, text="Hex:").grid(row=0, column=0)
+    hex_entry = Entry(hex_frame, width=7)
+    hex_entry.grid(row=0, column=1)
+
+    # RGB 입력창 생성 및 추가
+    rgb_frame = Frame(rgb_tab)
+    rgb_frame.pack(pady=10)
+    Label(rgb_frame, text="R:").grid(row=0, column=0)
+    r_entry = Entry(rgb_frame, width=3)
     r_entry.grid(row=0, column=1)
 
-    # G 값 입력 라벨과 입력창 생성 및 추가
-    Label(custom_color_frame, text="G:").grid(row=0, column=2)
-    g_entry = Entry(custom_color_frame, width=3)
+    Label(rgb_frame, text="G:").grid(row=0, column=2)
+    g_entry = Entry(rgb_frame, width=3)
     g_entry.grid(row=0, column=3)
 
-    # B 값 입력 라벨과 입력창 생성 및 추가
-    Label(custom_color_frame, text="B:").grid(row=0, column=4)
-    b_entry = Entry(custom_color_frame, width=3)
+    Label(rgb_frame, text="B:").grid(row=0, column=4)
+    b_entry = Entry(rgb_frame, width=3)
     b_entry.grid(row=0, column=5)
 
-    # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
-    Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
+    # 색상 설정 버튼 생성 및 추가
+    Button(hex_frame, text="Set Color", command=lambda: set_custom_color(hex_entry, None, None, None, palette_frame)).grid(row=1, columnspan=2, pady=10)
+    Button(rgb_frame, text="Set Color", command=lambda: set_custom_color(None, r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
 
+    # Colorhunt 링크 추가
+    colorhunt_link = Label(hex_frame, text="16진수 color 참고 사이트", fg="blue", cursor="hand2")
+    colorhunt_link.grid(row=2, columnspan=2)
+    colorhunt_link.bind("<Button-1>", open_colorhunt)
+
+# 웹 브라우저에서 링크 열기
+def open_colorhunt(event):
+    webbrowser.open_new("https://colorhunt.co/")
+
+# 브러시 색상을 설정하는 함수
+def set_brush_color(color):
+    global brush_color
+    brush_color = color
+    # spray_brush의 색상 변경을 위한 코드 추가
+    spray_brush.set_brush_color(brush_color)
 
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
