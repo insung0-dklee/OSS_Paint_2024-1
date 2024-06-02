@@ -124,7 +124,9 @@ timer = Timer()
 #타이머의 경과시간 업데이트 
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
-    timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
+    min = int(elapsed_time) // 60
+    sec = int(elapsed_time) % 60
+    timer_label.config(text=f"Time: {min} m {sec} s") #라벨에 표시
     window.after(1000, update_timer)  # 1초마다 updatae_time 함수를 호출
 #타이머 STOP
 def stop_timer():
