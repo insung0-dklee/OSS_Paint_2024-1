@@ -6,15 +6,6 @@ button_delete : clear_paint의 버튼
 
 """
 
-
-"""
-직선을 그릴 수 있게 해주는 함수 추가
-x1,y1 마우스를  클릭한 위치
-x2,y2 마우스에서 클릭을 땐 위치
-
-line 그 두점을 이어주는 함수
-"""
-
 from tkinter import *
 import time #시간 계산을 위한 모듈
 import brush_settings  # brush_settings 모듈 임포트
@@ -48,8 +39,6 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
-<<<<<<< HEAD
-=======
 #+=================================================================================
 def close_program(): #프로그램을 종료하는 기능
     if messagebox.askokcancel("Quit", "Do you want to quit?"): #프로그램을 종료할 것인지 확인 매시지를 띄움
@@ -85,7 +74,6 @@ def apply_dark_mode(): # 다크 모드 적용
         widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
->>>>>>> 94037f02749309e3a831ad2459671472421e1b19
 #이미지 파일 불러오기 
 def open_image():
     file_path = filedialog.askopenfilename()
@@ -219,14 +207,9 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
-<<<<<<< HEAD
-    elif brush_mode == "line":
-        canvas.bind("<B1-Motion>",lambda event:set_paint_mode_line(canvas)) #직선으로 변경
-=======
     elif brush_mode == "double_line": #브러쉬 모드가 double_line 면
         canvas.bind("<B1-Motion>", lambda event: double_line_paint(event, canvas))#이중 실선 브러쉬로 변경
         canvas.bind("<Button-1>", start_new_line)
->>>>>>> 94037f02749309e3a831ad2459671472421e1b19
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -279,9 +262,9 @@ def flip_horizontal(canvas):
 def erase(event, canvas):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
-    x1, y1 = ( event.x-3 ), ( event.y-3 )
-    x2, y2 = ( event.x+3 ), ( event.y+3 )
-    canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
+    x1, y1 = ( event.x-1 ), ( event.y-1 )
+    x2, y2 = ( event.x+1 ), ( event.y+1 )
+    canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color, width=brush_size) # 브러쉬 사이즈 조절 
 
 def change_bg_color(canvas):
     bg_color = askcolor()
@@ -601,17 +584,10 @@ def setup_paint_app(window):
     button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-<<<<<<< HEAD
-    button_line = Button(button_frame, text="line", command=lambda: set_brush_mode(canvas, "line")) # 직선을 위한 버튼 생성
-    button_line.pack()
-    button_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-=======
     button_double_line = Button(button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas,"double_line"))
     button_double_line.pack() 
     button_double_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_double_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
->>>>>>> 94037f02749309e3a831ad2459671472421e1b19
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
@@ -1307,25 +1283,6 @@ frame_distance.pack(side=RIGHT)
 frame_count = Frame(window)
 frame_count.pack(side=RIGHT)
 
-<<<<<<< HEAD
-def set_paint_mode_line(canvas): #직선을 그려주기 위한 함수 모듈"
-
-    canvas.pack()
-    canvas.bind("<Button-1>",clicked) # 버튼이 눌렸을때 실행
-    canvas.bind("<ButtonRelease-1>",unclicked)#버튼을 땠을때 실행
-
-def clicked(event):
-    global x1,y1 # x1,y1 값 저장
-    x1,y1=event.x,event.y 
-
-def unclicked(event):
-    global x2,y2#x2,y2 값 저장
-    x2,y2=event.x,event.y
-    canvas.create_line(x1,y1,x2,y2, width=brush_size, fill=brush_color) #저장한 두점을 이어준다
-
-
-
-=======
 # 눈금자 기본 설정
 ruler_on = False
 ruler_lines = []
@@ -1346,12 +1303,11 @@ canvas.bind("<Configure>", on_resize)
 bind_shortcuts_window(window)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
->>>>>>> 94037f02749309e3a831ad2459671472421e1b19
 
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
 
+
+
 window.mainloop()
-
-
