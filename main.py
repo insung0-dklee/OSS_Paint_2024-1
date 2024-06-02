@@ -230,6 +230,26 @@ def paint_marker(event, canvas):
     x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
+# 연필 브러시 함수
+def pencil_brush(event, canvas):
+    global last_x, last_y, brush_size
+    if last_x is not None and last_y is not None:
+        dx = event.x - last_x
+        dy = event.y - last_y
+        distance = max(abs(dx), abs(dy))
+        for i in range(0, distance, 2):  # 이동 거리의 절반마다 포인트 추가
+            x = last_x + dx * i / distance
+            y = last_y + dy * i / distance
+            jitter_x = x + random.randint(-brush_size, brush_size)  # 브러시 크기에 따른 진동 효과
+            jitter_y = y + random.randint(-brush_size, brush_size)
+            canvas.create_line(jitter_x, jitter_y, jitter_x + 1, jitter_y + 1, fill=brush_color, width=brush_size/2)
+    last_x, last_y = event.x, event.y
+
+def start_pencil(event):
+    global last_x, last_y
+    last_x, last_y = None, None
+    pencil_brush(event, canvas)
+
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -251,6 +271,10 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     elif brush_mode == "marker":
         canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
         canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
+    elif brush_mode == "pencil":
+        canvas.bind("<Button-1>", start_pencil)
+        canvas.bind("<B1-Motion>", lambda event: pencil_brush(event, canvas))
+        canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event))
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -683,6 +707,12 @@ def setup_paint_app(window):
     button_spray.pack(side=LEFT)
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 연필 브러시 버튼 추가
+    button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
+    button_pencil_brush.pack(side=LEFT)
+    button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
     button_paint.pack(side=RIGHT)
