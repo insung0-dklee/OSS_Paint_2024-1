@@ -1,80 +1,69 @@
-"""
-Project : Paint
-paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그리는 기능
-clear_paint : 그림판에 있는 그림을 다 지우는 기능
-button_delete : clear_paint의 버튼
-
-"""
-
 from tkinter import *
-import time #시간 계산을 위한 모듈
-import brush_settings  # brush_settings 모듈 임포트
+import time
+import brush_settings
 from brush_settings import change_brush_size, change_bg_color, change_brush_color, set_brush_mode, set_paint_mode_normal, set_paint_mode_pressure, paint_start, paint, dotted_paint
-from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
+from tkinter.colorchooser import askcolor
 from tkinter import filedialog
 from tkinter import PhotoImage
 from tkinter import messagebox
 from tkinter import simpledialog
-import math  # 수학 모듈을 가져옴
+import math
 import random
 from fun_timer import Timer
-from picture import ImageEditor #이미지 모듈을 가져옴
-from spray import SprayBrush #spray 모듈을 가지고 옴
+from picture import ImageEditor
+from spray import SprayBrush
 import os
+from TransformationHandler import TransformationHandler
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
-brush_size = 1  # 초기 브러시 크기
-selected_shape = "oval"  # 기본 도형은 타원형으로 설정
-brush_color = "black"  # 기본 색상은 검은색으로 설정
-brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-current_color = "black"  # 기본 색상은 검은색으로 설정
-eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
-spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
-last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
+brush_size = 1
+selected_shape = "oval"
+brush_color = "black"
+brush_mode = "solid"
+current_color = "black"
+eraser_mode = False
+spacing = 10
+last_x, last_y = None, None
 x1, y1 = None, None
 
-#동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
-#+=================================================================================
-def close_program(): #프로그램을 종료하는 기능
-    if messagebox.askokcancel("Quit", "Do you want to quit?"): #프로그램을 종료할 것인지 확인 매시지를 띄움
-        window.destroy() #확인 클릭시 프로그램을 종료
+def close_program():
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        window.destroy()
 
-def show_info_window(): #정보를 표시하는 기능
+def show_info_window():
     messagebox.showinfo("Info", "OSS_Paint_2024\n 그림판 v1.0.0")
-#+=================================================================================
 
-is_dark_mode = False  # 기본 모드는 라이트 모드
+is_dark_mode = False
 
-def toggle_dark_mode(): # 다크 모드를 토글하는 함수
+def toggle_dark_mode():
     global is_dark_mode
-    if is_dark_mode: # 지금 다크 모드라면
-        apply_light_mode() # 라이트 모드 적용
-    else: # 지금 라이트 모드라면
-        apply_dark_mode() # 다크 모드 적용
-    is_dark_mode = not is_dark_mode # 다크 모드 상태 변경
+    if is_dark_mode:
+        apply_light_mode()
+    else:
+        apply_dark_mode()
+    is_dark_mode = not is_dark_mode
 
-def apply_light_mode(): # 라이트 모드 적용(기본)
-    window.config(bg="sky blue") # 윈도우 배경색
-    canvas.config(bg="white") # 캔버스 배경색
-    button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
-        widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
-    timer_label.config(bg="sky blue", fg="black") # 타이머 라벨 배경색, 글자색
-
-def apply_dark_mode(): # 다크 모드 적용
-    window.config(bg="grey20") # 윈도우 배경색
-    canvas.config(bg="grey30") # 캔버스 배경색
-    button_frame.config(bg="grey20") # 버튼 프레임 배경색
+def apply_light_mode():
+    window.config(bg="sky blue")
+    canvas.config(bg="white")
+    button_frame.config(bg="sky blue")
     for widget in button_frame.winfo_children():
-        widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
-    timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
+        widget.config(bg="light grey", fg="black")
+    timer_label.config(bg="sky blue", fg="black")
 
-#이미지 파일 불러오기 
+def apply_dark_mode():
+    window.config(bg="grey20")
+    canvas.config(bg="grey30")
+    button_frame.config(bg="grey20")
+    for widget in button_frame.winfo_children():
+        widget.config(bg="grey40", fg="white")
+    timer_label.config(bg="grey20", fg="white")
+
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -89,181 +78,142 @@ def on_leave(event):
 def upload_image():
     path = filedialog.askopenfilename()
     if path:
-        # 업로드 파일이 PNG파일인지 확인
         if not path.lower().endswith('.png'):
             messagebox.showerror("Invalid File", "PNG 파일만 업로드할 수 있습니다.")
             return
-
-        # 업로드 파일이 PNG일 때 업로드 성공
         image = PhotoImage(file=path)
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
 
-#타이머 기능 추가
 timer = Timer()
-#타이머의 경과시간 업데이트 
+
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
-    timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
-    window.after(1000, update_timer)  # 1초마다 updatae_time 함수를 호출
-#타이머 STOP
+    timer_label.config(text=f"Time: {int(elapsed_time)} s")
+    window.after(1000, update_timer)
+
 def stop_timer():
     timer.stop()
-#타이머 리셋
+
 def reset_timer():
     timer.reset()
     if not timer.running:
         timer.start()
 
-#타이머 재시작
 def start_stop():
     if not timer.running:
         timer.start()
 
-
 def paint_airbrush(event, canvas):
-    for _ in range(dot_count.get()):  # 에어브러쉬 효과를 위해 여러 개의 작은 점을 그림
-        radius = random.randint(1, brush_size)  # 점의 크기를 무작위로 선택
-        angle = random.uniform(0, 2 * math.pi)  # 점의 방향을 무작위로 선택
-        distance = random.uniform(0, dot_distance.get())  # 점의 거리를 무작위로 선택
+    for _ in range(dot_count.get()):
+        radius = random.randint(1, brush_size)
+        angle = random.uniform(0, 2 * math.pi)
+        distance = random.uniform(0, dot_distance.get())
         x = event.x + distance * math.cos(angle)
         y = event.y + distance * math.sin(angle)
         canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill=brush_color, outline=brush_color)
 
-# 에어브러쉬 속성을 조정하는 함수
 def increase_dot_count():
     dot_count.set(dot_count.get() + 1)
 
 def decrease_dot_count():
-    dot_count.set(max(dot_count.get() - 1, 1))  # 최소값 1 설정
+    dot_count.set(max(dot_count.get() - 1, 1))
 
 def increase_dot_distance():
     dot_distance.set(dot_distance.get() + 1)
 
 def decrease_dot_distance():
-    dot_distance.set(max(dot_distance.get() - 1, 0))  # 최소값 0 설정
+    dot_distance.set(max(dot_distance.get() - 1, 0))
 
-    # 맞춤형 단축키 기능 추가
 def bind_shortcuts():
-    window.bind("<c>", lambda event: clear_paint(canvas)) #clear 단축키 c
-    window.bind("<Control-s>", save_canvas) #save 단축키 crtl+s
-    window.bind("<Control-z>", erase_last_stroke) #undo 단축키 crtl+z
-# brush_settings.initialize_globals(globals())
+    window.bind("<c>", lambda event: clear_paint(canvas))
+    window.bind("<Control-s>", save_canvas)
+    window.bind("<Control-z>", erase_last_stroke)
 
-def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
+def set_paint_mode_airbrush(canvas):
     canvas.bind("<B1-Motion>", lambda event: paint_airbrush(event, canvas))
 
 def set_paint_mode_normal(canvas, set_origin_mode=False):
     canvas.bind("<Button-1>", lambda event: paint_start(event))
     canvas.bind("<B1-Motion>", paint_stroke)
     if set_origin_mode:
-        # 추가적인 원점 모드 설정 코드
         pass
 
-    
-    
 def set_paint_mode_pressure(canvas):
     canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
     canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
 
 def start_paint_pressure(event, canvas):
     global start_time
-    start_time = time.time() #마우스를 클릭한 시간을 변수에 저장
+    start_time = time.time()
 
 def paint_pressure(event, canvas):
     global start_time
-    elapsed_time = time.time() - start_time  # 마우스를 클릭한 시간부터 지금까지의 시간을 계산
-    radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
-    x1, y1 = ( event.x - radius ), ( event.y - radius )
-    x2, y2 = ( event.x + radius ), ( event.y + radius )
+    elapsed_time = time.time() - start_time
+    radius = min(max(int(elapsed_time * 5), 1), 5)
+    x1, y1 = (event.x - radius), (event.y - radius)
+    x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
-
-
-# 점선 브러쉬 함수
 def dotted_paint(event, canvas):
     global last_x, last_y
-    spacing = 10 + brush_size  # 점 사이의 간격을 브러시 크기로 설정
+    spacing = 10 + brush_size
     if last_x is not None and last_y is not None:
         dx = event.x - last_x
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
-            canvas.create_oval(event.x-brush_size / 2, event.y-brush_size / 2, event.x+brush_size / 2, event.y+brush_size / 2, fill=brush_color, outline=brush_color)
+            canvas.create_oval(event.x - brush_size / 2, event.y - brush_size / 2, event.x + brush_size / 2, event.y + brush_size / 2, fill=brush_color, outline=brush_color)
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
         canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
 
-"""
-set_brush_mode: 브러쉬 모드를 변경하는 함수
-실선 브러쉬와 점선 브러쉬로 전환한다.
-매개변수: mode - 브러쉬 모드를 나타내는 문자열 ("solid" 또는 "dotted")
-"""
-def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
+def set_brush_mode(canvas, mode):
     global brush_mode
     brush_mode = mode
-    if brush_mode == "solid":  # 브러쉬 모드가 solid면
-        canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
-    elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
-        canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
-    elif brush_mode == "double_line": #브러쉬 모드가 double_line 면
-        canvas.bind("<B1-Motion>", lambda event: double_line_paint(event, canvas))#이중 실선 브러쉬로 변경
+    if brush_mode == "solid":
+        canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))
+    elif brush_mode == "dotted":
+        canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))
+    elif brush_mode == "double_line":
+        canvas.bind("<B1-Motion>", lambda event: double_line_paint(event, canvas))
         canvas.bind("<Button-1>", start_new_line)
 
-# 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
     global brush_size
     brush_size = int(new_size)
-    # spray의 크기를 변경하는 기능
     spray_brush.set_brush_size(brush_size)
 
-# 화면 확대 및 축소 기능 추가
 def zoom(event):
     scale = 1.0
-    if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
+    if event.delta > 0:
         scale = 1.1
-    elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
+    elif event.delta < 0:
         scale = 0.9
     canvas.scale("all", event.x, event.y, scale, scale)
 
-#all clear 기능 추가
 def clear_paint(canvas):
     canvas.delete("all")
     global last_x, last_y
-    last_x, last_y = None, None # 마지막 좌표 초기화
+    last_x, last_y = None, None
 
-def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
+def add_text(event, canvas, text_box):
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
-def bind_shortcuts_window(window):
-    window.bind("<Alt-Return>", toggle_fullscreen)  # Alt + Enter (Windows/Linux)
-    window.bind("<Command-Return>", toggle_fullscreen)  # Command + Enter (Mac)
 
-# 전체화면 토글 함수
+def bind_shortcuts_window(window):
+    window.bind("<Alt-Return>", toggle_fullscreen)
+    window.bind("<Command-Return>", toggle_fullscreen)
+
 def toggle_fullscreen(event=None):
     global window
     window.attributes("-fullscreen", not window.attributes("-fullscreen"))
 
-# 좌우 반전 기능 추가
-def flip_horizontal(canvas):
-    objects = canvas.find_all()
-    canvas.update()
-    canvas_width = canvas.winfo_width()
-    for obj in objects:
-        coords = canvas.coords(obj)
-        for i in range(len(coords)):
-            if i % 2 == 0:  # x 좌표를 반전시킵니다.
-                coords[i] = canvas_width - coords[i]
-        canvas.coords(obj, *coords)
-
 def erase(event, canvas):
     bg_color = canvas.cget("bg")
-    # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
-    x1, y1 = ( event.x-3 ), ( event.y-3 )
-    x2, y2 = ( event.x+3 ), ( event.y+3 )
+    x1, y1 = (event.x - 3), (event.y - 3)
+    x2, y2 = (event.x + 3), (event.y + 3)
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
 
 def change_bg_color(canvas):
@@ -276,35 +226,20 @@ def change_brush_color(event=None):
     if selected_color:
         brush_color = selected_color
         set_brush_color(brush_color)
-"""
-TypeError: change_brush_color() takes 0 positional arguments but 1 was given
-함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
-해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다. 
-인자를 받지 않기 위해 None로 설정
-"""
 
-# 브러시 색상을 설정하는 함수
 def set_brush_color(color):
     global brush_color
     brush_color = color
-    # spray_brush의 색상 변경을 위한 코드 추가
     spray_brush.set_brush_color(brush_color)
 
-# 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
 def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
     try:
-        # R, G, B 값을 입력받아 정수로 변환
         r = int(r_entry.get())
         g = int(g_entry.get())
         b = int(b_entry.get())
-
-        # R, G, B 값이 0에서 255 사이인지 확인
         if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
-            # R, G, B 값을 16진수로 변환하여 색상 코드 생성
             color = f'#{r:02x}{g:02x}{b:02x}'
-            set_brush_color(color)  # 브러시 색상 설정 함수 호출
-
-            # 사용자 정의 색상을 팔레트에 동적으로 추가
+            set_brush_color(color)
             button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
             button.pack(side=LEFT, padx=2, pady=2)
         else:
@@ -312,50 +247,28 @@ def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
     except ValueError:
         print("유효한 RGB 값을 입력하세요.")
 
-# 팔레트 설정 함수
 def setup_palette(window):
-    # 새로운 창 생성
     palette_window = Toplevel(window)
     palette_window.title("팔레트 설정")
-
-    # 팔레트 프레임 생성 및 추가
     palette_frame = Frame(palette_window)
     palette_frame.pack(pady=10)
-
-    # 미리 정의된 색상 목록
-    colors = [
-        'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'white', 'pink', 'brown', 'grey'
-    ]
-
-    # 색상 버튼 생성 및 팔레트 프레임에 추가
+    colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'white', 'pink', 'brown', 'grey']
     for color in colors:
         button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
         button.pack(side=LEFT, padx=2, pady=2)
-
-    # 사용자 정의 색상 입력창 생성 및 추가
     custom_color_frame = Frame(palette_window)
     custom_color_frame.pack(pady=10)
-
-    # R 값 입력 라벨과 입력창 생성 및 추가
     Label(custom_color_frame, text="R:").grid(row=0, column=0)
     r_entry = Entry(custom_color_frame, width=3)
     r_entry.grid(row=0, column=1)
-
-    # G 값 입력 라벨과 입력창 생성 및 추가
     Label(custom_color_frame, text="G:").grid(row=0, column=2)
     g_entry = Entry(custom_color_frame, width=3)
     g_entry.grid(row=0, column=3)
-
-    # B 값 입력 라벨과 입력창 생성 및 추가
     Label(custom_color_frame, text="B:").grid(row=0, column=4)
     b_entry = Entry(custom_color_frame, width=3)
     b_entry.grid(row=0, column=5)
-
-    # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
     Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
 
-
-# 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
     if file_path:
@@ -363,197 +276,170 @@ def save_canvas(canvas):
 
 def reset_brush(canvas):
     global brush_size, brush_color
-    brush_size = 1  # 초기 브러시 크기
-    brush_color = "black"  # 초기 브러시 색상
-    change_brush_size(brush_size)  # 브러시 크기 조정
-    canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
-
+    brush_size = 1
+    brush_color = "black"
+    change_brush_size(brush_size)
+    canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))
 
 def setup_reset_brush_button(window, canvas):
     button_reset = Button(window, text="Reset Brush", command=lambda: reset_brush(canvas))
     button_reset.pack(side=LEFT)
-    button_reset.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_reset.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    button_reset.bind("<Enter>", on_enter)
+    button_reset.bind("<Leave>", on_leave)
 
-# 색 채우기 기능 추가
 def flood_fill(event):
-    fill_color = askcolor()[1]  # 색상 선택 대화 상자에서 색상을 선택
+    fill_color = askcolor()[1]
     x, y = event.x, event.y
     target = canvas.find_closest(x, y)
     if target:
         canvas.itemconfig(target, fill=fill_color)
 
-
 def draw_actor(event, actor_name):
-    """
-    draw_actor: 액터를 그리는 함수
-    캔버스의 특정 위치에 액터를 그린다.
-    """
     x, y = event.x, event.y
-    canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill="white", outline="black") # 머리
-    canvas.create_line(x, y + 15, x, y + 40) # 몸통
-    canvas.create_line(x, y + 20, x - 10, y + 30) # 왼팔
-    canvas.create_line(x, y + 20, x + 10, y + 30) # 오른팔
-    canvas.create_line(x, y + 40, x - 10, y + 50) # 왼다리
-    canvas.create_line(x, y + 40, x + 10, y + 50) # 오른다리
-    canvas.create_text(x, y + 60, text=actor_name, anchor="center") # 액터 이름
-    # 바인딩 해제
+    canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill="white", outline="black")
+    canvas.create_line(x, y + 15, x, y + 40)
+    canvas.create_line(x, y + 20, x - 10, y + 30)
+    canvas.create_line(x, y + 20, x + 10, y + 30)
+    canvas.create_line(x, y + 40, x - 10, y + 50)
+    canvas.create_line(x, y + 40, x + 10, y + 50)
+    canvas.create_text(x, y + 60, text=actor_name, anchor="center")
     canvas.unbind("<Button-1>")
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
 
 def draw_use_case(event, use_case_name):
-    """
-    draw_use_case: 유스케이스를 그리는 함수
-    캔버스의 특정 위치에 유스케이스를 그린다.
-    유스케이스는 타원으로 표시되고, 유스케이스의 이름이 타원의 중앙에 표시된다.
-    """
     x, y = event.x, event.y
-    canvas.create_oval(x - 50, y - 25, x + 50, y + 25, fill="white", outline="black") # 유스케이스 모양
-    canvas.create_text(x, y, text=use_case_name, anchor="center") # 유스케이스 이름
-    # 바인딩 해제
+    canvas.create_oval(x - 50, y - 25, x + 50, y + 25, fill="white", outline="black")
+    canvas.create_text(x, y, text=use_case_name, anchor="center")
     canvas.unbind("<Button-1>")
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
 
 def draw_relationship_start(event):
-    """
-    draw_relationship_start: 관계 그리기를 시작하는 함수
-    관계의 시작 지점을 기록하고, 드래그 중에 미리보기 선을 그린다.
-    """
     global x1, y1, preview_line
-    x1, y1 = event.x, event.y # 시작 지점 기록
-    preview_line = None # 미리보기 선 초기화
-    canvas.bind("<B1-Motion>", draw_relationship_preview) # 드래그할 때 미리보기 선 그리기
+    x1, y1 = event.x, event.y
+    preview_line = None
+    canvas.bind("<B1-Motion>", draw_relationship_preview)
 
 def draw_relationship_preview(event):
-    """
-    draw_relationship_preview: 관계 그리기 미리보기 함수
-    관계를 그리기 위해 드래그할 때 현재 위치까지의 미리보기 선을 그린다.
-    """
     global x1, y1, preview_line
-    x2, y2 = event.x, event.y # 현재 지점
+    x2, y2 = event.x, event.y
     if preview_line:
-        canvas.delete(preview_line) # 이전 미리보기 선 삭제
-    preview_line = canvas.create_line(x1, y1, x2, y2, dash=(4, 2)) # 새로운 미리보기 선 그리기
+        canvas.delete(preview_line)
+    preview_line = canvas.create_line(x1, y1, x2, y2, dash=(4, 2))
 
 def draw_relationship_end(event, relationship_type):
-    """
-    draw_relationship_end: 관계 그리기를 종료하는 함수
-    드래그 종료 지점에서 실제 선을 그린다. 
-    관계 유형에 따라 화살표와 텍스트를 추가한다.
-    """
     global x1, y1, preview_line
-    x2, y2 = event.x, event.y # 종료 지점
+    x2, y2 = event.x, event.y
     if preview_line:
-        canvas.delete(preview_line) # 미리보기 선 삭제
-    if relationship_type in ["include", "extend"]: # 포함 관계나 확장 관계면
-        canvas.create_line(x1, y1, x2, y2, arrow=LAST, dash=(4, 2)) # 화살표가 있는 점선 그리기
+        canvas.delete(preview_line)
+    if relationship_type in ["include", "extend"]:
+        canvas.create_line(x1, y1, x2, y2, arrow=LAST, dash=(4, 2))
     else:
-        canvas.create_line(x1, y1, x2, y2) # 일반 선 그리기
-
-    # 관계 유형에 따라 텍스트 추가
+        canvas.create_line(x1, y1, x2, y2)
     if relationship_type == "include":
         canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, text="<<include>>", anchor="center")
     elif relationship_type == "extend":
         canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, text="<<extend>>", anchor="center")
-
-    # 바인딩 해제
     canvas.unbind("<Button-1>")
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
 
 def add_actor():
-    """
-    add_actor: 액터 추가 함수
-    액터의 이름을 입력받고, 캔버스에 액터를 그리는 이벤트를 바인딩한다.
-    """
-    actor_name = simpledialog.askstring("Input", "액터의 이름을 입력하세요:") # 액터 이름 입력받기
+    actor_name = simpledialog.askstring("Input", "액터의 이름을 입력하세요:")
     if actor_name:
-        canvas.bind("<Button-1>", lambda event: draw_actor(event, actor_name)) # 클릭 시 액터 그리기
+        canvas.bind("<Button-1>", lambda event: draw_actor(event, actor_name))
 
 def add_use_case():
-    """
-    add_use_case: 유스케이스 추가 함수
-    유스케이스의 이름을 입력받고, 캔버스에 유스케이스를 그리는 이벤트를 바인딩한다.
-    """
-    use_case_name = simpledialog.askstring("Input", "유스케이스의 이름을 입력하세요:") # 유스케이스 이름 입력받기
+    use_case_name = simpledialog.askstring("Input", "유스케이스의 이름을 입력하세요:")
     if use_case_name:
-        canvas.bind("<Button-1>", lambda event: draw_use_case(event, use_case_name)) # 클릭 시 유스케이스 그리기
+        canvas.bind("<Button-1>", lambda event: draw_use_case(event, use_case_name))
 
 def add_relationship():
-    """
-    add_relationship: 관계 추가 함수
-    관계의 유형을 입력받고, 관계를 그리는 이벤트를 바인딩한다.
-    """
-    relationship_type = simpledialog.askstring("Input", "관계의 유형을 입력하세요 (include/extend/line):") # 관계 유형 입력받기
+    relationship_type = simpledialog.askstring("Input", "관계의 유형을 입력하세요 (include/extend/line):")
     if relationship_type in ["include", "extend", "line"]:
-        canvas.bind("<Button-1>", draw_relationship_start) # 클릭 시 관계 그리기 시작
-        canvas.bind("<ButtonRelease-1>", lambda event: draw_relationship_end(event, relationship_type)) # 마우스 버튼 놓으면 관계 그리기 종료
+        canvas.bind("<Button-1>", draw_relationship_start)
+        canvas.bind("<ButtonRelease-1>", lambda event: draw_relationship_end(event, relationship_type))
     else:
-        messagebox.showerror("Error", "잘못된 입력입니다. include, extend, line 중에 입력하세요.")  # 잘못된 입력에 대한 오류 메시지
+        messagebox.showerror("Error", "잘못된 입력입니다. include, extend, line 중에 입력하세요.")
 
 def choose_use_case_element(event=None):
-    """
-    choose_use_case_element: 유스케이스 다이어그램 요소 선택 함수
-    액터, 유스케이스, 관계를 선택할 수 있는 팝업 메뉴를 생성한다.
-    """
     popup = Menu(window, tearoff=0)
-    popup.add_command(label="Actor", command=add_actor) # 액터 추가
-    popup.add_command(label="Use Case", command=add_use_case) # 유스케이스 추가
-    popup.add_command(label="Relationship", command=add_relationship) # 관계 추가
+    popup.add_command(label="Actor", command=add_actor)
+    popup.add_command(label="Use Case", command=add_use_case)
+    popup.add_command(label="Relationship", command=add_relationship)
     if event:
-        popup.post(event.x_root, event.y_root) # 마우스 위치에 팝업 메뉴 표시
+        popup.post(event.x_root, event.y_root)
     else:
-        popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
+        popup.post(window.winfo_pointerx(), window.winfo_pointery())
 
-
+def create_transformation_menu(event):
+    popup = Menu(window, tearoff=0)
+    popup.add_command(label="Flip Horizontal", command=transformation_handler.flip_horizontal)
+    popup.add_command(label="Flip Vertical", command=transformation_handler.flip_vertical)
+    popup.add_command(label="Rotate 90 Degrees", command=transformation_handler.rotate_90)
+    popup.post(event.x_root, event.y_root)
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame
 
-    brush_size = 1  # 초기 브러시 크기
-    brush_color = "black"  # 초기 브러시 색상
+
+    brush_size = 1
+    brush_color = "black"
 
     global canvas
     canvas = Canvas(window, bg="white")
     canvas.pack(fill="both", expand=True)
 
-    last_x, last_y = None, None  # 마지막 좌표 초기화
-    brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
+    global transformation_handler
+    transformation_handler = TransformationHandler(canvas)
 
-    button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
+
+    last_x, last_y = None, None
+    brush_mode = "solid"
+
+    button_frame = Frame(window, bg="sky blue")
     button_frame.pack(fill=X)
 
     button_toggle_mode = Button(window, text="Toggle Dark Mode", command=toggle_dark_mode)
-    button_toggle_mode.pack(side=LEFT) # 다크 모드 토글 버튼을 윈도우에 배치
+    button_toggle_mode.pack(side=LEFT)
 
-    # setup_paint_app 함수에 마커 모드 버튼 추가
+    button_flip_horizontal = Button(window, text="Flip Horizontal", command=transformation_handler.flip_horizontal)
+    button_flip_horizontal.pack(side=LEFT)
+    button_flip_horizontal.bind("<Enter>", on_enter)
+    button_flip_horizontal.bind("<Leave>", on_leave)
+
+    button_flip_vertical = Button(window, text="Flip Vertical", command=transformation_handler.flip_vertical)
+    button_flip_vertical.pack(side=LEFT)
+    button_flip_vertical.bind("<Enter>", on_enter)
+    button_flip_vertical.bind("<Leave>", on_leave)
+
+    button_rotate_90 = Button(window, text="Rotate 90 Degrees", command=transformation_handler.rotate_90)
+    button_rotate_90.pack(side=LEFT)
+    button_rotate_90.bind("<Enter>", on_enter)
+    button_rotate_90.bind("<Leave>", on_leave)
+
+
     button_marker = Button(button_frame, text="Marker Mode", command=lambda: set_paint_mode_marker(canvas))
     button_marker.pack(side=LEFT)
     button_marker.bind("<Enter>", on_enter)
     button_marker.bind("<Leave>", on_leave)
 
     button_use_case = Button(window, text="Use Case Diagram", command=choose_use_case_element)
-    button_use_case.pack(side=LEFT) # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
+    button_use_case.pack(side=LEFT)
 
-    # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
 
-    #타이머 리셋 버튼
     button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
     button_reset_timer.pack(side=RIGHT)
 
     start_button = Button(button_frame, text="Start", command=start_stop)
-    start_button.pack(side = RIGHT)
+    start_button.pack(side=RIGHT)
 
-    
-
-    #spray 인스턴스 생성 
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
-    # 스프레이 버튼
+
     button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
     button_spray.pack(side=LEFT)
 
@@ -565,62 +451,51 @@ def setup_paint_app(window):
 
     button_clear = Button(button_frame, text="All Clear", command=lambda: clear_paint(canvas))
     button_clear.pack(side=LEFT)
-    button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
+    button_clear.bind("<Enter>", on_enter)
+    button_clear.bind("<Leave>", on_leave)
 
     brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
 
-
     button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
     button_solid.pack()
-    button_solid.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_solid.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    button_solid.bind("<Enter>", on_enter)
+    button_solid.bind("<Leave>", on_leave)
 
     button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode(canvas, "dotted"))
     button_dotted.pack()
-    button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    button_dotted.bind("<Enter>", on_enter)
+    button_dotted.bind("<Leave>", on_leave)
 
-    button_double_line = Button(button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas,"double_line"))
-    button_double_line.pack() 
-    button_double_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_double_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    button_double_line = Button(button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas, "double_line"))
+    button_double_line.pack()
+    button_double_line.bind("<Enter>", on_enter)
+    button_double_line.bind("<Leave>", on_leave)
 
-    setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
-
-
+    setup_reset_brush_button(window, canvas)
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
     button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    button_paint.bind("<Enter>", on_enter)
+    button_paint.bind("<Leave>", on_leave)
 
-    button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
     canvas.bind("<Button-3>", lambda event: add_text(event, canvas, text_box))
     window.bind("<F11>", toggle_fullscreen)
 
-    button_flip = Button(window, text="Flip Horizontal", command=lambda: flip_horizontal(canvas))
+    button_flip = Button(window, text="Flip Horizontal", command=lambda: transformation_handler.flip_horizontal())
     button_flip.pack(side=LEFT)
-    button_flip.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_flip.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    button_flip.bind("<Enter>", on_enter)
+    button_flip.bind("<Leave>", on_leave)
 
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
-
-    # 
-
-    #도형 모양 선택하는 버튼 생성
     button_choose_shape = Button(window, text="shape", command=choose_shape)
-    button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
+    button_choose_shape.bind("<Button-1>", choose_shape)
     button_choose_shape.pack(side=LEFT)
 
     canvas.bind("<Enter>", change_cursor)
@@ -633,7 +508,6 @@ def setup_paint_app(window):
 
     bind_shortcuts()
 
-    # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
     dot_count.set(10)
 
@@ -646,20 +520,17 @@ def setup_paint_app(window):
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
 
-
-
-    # 에어브러쉬 속성 조절 버튼 추가
     Button(frame_distance, text="+", command=increase_dot_distance).pack(side=RIGHT)
     Label(frame_distance, text="Distance").pack(side=RIGHT)
-    Label(frame_distance, textvariable=dot_distance).pack(side=RIGHT)  # 거리 표시
+    Label(frame_distance, textvariable=dot_distance).pack(side=RIGHT)
     Button(frame_distance, text="-", command=decrease_dot_distance).pack(side=RIGHT)
 
     Button(frame_count, text="+", command=increase_dot_count).pack(side=RIGHT)
     Label(frame_count, text="Count").pack(side=RIGHT)
-    Label(frame_count, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
+    Label(frame_count, textvariable=dot_count).pack(side=RIGHT)
     Button(frame_count, text="-", command=decrease_dot_count).pack(side=RIGHT)
 
-    button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
+    button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas))
     button_paint.pack(side=RIGHT)
 
     canvas.bind("<Button-1>", paint_start)
@@ -668,147 +539,97 @@ def setup_paint_app(window):
 
     set_paint_mode_normal(canvas)
 
-    
+    menu_bar = Menu(window)
+    window.config(menu=menu_bar)
 
-#+=================================================================================
-    menu_bar = Menu(window) # 메뉴 바 생성
-    window.config(menu=menu_bar) # 윈도우에 매뉴바를 menu_bar로 설정
+    file_menu = Menu(menu_bar, tearoff=0)
+    color_menu = Menu(menu_bar, tearoff=0)
+    tool_menu = Menu(menu_bar, tearoff=0)
+    help_menu = Menu(menu_bar, tearoff=0)
 
-    file_menu = Menu(menu_bar, tearoff=0)  # 메뉴 바에 파일 관련 메뉴를 추가
-    color_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 색 관련 메뉴를 추가
-    tool_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도구 관련 메뉴를 추가
-    help_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도움 관련 메뉴를 추가
+    menu_bar.add_cascade(label="File", menu=file_menu)
+    menu_bar.add_cascade(label="Color", menu=color_menu)
+    menu_bar.add_cascade(label="Tools", menu=tool_menu)
+    menu_bar.add_cascade(label="Help", menu=help_menu)
 
-    menu_bar.add_cascade(label="File", menu=file_menu) # 'File' 메뉴를 매뉴바에 생성
-    menu_bar.add_cascade(label="Color", menu=color_menu) # 'Color' 메뉴를 매뉴바에 생성
-    menu_bar.add_cascade(label="Tools", menu=tool_menu) # 'Tools' 메뉴를 매뉴바에 생성
-    menu_bar.add_cascade(label="Help", menu=help_menu) # 'Help' 메뉴를 매뉴바에 생성
+    file_menu.add_command(label="Open New Window", command=create_new_window)
+    file_menu.add_command(label="Add Image", command=upload_image)
+    file_menu.add_command(label="Save", command=lambda: save_canvas(canvas))
+    file_menu.add_command(label="Exit", command=close_program)
 
-    file_menu.add_command(label="Open New Window", command=create_new_window) # File 메뉴에 Open New Window 기능 버튼 추가
-    file_menu.add_command(label="Add Image", command=upload_image) # File 메뉴에 Add Image 기능 버튼 추가
-    file_menu.add_command(label="Save", command=lambda: save_canvas(canvas)) # File 메뉴에 Save 기능 버튼 추가
-    file_menu.add_command(label="Exit", command=close_program) # File 메뉴에 Exit 기능 버튼 추가
+    color_menu.add_command(label="Set Palette", command=lambda: setup_palette(window))
+    color_menu.add_command(label="Change Background Color", command=lambda: change_bg_color(canvas))
+    color_menu.add_command(label="Change Brush Color", command=lambda: change_brush_color())
 
-    color_menu.add_command(label="Set Palette", command=lambda: setup_palette(window)) # Color 메뉴에 Set Palette 기능 버튼 추가
-    color_menu.add_command(label="Change Background Color", command=lambda: change_bg_color(canvas)) # Color 메뉴에 Change Background Color 기능 버튼 추가
-    color_menu.add_command(label="Change Brush Color", command=lambda: change_brush_color()) # Color 메뉴에 Change Brush Color 기능 버튼 추가
+    tool_menu.add_command(label="Toggle FullScreen", command=toggle_fullscreen)
+    tool_menu.add_command(label="Toggle Ruler", command=toggle_ruler)
+    tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas))
+    tool_menu.add_command(label="Grid Setting", command=open_grid_dialog)
 
-    tool_menu.add_command(label="Toggle FullScreen", command=toggle_fullscreen) # Tools 메뉴에 Toggle FullScreen 기능 버튼 추가
-    tool_menu.add_command(label="Toggle Ruler", command=toggle_ruler) # Tools 메뉴에 Toggle Ruler 기능 버튼 추가
-    tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas)) # Tools 메뉴에 Toggle Grid 기능 버튼 추가
-    tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
+    tool_menu.add_command(label="Flip Horizontal", command=transformation_handler.flip_horizontal)
+    tool_menu.add_command(label="Flip Vertical", command=transformation_handler.flip_vertical)
+    tool_menu.add_command(label="Rotate 90 Degrees", command=transformation_handler.rotate_90)
 
-    help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
-#+=================================================================================
-    
-    # button_new_window = Button(window, text="새 창 열기", command=create_new_window)
-    # button_new_window.pack(side=LEFT)
-
-    # toggle_button = Button(window, text="Ruler", command=toggle_ruler)
-    # toggle_button.pack()
-
-    # 팔레트 설정 버튼 생성 및 버튼 프레임에 추가
-    # button_palette = Button(button_frame, text="Set Palette", command=lambda: setup_palette(window))
-    # button_palette.pack(side=LEFT)
-
-    # # 보조선을 토글하는 버튼
-    # button_toggle_grid = Button(window, text="Grid on/off", command=lambda: toggle_grid(canvas))
-    # button_toggle_grid.pack(side=LEFT)
-
-    # # 보조선 크기 설정
-    # button_grid_settings = Button(window, text="Grid setting", command=open_grid_dialog)
-    # button_grid_settings.pack()
-
-    # button_bg_color = Button(window, text="Change Background Color", command=lambda: change_bg_color(canvas))
-    # button_bg_color.pack(side=LEFT)
-    # button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    # button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    # button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color())
-    # button_brush_color.pack(side=LEFT)
-    # button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    # button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    # # 버튼 프레임에 저장 버튼 추가
-    # button_save = Button(window, text="Save", command=lambda: save_canvas(canvas))
-    # button_save.pack(side=LEFT)
-
-    # button_upload_image = Button(window, text="Upload Image", command=upload_image)
-    # button_upload_image.pack(side=LEFT)
+    help_menu.add_command(label="Info", command=show_info_window)
 
 
-# 새 창 열기 생성
+
+
 def create_new_window():
-    new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
+    new_window = Toplevel(window)
     new_window.title("새 그림판")
     new_window.geometry("800x600+200+200")
-    new_window.configure(bg="sky blue")#구별하기 위한 버튼 영역 색 변경
+    new_window.configure(bg="sky blue")
     setup_paint_app(new_window)
 
-# 마우스 커서를 연필 형태로 변경하기
 def change_cursor(event):
     canvas.config(cursor="pencil")
 
-# 연필 형태 커서를 원래대로 변경하기
 def default_cursor(event):
     canvas.config(cursor="")
 
-# 우클릭을 누르면 우측 상단에 x, y 좌표값을 백분율로 표시
 def show_coordinates(event):
-    canvas.delete("coord_text")  # 이전 좌표값 삭제
+    canvas.delete("coord_text")
     width = canvas.winfo_width()
     height = canvas.winfo_height()
     x_percent = (event.x / width) * 100
     y_percent = (event.y / height) * 100
-    coord_text = f"<{x_percent:.1f}% / {100-y_percent:.1f}%>"
+    coord_text = f"<{x_percent:.1f}% / {100 - y_percent:.1f}%>"
     canvas.create_text(10, 10, text=coord_text, anchor="nw", tags="coord_text")
 
-# 우클릭을 떼면 좌표값 삭제
 def hide_coordinates(event):
     canvas.delete("coord_text")
 
-"""
-shape로 그릴 도형을 선택할 시 호출되어 윤곽선, 내부 색 선택이 가능하게 해주는 함수
-shape_outline_color : 도형의 윤곽선 색
-shape_fill_color : 도형의 내부 색
-"""
-
 def select_shape_color():
     global shape_outline_color, shape_fill_color
-    shape_outline_color = askcolor()[1]  # 윤곽선 색상 선택
-    shape_fill_color = askcolor()[1]  # 내부 색상 선택
+    shape_outline_color = askcolor()[1]
+    shape_fill_color = askcolor()[1]
 
-# 사각형 그리기
 def create_rectangle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_rectangle)
 
-# 삼각형 그리기
 def create_triangle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_triangle)
 
-# 원형 그리기
 def create_circle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_circle)
 
-# 사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
     global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
     current_shape = None
     canvas.bind("<B1-Motion>", lambda event: draw_rectangle(event))
-    canvas.bind("<ButtonRelease-1>", finish_rectangle) # 마우스 버튼을 떼면 사각형 그리기 종료
+    canvas.bind("<ButtonRelease-1>", finish_rectangle)
 
-# 사각형 생성하기
 def draw_rectangle(event):
     global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
     paint_start(event)
 
-# 사각형 그리기 종료
 def finish_rectangle(event):
     global current_shape
     canvas.unbind("<B1-Motion>")
@@ -816,7 +637,6 @@ def finish_rectangle(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
-# 삼각형 그릴 위치 정하고 생성하는 함수 호출
 def start_triangle(event):
     global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
@@ -824,27 +644,19 @@ def start_triangle(event):
     canvas.bind("<B1-Motion>", draw_triangle)
     canvas.bind("<ButtonRelease-1>", finish_triangle)
 
-# 삼각형 생성하기
 def draw_triangle(event):
-    global start_x, start_y, current_shape 
+    global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     x2, y2 = event.x, event.y
-
-    # 시작점과 마우스 이벤트가 발생한 점 사이의 거리 계산
     side_length = math.sqrt((x2 - start_x) ** 2 + (y2 - start_y) ** 2)
-
-    # 정삼각형의 꼭짓점을 계산
-    angle = math.radians(60)  # 120도를 라디안으로 변환
+    angle = math.radians(60)
     x3 = start_x + side_length * math.cos(angle)
     y3 = start_y + side_length * math.sin(angle)
-
-    angle += math.radians(60)  # 240도를 라디안으로 변환
+    angle += math.radians(60)
     x4 = start_x + side_length * math.cos(angle)
     y4 = start_y + side_length * math.sin(angle)
-
     current_shape = canvas.create_polygon(start_x, start_y, x2, y2, x3, y3, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
-# 삼각형 그리기 종료
 def finish_triangle(event):
     global current_shape
     canvas.unbind("<B1-Motion>")
@@ -852,7 +664,6 @@ def finish_triangle(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
-# 원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
     global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
@@ -860,14 +671,12 @@ def start_circle(event):
     canvas.bind("<B1-Motion>", lambda event: draw_circle(event))
     canvas.bind("<ButtonRelease-1>", finish_circle)
 
-# 원형 생성하기
 def draw_circle(event):
     global start_x, start_y, current_shape
     canvas.delete("temp_shape")
-    r = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
+    r = ((start_x - event.x) ** 2 + (start_y - event.y) ** 2) ** 0.5
     current_shape = canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
-# 원형 그리기 종료
 def finish_circle(event):
     global current_shape
     canvas.unbind("<B1-Motion>")
@@ -875,12 +684,10 @@ def finish_circle(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
-# 별 모양 그리기
 def create_star(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_star)
 
-# 별 모양 그릴 위치 정하고 생성하는 함수 호출
 def start_star(event):
     global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
@@ -888,31 +695,25 @@ def start_star(event):
     canvas.bind("<B1-Motion>", lambda event: draw_star(event))
     canvas.bind("<ButtonRelease-1>", finish_star)
 
-# 별 모양 생성하기
 def draw_star(event):
     global start_x, start_y, current_shape
     canvas.delete("temp_shape")
-    outer_radius = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
-    inner_radius = outer_radius / 2.5  # 내각 반지름은 외각 반지름의 2.5분의 1
+    outer_radius = ((start_x - event.x) ** 2 + (start_y - event.y) ** 2) ** 0.5
+    inner_radius = outer_radius / 2.5
     points = []
-    
     for i in range(5):
         angle_outer = math.radians(i * 72 - 90)
         angle_inner = math.radians(i * 72 + 36 - 90)
-        
         x_outer = start_x + outer_radius * math.cos(angle_outer)
         y_outer = start_y + outer_radius * math.sin(angle_outer)
         x_inner = start_x + inner_radius * math.cos(angle_inner)
         y_inner = start_y + inner_radius * math.sin(angle_inner)
-        
         points.append(x_outer)
         points.append(y_outer)
         points.append(x_inner)
         points.append(y_inner)
-    
     current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
-# 별 모양 그리기 종료
 def finish_star(event):
     global current_shape
     canvas.unbind("<B1-Motion>")
@@ -920,17 +721,14 @@ def finish_star(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
-#모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
     popup.add_command(label="Rectangle", command=lambda: create_rectangle(event))
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
-    popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
+    popup.post(event.x_root, event.y_root)
 
-
-# 마커 모드 추가
 def paint_marker(event, canvas):
     radius = brush_size
     x1, y1 = (event.x - radius), (event.y - radius)
@@ -941,41 +739,35 @@ def set_paint_mode_marker(canvas):
     canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
     canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
 
-"""
-그림그리는 것을 획 단위로 그리도록 개선, 획 단위로 지우는 지우개 기능 추가, 지웠던 획을 다시 되돌리는 기능 추가
-그림그리는 것을 획 단위로 그리도록 개선하였으며, 마우스 클릭 후 놓을 때 까지를 한 획으로 보았다.
-이를 최근에 그린 획을 지우는 기능을 추가하였으며, 지웠던 획을 다시 되돌리도록 하는 기능을 구현하였다.
-지웠던 획들 다시 되돌리는 것은 획 지우기 기능을 이용해 지웠던 경우에만 한함
-"""
-strokes = [] #획을 담아 둠
+strokes = []
 current_stroke = []
 redo_strokes = []
 
-def paint_start(event): #획 시작
+def paint_start(event):
     global x1, y1, current_stroke
     x1, y1 = event.x, event.y
     current_stroke = []
 
-def paint_stroke(event): #획 그림
+def paint_stroke(event):
     global x1, y1, current_stroke
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
     current_stroke.append((x1, y1, x2, y2))
     x1, y1 = x2, y2
 
-def paint_end(event): #획 끝
+def paint_end(event):
     global current_stroke
     strokes.append(list(current_stroke))
     current_stroke.clear()
 
-def erase_last_stroke(event=None): #마지막으로 그린 획을 지움
+def erase_last_stroke(event=None):
     if strokes:
         last_stroke = strokes.pop()
         redo_strokes.append(last_stroke)
         for line in last_stroke:
             canvas.create_line(*line, fill="white", width=brush_size)
 
-def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
+def rewrite_last_stroke():
     if redo_strokes:
         last_redo_stroke = redo_strokes.pop()
         strokes.append(last_redo_stroke)
@@ -986,27 +778,19 @@ def start_new_line(event):
     global last_x, last_y
     last_x, last_y = None, None
 
-# 이중실선 브러쉬 함수
 def double_line_paint(event, canvas):
     global last_x, last_y
-    spacing = brush_size  # 두 선 사이의 간격 설정
+    spacing = brush_size
     if last_x is not None and last_y is not None:
-        # 마지막 위치와 현재 위치 사이의 각도 계산
         angle = math.atan2(event.y - last_y, event.x - last_x)
-        # 각도에 따라 선 사이의 수직 거리를 계산하여 두 선의 시작점과 끝점을 결정
         dx = math.cos(angle + math.pi / 2) * spacing
         dy = math.sin(angle + math.pi / 2) * spacing
-
-        # 첫 번째 선 그리기
         canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color)
-        # 두 번째 선 그리기
         canvas.create_line(last_x + dx, last_y + dy, event.x + dx, event.y + dy, width=brush_size, fill=brush_color)
-
         last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
 
-# 패턴을 그리는 함수들 추가
 def draw_tile_pattern(canvas, tile_size=50):
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
@@ -1033,7 +817,7 @@ def draw_diagonal_pattern(canvas, line_spacing=50):
         canvas.create_line(canvas_width, canvas_height - y, canvas_width - y, canvas_height, fill="black")
 
 def draw_grid(canvas, step):
-    canvas.delete("grid_line") #새로 grid를 그리기 위해 기존 grid를 삭제
+    canvas.delete("grid_line")
     width = canvas.winfo_width()
     height = canvas.winfo_height()
     for x in range(0, width, step):
@@ -1046,9 +830,6 @@ def toggle_grid(canvas):
         canvas.delete("grid_line")
     else:
         draw_grid(canvas, 50)
-
-def change_grid_spacing(value):
-    draw_grid(canvas, value)
 
 def change_grid_spacing(value):
     draw_grid(canvas, value)
@@ -1079,47 +860,26 @@ class GridDialog:
         self.top.destroy()
 
 def open_grid_dialog():
-    dialog = GridDialog(window)  # GridDialog 인스턴스 생성
-    window.wait_window(dialog.top)  # 다이얼로그 창이 닫힐 때까지 대기
-    grid_spacing = dialog.result  # 사용자가 선택한 그리드 간격 가져오기
+    dialog = GridDialog(window)
+    window.wait_window(dialog.top)
+    grid_spacing = dialog.result
     if grid_spacing is not None:
-        global grid_spacing_global # 전역 변수로 그리드 간격 설정 (수정)
+        global grid_spacing_global
         grid_spacing_global = grid_spacing
-        window.bind("<Configure>", on_window_grid) # 윈도우 크기 변경 이벤트 핸들러 등록
-"""
-on_window_grid : 윈도우 크기가 변경될 때마다 호출되는 이벤트 핸들러
+        window.bind("<Configure>", on_window_grid)
 
-@Param
-    event : 이벤트 객체 (윈도우 크기 변경 이벤트에 반응)
-@Return
-    None
-"""
 def on_window_grid(event):
-    global grid_spacing_global  # 전역 변수로부터 그리드 간격 가져오기
-    draw_grid(canvas, grid_spacing_global)  # 윈도우 크기가 변경될 때마다 그리드 다시 그리기
-
-"""
-눈금자를 그리는 기능
-ruler_lines : 눈금자의 선을 저장하는 리스트
-ruler_text : 눈금자의 텍스트(숫자)를 저장하는 리스트
-try문을 통해 int형 데이터가 아닌 다른 데이터가 들어올 경우(ValueError) 간격을 10(기본값)으로 조정
-interval : 격자의 간격 변수
-5번째로 생성된 눈금에 숫자 표기 및 크기 증가
-눈금자을 생성할 시 각 리스트에 눈금 선과 숫자값을 저장
-"""
-
+    global grid_spacing_global
+    draw_grid(canvas, grid_spacing_global)
 
 def draw_ruler():
     global ruler_lines, ruler_texts
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
-
     try:
         interval = int(interval_entry.get())
     except ValueError:
         interval = 10
-
-    # 상단 눈금자 그리기
     for x in range(0, canvas_width, interval):
         if x % (interval * 5) == 0:
             line = canvas.create_line(x, 0, x, 15, fill="black")
@@ -1129,8 +889,6 @@ def draw_ruler():
         else:
             line = canvas.create_line(x, 0, x, 10, fill="black")
             ruler_lines.append(line)
-
-    # 좌측 눈금자 그리기
     for y in range(0, canvas_height, interval):
         if y % (interval * 5) == 0:
             line = canvas.create_line(0, y, 15, y, fill="black")
@@ -1141,16 +899,6 @@ def draw_ruler():
             line = canvas.create_line(0, y, 10, y, fill="black")
             ruler_lines.append(line)
 
-"""
-clear_ruler : 눈금자를 지우는 함수
-리스트 내의 요소를 전부 제거한 후 리스트 초기화
-toggle_ruler
-ruler_on : 눈금자가 활성화되어 있는 지 확인하는 변수
-눈금자가 켜져 있을 경우 clear_ruler() 함수를 호출
-아닐 경우 draw_ruler() 함수를 호출
-on_resize : 위젯의 크기가 변경될 경우 눈금자 재생성
-<Configure> : 크기가 변경될 경우
-"""
 def clear_ruler():
     global ruler_lines, ruler_texts
     for item in ruler_lines + ruler_texts:
@@ -1173,12 +921,10 @@ def on_resize(event):
 
 def on_closing():
     if messagebox.askokcancel("Quit", "그림을 저장하시겠습니까?"):
-        save_canvas(canvas)  # 저장 함수 호출
+        save_canvas(canvas)
     window.destroy()
 
 def get_image_size(file_path):
-    # 파일 경로가 주어졌을 때 해당 파일의 용량을 반환합니다.
-    # 파일이 존재하지 않을 경우 0을 반환합니다.
     if os.path.exists(file_path):
         size = os.path.getsize(file_path)
         return size
@@ -1187,71 +933,55 @@ def get_image_size(file_path):
         return 0
 
 def get_canvas_size(canvas):
-    # 캔버스를 PostScript 파일로 저장하여 용량을 측정합니다.
     temp_file = "temp_canvas.ps"
     canvas.postscript(file=temp_file)
     size = get_image_size(temp_file)
-    os.remove(temp_file)  # 임시 파일 삭제
+    os.remove(temp_file)
     return size
 
 def print_image_size(file_path):
-    # 이미지 파일의 경로가 주어졌을 때 해당 이미지 파일의 용량을 출력합니다.
     size = get_image_size(file_path)
     print("Image size:", size, "bytes")
 
 def print_canvas_size(canvas):
-    # 캔버스의 용량을 출력하는 함수입니다.
     size = get_canvas_size(canvas)
     print("Canvas size:", size, "bytes")
 
-
-
-
 window = Tk()
-#Tk 객체를 생성하여 주 윈도우를 만들기
-version = "1.0.0"  # 프로그램 버전
+version = "1.0.0"
 window.title(f"그림판 v{version}")
 window.geometry("800x600+200+200")
 window.resizable(True, True)
-window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
+window.configure(bg="sky blue")
 setup_paint_app(window)
 editor = ImageEditor(canvas)
+transformation_handler = TransformationHandler(canvas)
 
-# 타이머 라벨
 timer_label = Label(window, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
 
-#텍스트 박스 추가 기능
-# 문자열을 드래그하기 위한 변수
 drag_data = {"item": None, "x": 0, "y": 0}
 
 def open_text_input_window():
-    # 문자열을 입력할 새로운 창 생성
     text_input_window = Toplevel(window)
     text_input_window.title("Text Input")
-
-    # 텍스트 입력 창 생성
     text_input = Text(text_input_window, width=30, height=5)
     text_input.pack()
-
-    # 확인 버튼 생성 및 클릭 이벤트 핸들러 설정
     confirm_button = Button(text_input_window, text="확인", command=lambda: add_text_to_canvas(text_input.get("1.0", "end-1c")))
     confirm_button.pack()
 
 def add_text_to_canvas(text):
-    if text.strip():  # 입력된 텍스트가 공백이 아닌 경우에만 캔버스에 추가
+    if text.strip():
         text_item = canvas.create_text(100, 100, text=text, fill="black", font=('Arial', 12))
         canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
         canvas.tag_bind(text_item, "<B1-Motion>", drag)
         canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
 
-# 문자열 드래그 시작
 def start_drag(event):
     drag_data["item"] = canvas.find_closest(event.x, event.y)[0]
     drag_data["x"] = event.x
     drag_data["y"] = event.y
 
-# 문자열 드래그 중
 def drag(event):
     if drag_data["item"]:
         dx = event.x - drag_data["x"]
@@ -1260,17 +990,14 @@ def drag(event):
         drag_data["x"] = event.x
         drag_data["y"] = event.y
 
-# 문자열 드래그 종료
 def end_drag(event):
     drag_data["item"] = None
     drag_data["x"] = 0
     drag_data["y"] = 0
 
-# "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
 
-# 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
 dot_count.set(10)
 
@@ -1283,20 +1010,16 @@ frame_distance.pack(side=RIGHT)
 frame_count = Frame(window)
 frame_count.pack(side=RIGHT)
 
-# 눈금자 기본 설정
 ruler_on = False
 ruler_lines = []
 ruler_texts = []
 
-
-
-# 눈금자 간격 입력 레이블
 interval_label = Label(window, text="Ruler Interval:")
 interval_label.pack()
 
 interval_entry = Entry(window)
 interval_entry.pack()
-interval_entry.insert(0, "10")  # 기본값 설정
+interval_entry.insert(0, "10")
 
 canvas.bind("<Configure>", on_resize)
 
@@ -1304,10 +1027,7 @@ bind_shortcuts_window(window)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
 
-#프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
 
 window.mainloop()
-
-
