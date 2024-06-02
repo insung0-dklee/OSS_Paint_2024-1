@@ -177,6 +177,7 @@ def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas)) #clear 단축키 c
     window.bind("<Control-s>", save_canvas) #save 단축키 crtl+s
     window.bind("<Control-z>", erase_last_stroke) #undo 단축키 crtl+z
+    window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
     window.bind("d", lambda event: toggle_dark_mode()) #dark 모드 단축키 d
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
@@ -616,12 +617,12 @@ def setup_paint_app(window):
     spray_brush = SprayBrush(canvas, brush_color)
     
 
-    button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
+    button_erase_last_stroke = Button(button_frame, text="Undo", command=erase_last_stroke)
     button_erase_last_stroke.pack(side=LEFT)
     button_erase_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_erase_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_redo_last_stroke = Button(button_frame, text="Rewrite Last Stroke", command=rewrite_last_stroke)
+    button_redo_last_stroke = Button(button_frame, text="Redo", command=rewrite_last_stroke)
     button_redo_last_stroke.pack(side=LEFT)
     button_redo_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_redo_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
@@ -1208,7 +1209,7 @@ def erase_last_stroke(event=None): #마지막으로 그린 획을 지움
         for line in last_stroke:
             canvas.create_line(*line, fill="white", width=brush_size)
 
-def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
+def rewrite_last_stroke(event=None): #마지막으로 지운 획을 다시 그림
     if redo_strokes:
         last_redo_stroke = redo_strokes.pop()
         strokes.append(last_redo_stroke)
