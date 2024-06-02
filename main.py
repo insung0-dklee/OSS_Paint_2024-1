@@ -137,6 +137,7 @@ def increase_dot_count():
 def decrease_dot_count():
     dot_count.set(max(dot_count.get() - 1, 1))  # 최소값 1 설정
 
+
 def increase_dot_distance():
     dot_distance.set(dot_distance.get() + 1)
 
@@ -194,6 +195,27 @@ def dotted_paint(event, canvas):
     else:
         last_x, last_y = event.x, event.y
         canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
+
+"""
+마우스(중간 휠 버튼)를 따라 랜덤 곡선을 그리는 함수
+"""
+def draw_curvy_line(event):
+    global last_x, last_y
+    if last_x is not None and last_y is not None:
+        # 마우스의 현재 위치와 이전 위치 사이의 중간 지점을 계산
+        mid_x = (event.x + last_x) / 2
+        mid_y = (event.y + last_y) / 2
+
+        # 중간 지점에 약간의 무작위성을 추가하여 굴곡을 만듬
+        curve_x = mid_x + random.uniform(-30, 30)  
+        curve_y = mid_y + random.uniform(-30, 30)  
+
+        # 이전 위치에서 중간 굴곡 지점을 거쳐 현재 위치로 선을 그림
+        canvas.create_line(last_x, last_y, curve_x, curve_y, event.x, event.y, smooth=True, width=brush_size)
+
+    # 현재 마우스 위치를 마지막 위치로 업데이트
+    last_x = event.x
+    last_y = event.y
 
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
@@ -665,6 +687,11 @@ def setup_paint_app(window):
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
+
+    # 오른쪽 마우스 드래그 이벤트에 draw_curvy_line 함수를 바인딩
+    canvas.bind("<B2-Motion>", draw_curvy_line)
+
+    
 
     set_paint_mode_normal(canvas)
 
