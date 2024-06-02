@@ -1233,7 +1233,7 @@ def double_line_paint(event, canvas):
         # 첫 번째 선 그리기
         canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color, capstyle=ROUND)
         # 두 번째 선 그리기
-        canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color, capstyle=ROUND)
+        canvas.create_line(last_x + dx, last_y + dy, event.x + dx, event.y + dy, width=brush_size, fill=brush_color, capstyle=ROUND)
 
         last_x, last_y = event.x, event.y
     else:
