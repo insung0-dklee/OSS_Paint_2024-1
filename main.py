@@ -887,8 +887,7 @@ def draw_line(event): # 선을 그리는 기능
     canvas.delete("temp_shape")
     current_shape = canvas.create_line(start_x, start_y, event.x, event.y, fill=shape_outline_color, tags="temp_shape")
 
-# 45도 간격으로 선 그리기 # 선을 45도 각도로 그리는 기능
-def draw_line_45_degree(event):
+def draw_line_45_degree(event): # 선을 45도 각도로 그리는 기능
     global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     angle = math.atan2(event.y - start_y, event.x - start_x) #시작점과 끝점이 바라보는 각도를 계산
