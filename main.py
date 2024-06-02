@@ -607,7 +607,25 @@ def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
                     hexagon = [hex_corner(x + dx, y + dy, hex_size, i) for i in range(6)]
                     canvas.create_polygon(hexagon, outline=hex_color, fill='')
 
+# 벽돌 색상 선택 함수
+def choose_brick_line_color():
+    color = askcolor()[1]
+    if color:
+        draw_brick_pattern(canvas, line_color=color)
 
+
+# 벽돌 모양 패턴 함수
+def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="black"):
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+
+    for y in range(0, canvas_height, brick_height):
+        for x in range(0, canvas_width, brick_width):
+            if (y // brick_height) % 2 == 0:
+                canvas.create_rectangle(x, y, x + brick_width, y + brick_height, outline=line_color, fill="")
+            else:
+                canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
+                                        outline=line_color, fill="")
 
 
 def setup_paint_app(window):
@@ -664,6 +682,18 @@ def setup_paint_app(window):
     button_honeycomb_color.pack(side=LEFT)
     button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 벽돌 패턴 버튼
+    button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
+    button_brick_pattern.pack(side=LEFT)
+    button_brick_pattern.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_brick_pattern.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 벽돌 패턴 색상 선택 버튼
+    button_brick_line_color = Button(window, text="Choose Brick Line Color", command=choose_brick_line_color)
+    button_brick_line_color.pack(side=LEFT)
+    button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     start_button = Button(button_frame, text="Start", command=start_stop)
     start_button.pack(side = RIGHT)
