@@ -920,6 +920,53 @@ def finish_star(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 십자형 도형 그리기 
+def create_cross(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_cross)
+
+# 십자형 도형 그릴 위치 정하고 생성하는 함수 호출
+def start_cross(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_cross(event))
+    canvas.bind("<ButtonRelease-1>", finish_cross)
+
+# 십자형 도형 생성하기
+def draw_cross(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    width = abs(start_x - event.x)  # 가로 길이
+    height = abs(start_y - event.y)  # 세로 길이
+    cross_width = min(width, height) / 3  # 십자형의 arm 너비
+
+    # 중심점을 기준으로 십자형의 4개 arm 그리기
+    points = [
+        start_x - cross_width, start_y - height,  
+        start_x + cross_width, start_y - height, 
+        start_x + cross_width, start_y - cross_width, 
+        start_x + width, start_y - cross_width,  
+        start_x + width, start_y + cross_width,  
+        start_x + cross_width, start_y + cross_width,
+        start_x + cross_width, start_y + height,  
+        start_x - cross_width, start_y + height, 
+        start_x - cross_width, start_y + cross_width,
+        start_x - width, start_y + cross_width, 
+        start_x - width, start_y - cross_width,  
+        start_x - cross_width, start_y - cross_width
+    ]
+
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 십자형 도형 그리기 종료
+def finish_cross(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -927,6 +974,7 @@ def choose_shape(event):
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
+    popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
