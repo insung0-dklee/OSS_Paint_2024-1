@@ -57,12 +57,14 @@ def show_info_window(): #정보를 표시하는 기능
 is_dark_mode = False  # 기본 모드는 라이트 모드
 
 def toggle_dark_mode(): # 다크 모드를 토글하는 함수
+    
     global is_dark_mode
     if is_dark_mode: # 지금 다크 모드라면
         apply_light_mode() # 라이트 모드 적용
     else: # 지금 라이트 모드라면
         apply_dark_mode() # 다크 모드 적용
     is_dark_mode = not is_dark_mode # 다크 모드 상태 변경
+    
 
 def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
@@ -1034,6 +1036,52 @@ def finish_six_pointed_star(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 12각별 모양 그리기
+def create_twelve_pointed_star(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_twelve_pointed_star)
+
+# 12각별 모양 그릴 위치 정하고 생성하는 함수 호출
+def start_twelve_pointed_star(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_twelve_pointed_star(event))
+    canvas.bind("<ButtonRelease-1>", finish_twelve_pointed_star)
+
+# 12별 모양 생성하기
+def draw_twelve_pointed_star(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    outer_radius = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
+    inner_radius = outer_radius / 2.0  
+    points = []
+
+    for i in range(12):
+        angle_outer = math.radians(i * 30 - 90)
+        angle_inner = math.radians(i * 30 + 15 - 90)
+
+        x_outer = start_x + outer_radius * math.cos(angle_outer)
+        y_outer = start_y + outer_radius * math.sin(angle_outer)
+        x_inner = start_x + inner_radius * math.cos(angle_inner)
+        y_inner = start_y + inner_radius * math.sin(angle_inner)
+
+        points.append(x_outer)
+        points.append(y_outer)
+        points.append(x_inner)
+        points.append(y_inner)
+
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 12각별 모양 그리기 종료
+def finish_twelve_pointed_star(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")  
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+
 # 하트 모양 그리기
 def create_heart(event=None):
     select_shape_color()
@@ -1158,6 +1206,7 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -1166,6 +1215,7 @@ def choose_shape(event):
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
     popup.add_command(label="Six Pointed Star", command=lambda: create_six_pointed_star(event))
+    popup.add_command(label="twelve Pointed Star", command=lambda: create_twelve_pointed_star(event))
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
