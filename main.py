@@ -168,7 +168,7 @@ def start_paint_pressure(event, canvas):
 def paint_pressure(event, canvas):
     global start_time
     elapsed_time = time.time() - start_time  # 마우스를 클릭한 시간부터 지금까지의 시간을 계산
-    radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
+    radius = min(max(int(elapsed_time * 20), 1), 8) * brush_size / 4 # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
@@ -928,7 +928,7 @@ def paint_start(event): #획 시작
 def paint_stroke(event): #획 그림
     global x1, y1, current_stroke
     x2, y2 = event.x, event.y
-    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size, capstyle=ROUND)
     current_stroke.append((x1, y1, x2, y2))
     x1, y1 = x2, y2
 
@@ -967,9 +967,9 @@ def double_line_paint(event, canvas):
         dy = math.sin(angle + math.pi / 2) * spacing
 
         # 첫 번째 선 그리기
-        canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color)
+        canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color, capstyle=ROUND)
         # 두 번째 선 그리기
-        canvas.create_line(last_x + dx, last_y + dy, event.x + dx, event.y + dy, width=brush_size, fill=brush_color)
+        canvas.create_line(last_x + dx, last_y + dy, event.x + dx, event.y + dy, width=brush_size, fill=brush_color, capstyle=ROUND)
 
         last_x, last_y = event.x, event.y
     else:
