@@ -143,3 +143,63 @@ button_clear_inside = Button(window, text="Clear Inside Rectangle", command=clea
 button_clear_inside.pack()
 
 window.mainloop()
+
+import tkinter as tk
+from tkinter.colorchooser import askcolor
+
+class PaintApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("그림판")
+        
+        self.pen_color = 'black'
+        self.eraser_on = False
+        
+        self.canvas = tk.Canvas(self.root, bg='white', width=600, height=400)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        
+        self.button_frame = tk.Frame(self.root)
+        self.button_frame.pack(fill=tk.X)
+        
+        self.color_button = tk.Button(self.button_frame, text='색 변경', command=self.choose_color)
+        self.color_button.pack(side=tk.LEFT)
+        
+        self.eraser_button = tk.Button(self.button_frame, text='지우개', command=self.use_eraser)
+        self.eraser_button.pack(side=tk.LEFT)
+        
+        self.pen_button = tk.Button(self.button_frame, text='펜', command=self.use_pen)
+        self.pen_button.pack(side=tk.LEFT)
+        
+        self.canvas.bind('<B1-Motion>', self.paint)
+        self.root.bind('<z>', self.undo)
+        
+        self.undo_stack = []
+
+    def choose_color(self):
+        color = askcolor(color=self.pen_color)[1]
+        if color:
+            self.pen_color = color
+            self.eraser_on = False
+    
+    def use_eraser(self):
+        self.eraser_on = True
+    
+    def use_pen(self):
+        self.eraser_on = False
+    
+    def paint(self, event):
+        paint_color = 'white' if self.eraser_on else self.pen_color
+        x1, y1 = (event.x - 1), (event.y - 1)
+        x2, y2 = (event.x + 1), (event.y + 1)
+        item = self.canvas.create_oval(x1, y1, x2, y2, fill=paint_color, outline=paint_color)
+        self.undo_stack.append(item)
+    
+    def undo(self, event=None):
+        if self.undo_stack:
+            last_item = self.undo_stack.pop()
+            self.canvas.delete(last_item)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PaintApp(root)
+    root.mainloop()
