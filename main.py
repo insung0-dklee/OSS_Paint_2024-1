@@ -176,6 +176,7 @@ def paint_pressure(event, canvas):
     radius = min(max(int(elapsed_time * 5), 1), 5)  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
+    canvas.coords(circle, event.x - brush_size/2+2, event.y- brush_size/2+2, event.x + brush_size/2+2, event.y + brush_size/2+2) #그리는 위치도 보여주기 위해 브러시 크기보다 조금더 크게 만들기
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
 
