@@ -1158,6 +1158,33 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 타원 그리기 기능 추가
+def create_oval(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_oval)
+
+# 타원 그릴 위치 정하고 생성하는 함수 호출
+def start_oval(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_oval(event))
+    canvas.bind("<ButtonRelease-1>", finish_oval)
+
+# 타원 생성하기
+def draw_oval(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    current_shape = canvas.create_oval(start_x, start_y, event.x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 타원 그리기 종료
+def finish_oval(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -1169,6 +1196,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Oval", command=lambda: create_oval(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
