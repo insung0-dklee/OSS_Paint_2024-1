@@ -124,7 +124,7 @@ def set_paint_mode_normal(canvas, set_origin_mode=False):
         pass
 
     
-    
+# 압력 기반 그림 그리기 모드 함수
 def set_paint_mode_pressure(canvas):
     canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
     canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
@@ -722,27 +722,37 @@ def double_line_paint(event, canvas):
     else:
         last_x, last_y = event.x, event.y
 
+# 캔버스에 그리드를 그리는 함수
+"""
+canvas : Thinter 캔버스 객체
+step : 그리드 선 사이의 간격
+"""
 def draw_grid(canvas, step):
-    width = canvas.winfo_width()
+    width = canvas.winfo_width() 
     height = canvas.winfo_height()
-    for x in range(0, width, step):
+    # 캔버스 너비와 높이에 맞춰 각각 수평선과 수직선을 그림 
+    for x in range(0, width, step): 
         canvas.create_line(x, 0, x, height, fill="lightgray", tags="grid_line")
     for y in range(0, height, step):
         canvas.create_line(0, y, width, y, fill="lightgray", tags="grid_line")
 
+# 그려진 그리드를 토글하는 함수
 def toggle_grid(canvas):
-    if canvas.find_withtag("grid_line"):
-        canvas.delete("grid_line")
+    if canvas.find_withtag("grid_line"): # 'grid_line' 태그가 붙은 객체들을 찾음
+        canvas.delete("grid_line") # 태그가 붙은 객체가 있다면 객체들을 삭제
     else:
         draw_grid(canvas, 50)
 
+# 그리드 간격을 변경하는 함수
 def change_grid_spacing(value):
     draw_grid(canvas, value)
 
 def change_grid_spacing(value):
     draw_grid(canvas, value)
 
+# 그리드 간격을 조절할 수 있는 다이얼로그 창을 생성하는 클래스
 class GridDialog:
+    # Toplevel 위젯을 생성하여 다이얼로그 창을 만듦
     def __init__(self, window):
         self.top = Toplevel(window)
         self.top.title("Grid scale")
@@ -752,20 +762,20 @@ class GridDialog:
         self.gridscale_slider.set(50)
         self.gridscale_slider.pack()
 
-        self.ok_button = Button(self.top, text="OK", command=self.ok)
+        self.ok_button = Button(self.top, text="OK", command=self.ok) # OK 버튼 생성
         self.ok_button.pack()
 
-        self.cancel_button = Button(self.top, text="Cancel", command=self.cancel)
+        self.cancel_button = Button(self.top, text="Cancel", command=self.cancel) # Cancel 버튼 생성
         self.cancel_button.pack()
 
         self.result = None
-
+    
     def ok(self):
-        self.result = self.gridscale_slider.get()
-        self.top.destroy()
-
+        self.result = self.gridscale_slider.get() # 사용자가 선택한 그리드 간격 값을 변수에 저장
+        self.top.destroy() # 다이얼로그 창 닫기
+    
     def cancel(self):
-        self.top.destroy()
+        self.top.destroy() # 다이얼로그 창 닫기
 
 def open_grid_dialog():
     dialog = GridDialog(window)  # GridDialog 인스턴스 생성
