@@ -609,7 +609,9 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+    # 별 모양 브러시 버튼 추가
+    button_star = Button(window, text="Draw Star", command=lambda: canvas.bind("<B1-Motion>", draw_star))
+    button_star.pack()
 
     #spray 인스턴스 생성 
     global spray_brush
@@ -1447,7 +1449,13 @@ def set_modified():
     global is_modified
     is_modified = True
 
-
+# 별 모양 그리기 기능 추가
+def draw_star(event):
+    x, y = event.x, event.y
+    points = [x, y-20, x+6, y-6, x+20, y-6, x+6, y+4, 
+              x+14, y+20, x, y+10, x-14, y+20, x-10, y+4, 
+              x-20, y-6, x-6, y-6]
+    canvas.create_polygon(points, outline="black", fill="")
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -1568,5 +1576,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
