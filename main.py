@@ -103,6 +103,33 @@ def convert_to_grayscale():
         canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
         canvas.image = tk_image
 
+def copy_layer():
+    global image, tk_image
+    if image:
+        new_layer = image.copy()
+        tk_image = ImageTk.PhotoImage(new_layer)
+        canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+        canvas.image = tk_image
+
+def invert_selection():
+    global image, tk_image
+    if image:
+        left = int(entry_left.get())
+        top = int(entry_top.get())
+        right = int(entry_right.get())
+        bottom = int(entry_bottom.get())
+        # 기존 이미지 복사 
+        inverted_image = image.copy()
+        # 선택된 영역 복사 및 반전
+        selected_area = image.crop((left, top, right, bottom))
+        inverted_area = ImageOps.invert(selected_area)
+        # 복사한 이미지에 반전된 부분 다시 붙여넣기
+        inverted_image.paste(inverted_area, (left, top))
+        image = inverted_image
+        tk_image = ImageTk.PhotoImage(image)
+        canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+        canvas.image = tk_image
+
 root = tk.Tk()
 root.title("이미지 편집기")
 root.geometry("1000x700")
@@ -157,6 +184,12 @@ entry_brightness.pack(side=tk.LEFT)
 
 grayscale_button = tk.Button(root, text="흑백", command=convert_to_grayscale)
 grayscale_button.pack(side=tk.LEFT)
+
+copy_button = tk.Button(root, text="레이어 복사", command=copy_layer)
+copy_button.pack(side=tk.LEFT)
+
+invert_selection_button = tk.Button(root, text="선택 영역 반전", command=invert_selection)
+invert_selection_button.pack(side=tk.LEFT)
 
 root.mainloop()
 
