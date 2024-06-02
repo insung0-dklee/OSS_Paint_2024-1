@@ -1183,6 +1183,10 @@ current_stroke = []
 redo_strokes = []
 
 def paint_start(event): #획 시작
+    """
+    마우스 버튼을 눌렀을 때 호출되어 획을 시작하는 함수.
+    시작 지점의 좌표를 저장하고, 현재 획을 초기화한다.
+    """
     global x1, y1, current_stroke
     x1, y1 = event.x, event.y
     current_stroke = []
