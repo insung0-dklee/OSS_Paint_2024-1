@@ -920,6 +920,47 @@ def finish_star(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 하트 모양 그리기
+def create_heart(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_heart)
+
+# 하트 모양 그릴 위치 정하고 생성하는 함수 호출
+def start_heart(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_heart(event))
+    canvas.bind("<ButtonRelease-1>", finish_heart)
+
+# 하트 모양 생성하기
+def draw_heart(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    size = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5 / 10
+    points = []
+
+    for t in range(0, 361, 1):
+        t_rad = math.radians(t)
+        x = 16 * math.sin(t_rad)**3
+        y = -(13 * math.cos(t_rad) - 5 * math.cos(2*t_rad) - 2 * math.cos(3*t_rad) - math.cos(4*t_rad))
+        
+        x_scaled = start_x + x * size  
+        y_scaled = start_y + y * size  
+        
+        points.append(x_scaled)
+        points.append(y_scaled)
+
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+# 하트 모양 그리기 종료
+def finish_heart(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -927,6 +968,7 @@ def choose_shape(event):
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
+    popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
