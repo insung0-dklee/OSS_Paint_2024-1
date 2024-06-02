@@ -2,7 +2,18 @@
 Project : Paint
 paint : 내외부 검은색의 2픽셀 크기의 원을 이용해 그림을 그리는 기능
 clear_paint : 그림판에 있는 그림을 다 지우는 기능
-button_delete : clear_paint의 버튼
+button_delete : clear_paint의 버튼```python
+def toggle_grid_display(canvas):  # 그리드 표시를 켜거나 끄는 함수
+    current_state = canvas.itemcget("grid", "state")  # 현재 그리드 상태 가져오기
+    new_state = "hidden" if current_state == "normal" else "normal"  # 현재 상태가 normal이면 hidden으로, hidden이면 normal로 변경
+    canvas.itemconfigure("grid", state=new_state)  # 그리드 상태 업데이트
+
+def add_grid_menu():
+    grid_menu = Menu(menu_bar, tearoff=0)  # 그리드를 위한 새로운 메뉴 생성
+    grid_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid_display(canvas))  # 그리드 토글 기능 추가
+    menu_bar.add_cascade(label="Grid", menu=grid_menu)  # 그리드 메뉴를 메뉴바에 추가
+    window.config(menu=menu_bar)  # 윈도우에 메뉴바 설정
+```
 
 """
 
@@ -1170,10 +1181,33 @@ def on_resize(event):
     if ruler_on:
         clear_ruler()
         draw_ruler()
+        
+is_modified = False
+
+def set_modified():
+    # 사용자의 작업 내역이 발생할 때마다 호출되어 is_modified 변수를 True로 설정한다
+    global is_modified
+    is_modified = True
+    
+
+def paint_stroke(event):
+    # paint_stroke 함수에서 set_modified 함수를 호출하여 작업 내역을 추적한다.
+    global x1, y1, current_stroke
+    x2, y2 = event.x, event.y
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
+    current_stroke.append((x1, y1, x2, y2))
+    x1, y1 = x2, y2
+    
+    # 작업 내역 추적
+    set_modified()
+   
 
 def on_closing():
-    if messagebox.askokcancel("Quit", "그림을 저장하시겠습니까?"):
-        save_canvas(canvas)  # 저장 함수 호출
+    # 프로그램 종료 시 호출되는 함수
+    global is_modified
+    if is_modified:
+        if messagebox.askokcancel("Quit", "그림을 저장하시겠습니까?"):
+            save_canvas(canvas)  # 저장 함수 호출
     window.destroy()
 
 def get_image_size(file_path):
@@ -1309,5 +1343,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
