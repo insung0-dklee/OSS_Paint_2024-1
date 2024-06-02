@@ -228,7 +228,7 @@ def zoom(event):
     canvas.scale("all", event.x, event.y, scale, scale)
 
 #all clear 기능 추가
-def clear_paint(canvas):
+def clear_paint(event=None):
     canvas.delete("all")
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
@@ -241,6 +241,7 @@ def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와�
 def bind_shortcuts_window(window):
     window.bind("<Alt-Return>", toggle_fullscreen)  # Alt + Enter (Windows/Linux)
     window.bind("<Command-Return>", toggle_fullscreen)  # Command + Enter (Mac)
+    window.bind("r", clear_paint)
 
 # 전체화면 토글 함수
 def toggle_fullscreen(event=None):
@@ -1309,5 +1310,7 @@ timer.start()
 update_timer()
 
 window.mainloop()
+
+
 
 
