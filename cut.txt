@@ -1,0 +1,30 @@
+# 이미지 자르기 기능추가
+    """
+먼저 pillow를 설치하고 사용해야 합니다.
+
+    사진을 자르는 함수.
+
+    :param input_image_path: 입력 이미지 경로
+    :param output_image_path: 출력 이미지 경로
+    :param crop_area: 자를 영역 (왼쪽, 위, 오른쪽, 아래) 튜플로 지정
+
+# 예제 사용법
+input_image_path = 'path_to_your_image.jpg'
+output_image_path = 'cropped_image.jpg'
+crop_area = (100, 100, 400, 400)  # (left, top, right, bottom)
+
+crop_image(input_image_path, output_image_path, crop_area)
+
+    """
+from PIL import Image
+
+def crop_image(input_image_path, output_image_path, crop_area):
+
+    with Image.open(input_image_path) as image:
+        # 이미지 자르기
+        cropped_image = image.crop(crop_area)
+        # 자른 이미지 저장
+        cropped_image.save(output_image_path)
+        print(f"Cropped image saved as {output_image_path}")
+
+
