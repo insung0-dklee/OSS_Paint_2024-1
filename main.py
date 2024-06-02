@@ -120,6 +120,14 @@ def start_stop():
     if not timer.running:
         timer.start()
 
+# 타이머 시간을 10초 증가 
+def add_time():
+    timer.add_time(10)
+
+# 타이머 시간을 10초 감소
+def subtract_time():
+    timer.subtract_time(10)
+
 
 def paint_airbrush(event, canvas):
     for _ in range(dot_count.get()):  # 에어브러쉬 효과를 위해 여러 개의 작은 점을 그림
@@ -536,6 +544,15 @@ def setup_paint_app(window):
 
     button_use_case = Button(window, text="Use Case Diagram", command=choose_use_case_element)
     button_use_case.pack(side=LEFT) # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
+
+    
+
+    # 타이머 시간 감소 버튼
+    subtract_button = Button(button_frame, text="10s Subtract", command=subtract_time)
+    subtract_button.pack(side = RIGHT)
+    # 타이머 시간 추가 버튼 
+    add_button = Button(button_frame, text="10s Add", command=add_time)
+    add_button.pack(side = RIGHT)
 
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
