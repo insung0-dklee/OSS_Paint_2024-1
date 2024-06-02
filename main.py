@@ -206,6 +206,17 @@ def paint_pressure(event, canvas):
     x2, y2 = ( event.x + radius ), ( event.y + radius )
     
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
+    
+  
+   # 드래그를 통해 캔버스에 그려져있는 그림을 선택하는 함수
+   # 함수는 canvas 위에서 마우스 클릭 이벤트가 발생하면 실행됩니다. 
+   # 선택된 객체의 윤곽선을 빨간색으로 변경하여 사용자에게 선택되었음을 시각적으로 알려줍니다. 
+   # 이 함수를 메인 함수에 적절한 위치에 추가하여 사용하시면 됩니다. 
+def select_object(event):
+    global selected_object
+    if current_object:
+        selected_object = current_object
+        canvas.itemconfig(selected_object, outline="red")
 
 
 
