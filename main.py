@@ -75,6 +75,7 @@ def apply_dark_mode():  # 다크 모드 적용
     for widget in brush_button_frame.winfo_children():
         widget.config(bg="light grey", fg="black")  # 브러쉬 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white")  # 타이머 라벨 배경색, 글자색
+
 #이미지 파일 불러오기 
 def open_image():
     file_path = filedialog.askopenfilename()
@@ -247,6 +248,7 @@ def bind_shortcuts_window(window):
 def toggle_fullscreen(event=None):
     global window
     window.attributes("-fullscreen", not window.attributes("-fullscreen"))
+
 
 def flip_vertical(canvas):
     objects = canvas.find_all()
@@ -670,6 +672,7 @@ def setup_paint_app(window):
     canvas.bind("<ButtonRelease-1>", paint_end)
 
     set_paint_mode_normal(canvas)
+
     
 
 #+=================================================================================
@@ -794,6 +797,44 @@ def create_triangle(event=None):
 def create_circle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_circle)
+
+def create_diamond(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_diamond)
+
+def start_diamond(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_diamond(event))
+    canvas.bind("<ButtonRelease-1>", finish_diamond)
+
+def draw_diamond(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    x2, y2 = event.x, event.y
+
+    # 중심에서 각 꼭짓점까지의 거리 계산
+    width = abs(x2 - start_x)
+    height = abs(y2 - start_y)
+
+    # 마름모의 네 꼭짓점 좌표 계산
+    points = [
+        start_x, start_y - height,  # 위쪽 꼭짓점
+        start_x + width, start_y,  # 오른쪽 꼭짓점
+        start_x, start_y + height,  # 아래쪽 꼭짓점
+        start_x - width, start_y  # 왼쪽 꼭짓점
+    ]
+
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+def finish_diamond(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
 
 # 사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
@@ -929,6 +970,7 @@ def choose_shape(event):
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
+    popup.add_command(label="Diamond", command=lambda: create_diamond(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
