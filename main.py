@@ -21,7 +21,7 @@ from picture import ImageEditor # 이미지 모듈을 가져옴
 from spray import SprayBrush #s pray 모듈을 가지고 옴
 
 # 초기 설정 값들
-global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
+global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas, spray_brush
 brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
@@ -31,6 +31,7 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+spray_brush = None # SprayBrush 인스턴스 초기화
 
 # 동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -167,7 +168,7 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     global brush_mode
     brush_mode = mode
     if brush_mode == "solid":  # 브러쉬 모드가 solid면
-        canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))  # 실선(기본) 브러쉬로 변경
+        canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas)) # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
     elif brush_mode == "double_line": # 브러쉬 모드가 double_line 면
@@ -187,6 +188,8 @@ def zoom(event):
     elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
         scale = 0.9
     canvas.scale("all", event.x, event.y, scale, scale)
+    if canvas.find_withtag("grid_line"):  # 격자가 활성화된 경우 격자 다시 그리기
+        draw_grid(canvas, grid_spacing)
 
 # all clear 기능 추가
 def clear_paint(canvas):
@@ -194,11 +197,10 @@ def clear_paint(canvas):
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
 
-def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
-
+def add_text(event, canvas, text_box):  # 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
+        
 def bind_shortcuts_window(window):
     window.bind("<Alt-Return>", toggle_fullscreen)  # Alt + Enter (Windows/Linux)
     window.bind("<Command-Return>", toggle_fullscreen)  # Command + Enter (Mac)
@@ -235,7 +237,7 @@ def change_brush_color(event=None):
     global brush_color
     selected_color = askcolor()[1]
     if selected_color:
-        brush_color = selected_color
+        set_brush_color(selected_color)
 """
 TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
@@ -247,6 +249,8 @@ TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 def set_brush_color(color):
     global brush_color
     brush_color = color
+    if spray_brush:
+        spray_brush.set_brush_color(brush_color)
 
 # 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
 def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
@@ -342,8 +346,8 @@ def flood_fill(event):
         canvas.itemconfig(target, fill=fill_color)
 
 def setup_paint_app(window):
-    global brush_size, brush_color
-
+    global brush_size, brush_color, spray_brush
+    
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
 
@@ -387,7 +391,9 @@ def setup_paint_app(window):
     button_grid_settings.pack()
 
     # spray 인스턴스 생성 
-    spray_brush = SprayBrush(canvas, "black")
+    global spray_brush
+    spray_brush = SprayBrush(canvas, brush_color)
+
     # 스프레이 버튼
     button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
     button_spray.pack(side=LEFT)
@@ -455,7 +461,7 @@ def setup_paint_app(window):
     button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color())
+    button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
     button_brush_color.pack(side=LEFT)
     button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
@@ -519,6 +525,8 @@ def setup_paint_app(window):
 
     button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     button_new_window.pack(side=LEFT)
+
+    
 
 # 새 창 열기 생성
 def create_new_window():
@@ -589,32 +597,33 @@ def draw_rectangle(event):
 
 # 삼각형 그릴 위치 정하고 생성하는 함수 호출
 def start_triangle(event):
-    global start_x, start_y, current_shape
+    global start_x, start_y, current_triangle
     start_x, start_y = event.x, event.y
     current_triangle = None
     canvas.bind("<B1-Motion>", draw_triangle)
     canvas.bind("<ButtonRelease-1>", finish_triangle)
+
 # 삼각형 생성하기
 def draw_triangle(event):
-    global start_x, start_y
-    canvas.delete("temp_shape")
+    global start_x, start_y, current_triangle
+    if current_triangle:
+        canvas.delete(current_triangle)
     x2, y2 = event.x, event.y
 
-    
     # 시작점과 마우스 이벤트가 발생한 점 사이의 거리 계산
     side_length = math.sqrt((x2 - start_x) ** 2 + (y2 - start_y) ** 2)
 
     # 정삼각형의 꼭짓점을 계산
-    angle = math.radians(60)  # 120도를 라디안으로 변환
+    angle = math.radians(60)  # 60도를 라디안으로 변환
     x3 = start_x + side_length * math.cos(angle)
     y3 = start_y + side_length * math.sin(angle)
 
-    angle += math.radians(60)  # 240도를 라디안으로 변환
+    angle += math.radians(60)  # 120도를 라디안으로 변환
     x4 = start_x + side_length * math.cos(angle)
     y4 = start_y + side_length * math.sin(angle)
 
     # 시작점과 세 개의 점으로 정삼각형 그리기
-    current_shape = canvas.create_polygon(start_x, start_y, event.x, event.y, (start_x-event.x)+start_x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_triangle = canvas.create_polygon(start_x, start_y, event.x, event.y, x3, y3, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 삼각형 그리기 종료
 def finish_triangle(event):
@@ -622,8 +631,7 @@ def finish_triangle(event):
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
     if current_triangle:
-        canvas.delete(current_triangle)
-        canvas.create_polygon(start_x, start_y, event.x, start_y, event.x, event.y, outline="black", fill="white")
+        canvas.itemconfig(current_triangle, tags="")
 
 # 원형 그릴 위치 정하고 생성하는 함수 호출
 def start_circle(event):
@@ -725,6 +733,7 @@ def double_line_paint(event, canvas):
 def draw_grid(canvas, step):
     width = canvas.winfo_width()
     height = canvas.winfo_height()
+    canvas.delete("grid_line")  # 이전 격자 삭제
     for x in range(0, width, step):
         canvas.create_line(x, 0, x, height, fill="lightgray", tags="grid_line")
     for y in range(0, height, step):
@@ -734,7 +743,7 @@ def toggle_grid(canvas):
     if canvas.find_withtag("grid_line"):
         canvas.delete("grid_line")
     else:
-        draw_grid(canvas, 50)
+        draw_grid(canvas, grid_spacing)
 
 def change_grid_spacing(value):
     draw_grid(canvas, value)
@@ -844,14 +853,55 @@ def toggle_ruler():
     ruler_on = not ruler_on
 
 def on_resize(event):
+    if canvas.find_withtag("grid_line"):  # 격자가 활성화된 경우 격자 다시 그리기
+        draw_grid(canvas, grid_spacing)
     if ruler_on:
         clear_ruler()
         draw_ruler()
 
+class GridDialog:
+    def __init__(self, window):
+        self.top = Toplevel(window)
+        self.top.title("Grid scale")
+
+        Label(self.top, text="그리드 간격:").pack()
+        self.gridscale_slider = Scale(self.top, from_=10, to=100, resolution=5, orient=HORIZONTAL)
+        self.gridscale_slider.set(grid_spacing)
+        self.gridscale_slider.pack()
+
+        self.ok_button = Button(self.top, text="OK", command=self.ok)
+        self.ok_button.pack()
+
+        self.cancel_button = Button(self.top, text="Cancel", command=self.cancel)
+        self.cancel_button.pack()
+
+        self.result = None
+
+    def ok(self):
+        global grid_spacing
+        grid_spacing = self.gridscale_slider.get()
+        self.top.destroy()
+        if canvas.find_withtag("grid_line"):  # 격자가 활성화된 경우 격자 다시 그리기
+            draw_grid(canvas, grid_spacing)
+
+    def cancel(self):
+        self.top.destroy()
+
+def open_grid_dialog():
+    dialog = GridDialog(window)  # GridDialog 인스턴스 생성
+    window.wait_window(dialog.top)  # 다이얼로그 창이 닫힐 때까지 대기
+    grid_spacing = dialog.result  # 사용자가 선택한 그리드 간격 가져오기
+    if grid_spacing is not None:
+        draw_grid(canvas, grid_spacing)  # 사용자가 선택한 그리드 간격으로 그리드 다시 그리기
+        
 def on_closing():
     if messagebox.askokcancel("Quit", "그림을 저장하시겠습니까?"):
         save_canvas(canvas)  # 저장 함수 호출
     window.destroy()
+
+# 윈도우 및 캔버스 초기화 시 전역 변수 선언
+global grid_spacing
+grid_spacing = 50  # 초기 그리드 간격
 
 window = Tk()
 # Tk 객체를 생성하여 주 윈도우를 만들기
