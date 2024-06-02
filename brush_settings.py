@@ -1,6 +1,19 @@
 import time
 from tkinter.colorchooser import askcolor
 
+    """
+    initialize_globals: 전역 변수를 초기화하는 함수
+    main_globals 딕셔너리에서 값을 가져와 전역 변수에 할당한다.
+    매개변수: main_globals - 전역 변수 값을 포함하는 딕셔너리
+    
+    전역 변수:
+    - brush_size: 브러쉬의 크기
+    - brush_color: 브러쉬의 색상
+    - brush_mode: 브러쉬의 모드 ("solid" 또는 "dotted")
+    - last_x, last_y: 마지막 마우스 위치
+    - x1, y1: 현재 마우스 위치
+    """
+    
 def initialize_globals(main_globals):
     global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1
     brush_size = main_globals['brush_size']
