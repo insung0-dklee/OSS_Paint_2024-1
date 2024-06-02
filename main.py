@@ -172,15 +172,23 @@ def set_dotted_brush_mode(event):
 def set_double_line_brush_mode(event):
     set_brush_mode(canvas, "double_line")
 
+def set_pressure_brush_mode(event=None):
+    set_brush_mode(canvas, "pressure")
+
+def set_marker_brush_mode(event=None):
+    set_brush_mode(canvas, "marker")
+
     # 맞춤형 단축키 기능 추가
 def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas)) #clear 단축키 c
     window.bind("<Control-s>", save_canvas) #save 단축키 crtl+s
     window.bind("<Control-z>", erase_last_stroke) #undo 단축키 crtl+z
     window.bind("d", lambda event: toggle_dark_mode()) #dark 모드 단축키 d
-    window.bind("<q>", set_solid_brush_mode)
-    window.bind("<w>", set_dotted_brush_mode)
-    window.bind("<e>", set_double_line_brush_mode)
+    window.bind("<q>", set_solid_brush_mode)  # Solid Brush 단축키 q
+    window.bind("<w>", set_dotted_brush_mode)  # Dotted Brush 단축키 w
+    window.bind("<e>", set_double_line_brush_mode)  # Double Line Brush 단축키 e
+    window.bind("<r>", set_pressure_brush_mode)  # Pressure Brush 단축키 r
+    window.bind("<t>", set_marker_brush_mode)  # Marker Brush 단축키 t
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
