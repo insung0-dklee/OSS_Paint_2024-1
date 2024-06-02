@@ -1198,6 +1198,51 @@ def finish_pentagon(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 팔각별 모양 그리기
+def create_eight_pointed_star(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_eight_pointed_star)
+
+# 팔각별 모양 그릴 위치 정하고 생성하는 함수 호출
+def start_eight_pointed_star(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_eight_pointed_star(event))
+    canvas.bind("<ButtonRelease-1>", finish_eight_pointed_star)
+
+# 팔각별 모양 생성하기
+def draw_eight_pointed_star(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    outer_radius = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
+    inner_radius = outer_radius / 2.0  # 내각 반지름은 외각 반지름의 2분의 1
+    points = []
+
+    for i in range(8):
+        angle_outer = math.radians(i * 45 - 90)
+        angle_inner = math.radians(i * 45 + 22.5 - 90)
+
+        x_outer = start_x + outer_radius * math.cos(angle_outer)
+        y_outer = start_y + outer_radius * math.sin(angle_outer)
+        x_inner = start_x + inner_radius * math.cos(angle_inner)
+        y_inner = start_y + inner_radius * math.sin(angle_inner)
+
+        points.append(x_outer)
+        points.append(y_outer)
+        points.append(x_inner)
+        points.append(y_inner)
+
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 팔각별 모양 그리기 종료
+def finish_eight_pointed_star(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
 
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
@@ -1207,6 +1252,7 @@ def choose_shape(event):
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
     popup.add_command(label="Six Pointed Star", command=lambda: create_six_pointed_star(event))
+    popup.add_command(label="Eight Pointed Star", command=lambda: create_eight_pointed_star())
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
