@@ -1266,6 +1266,20 @@ def end_drag(event):
     drag_data["x"] = 0
     drag_data["y"] = 0
 
+#작업 시작 시간 기능
+def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
+    return f"{hours:02}:{minutes:02}"
+
+
+current_time = time.localtime() 
+initial_hours = current_time.tm_hour
+initial_minutes = current_time.tm_min 
+
+time_label = Label(window, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
+time_label.pack()
+
+
+
 # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
