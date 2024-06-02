@@ -105,6 +105,18 @@ def upload_image():
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
 
+def get_canvas_resolution(canvas):
+    # 캔버스의 해상도(너비와 높이)를 반환하는 함수
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+    return width, height
+
+def print_canvas_resolution(canvas):
+    # 캔버스의 해상도(너비와 높이)를 출력하는 함수
+    width, height = get_canvas_resolution(canvas)
+    print("Canvas resolution:", width, "x", height)
+
+
 # 라인 브러쉬 기능 추가 
 def set_brush_mode_line(canvas):
     canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
