@@ -619,7 +619,7 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_Last_stroke, labelframe_timer, labelframe_additional, labelframe_additional2
+    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
@@ -635,22 +635,19 @@ def setup_paint_app(window):
     button_frame.pack(fill=X)
 
     labelframe_brush = LabelFrame(button_frame, text="brush mode") #브러시 설정을 정리한 프레임
-    labelframe_brush.pack(side = LEFT,fill=Y)
+    labelframe_brush.pack(side = LEFT,fill=BOTH)
 
     labelframe_flip = LabelFrame(button_frame, text="flip") #브러시 설정을 정리한 프레임
-    labelframe_flip.pack(side = LEFT,fill=Y)
-
-    labelframe_Last_stroke = LabelFrame(button_frame,text="last stroke") # 지난 획에 대한 옵션을 정리한 프레임
-    labelframe_Last_stroke.pack(side = LEFT,fill=Y) 
+    labelframe_flip.pack(side = LEFT,fill=BOTH)
 
     labelframe_timer = LabelFrame(button_frame, text="timer") #타이머 설정을 정리한 프레임
-    labelframe_timer.pack(side = LEFT,fill=Y)
+    labelframe_timer.pack(side = LEFT,fill=BOTH)
 
     labelframe_additional = LabelFrame(button_frame,text="additionals") # 추가 기능 설정을 정리한 프레임
-    labelframe_additional.pack(side = LEFT,fill=Y)
+    labelframe_additional.pack(side = LEFT,fill=BOTH)
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
-    labelframe_additional2.pack(side = LEFT,fill=Y)
+    labelframe_additional2.pack(side = LEFT,fill=BOTH)
 
 
     #timer 카테고리
@@ -687,7 +684,7 @@ def setup_paint_app(window):
     button_use_case.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     
     #이전 획 설정
-    button_erase_last_stroke = Button(labelframe_additional, text="Erase laststroke", command=erase_last_stroke)
+    button_erase_last_stroke = Button(labelframe_additional, text="Erase last stroke", command=erase_last_stroke)
     button_erase_last_stroke.grid(row=2, column=1)
     button_erase_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_erase_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
