@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from math import sin, cos, radians
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -609,7 +610,9 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+    # 꽃 브러쉬 버튼 추가
+    button_flower = Button(window, text="Flower Brush", command=lambda: canvas.bind("<B1-Motion>", flower_brush))
+    button_flower.pack()
 
     #spray 인스턴스 생성 
     global spray_brush
@@ -1447,8 +1450,18 @@ def set_modified():
     global is_modified
     is_modified = True
 
-
-
+# 꽃 브러쉬 기능 추가
+def flower_brush(event):
+    x, y = event.x, event.y
+    radius = 10
+    for i in range(5):
+        angle = i * 72
+        x1 = x + radius * 1.5 * cos(radians(angle)) - radius
+        y1 = y + radius * 1.5 * sin(radians(angle)) - radius
+        x2 = x1 + 2 * radius
+        y2 = y1 + 2 * radius
+        canvas.create_oval(x1, y1, x2, y2, outline="black")
+        
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 version = "1.0.0"  # 프로그램 버전
@@ -1568,5 +1581,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
