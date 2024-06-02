@@ -621,7 +621,7 @@ def setup_paint_app(window):
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
-    canvas.bind("<Button-3>", lambda event: add_text(event, canvas, text_box))
+    canvas.bind("<Button-2>", lambda event: add_text(event, canvas, text_box))
     window.bind("<F11>", toggle_fullscreen)
 
     button_flip = Button(window, text="Flip Horizontal", command=lambda: flip_horizontal(canvas))
