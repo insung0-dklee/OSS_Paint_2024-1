@@ -34,6 +34,7 @@ spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
 
+
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
 previous_time = None
@@ -505,7 +506,7 @@ def choose_use_case_element(event=None):
         popup.post(event.x_root, event.y_root) # 마우스 위치에 팝업 메뉴 표시
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
-# 라인 브러쉬 기능 추가 
+
 def set_brush_mode_line(canvas):
     canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
 
@@ -547,6 +548,11 @@ def setup_paint_app(window):
     button_use_case = Button(window, text="Use Case Diagram", command=choose_use_case_element)
     button_use_case.pack(side=LEFT) # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
 
+    button_clear = Button(window, text="All Clear", command=lambda: clear_paint(canvas))
+    button_clear.pack(side=LEFT)
+    button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
@@ -558,18 +564,13 @@ def setup_paint_app(window):
     start_button = Button(button_frame, text="Start", command=start_stop)
     start_button.pack(side = RIGHT)
 
-    button_line = Button(window, text="Line Brush", command=lambda: set_brush_mode_line(canvas))
-    button_line.pack()
-    button_line.bind("<Enter>", on_enter)  
-    button_line.bind("<Leave>", on_leave)  
+    
     
 
     #spray 인스턴스 생성 
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
     # 스프레이 버튼
-    button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
-    button_spray.pack(side=LEFT)
 
     button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
     button_erase_last_stroke.pack(side=LEFT)
@@ -577,10 +578,7 @@ def setup_paint_app(window):
     button_redo_last_stroke = Button(button_frame, text="Rewrite Last Stroke", command=rewrite_last_stroke)
     button_redo_last_stroke.pack(side=LEFT)
 
-    button_clear = Button(button_frame, text="All Clear", command=lambda: clear_paint(canvas))
-    button_clear.pack(side=LEFT)
-    button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    
 
 
     brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
@@ -589,30 +587,38 @@ def setup_paint_app(window):
 
 
     button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode(canvas, "solid"))
-    button_solid.pack()
+    button_solid.pack(side=LEFT)
     button_solid.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_solid.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode(canvas, "dotted"))
-    button_dotted.pack()
+    button_dotted.pack(side=LEFT)
     button_dotted.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_dotted.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_double_line = Button(button_frame, text="Double line Brush", command=lambda: set_brush_mode(canvas,"double_line"))
-    button_double_line.pack() 
+    button_double_line.pack(side=LEFT) 
     button_double_line.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_double_line.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_line = Button(button_frame, text="Line Brush", command=lambda: set_brush_mode_line(canvas))
+    button_line.pack(side = LEFT)
+    button_line.bind("<Enter>", on_enter)  
+    button_line.bind("<Leave>", on_leave)  
+
+    button_spray = Button(button_frame, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
+    button_spray.pack(side=LEFT)
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
 
 
-    button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
+    button_paint = Button(button_frame, text="normal", command=lambda: set_paint_mode_normal(canvas))
     button_paint.pack(side=RIGHT)
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
+    button_paint = Button(button_frame, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
     button_paint.pack(side=RIGHT)
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
@@ -755,7 +761,7 @@ def setup_paint_app(window):
 def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
     new_window.title("새 그림판")
-    new_window.geometry("800x600+200+200")
+    new_window.geometry("1050x600+200+200") #gui 개선 (가려진 버튼 모두 보이게)
     new_window.configure(bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     setup_paint_app(new_window)
 
@@ -1225,7 +1231,7 @@ window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 version = "1.0.0"  # 프로그램 버전
 window.title(f"그림판 v{version}")
-window.geometry("800x600+200+200")
+window.geometry("1050x600+200+200")#gui 개선 (가려진 버튼 모두 보이게)
 window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
