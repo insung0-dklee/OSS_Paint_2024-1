@@ -609,7 +609,9 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+    # 웃는 얼굴 브러쉬 버튼 추가
+    button_smiley = Button(window, text="Smiley Brush", command=lambda: canvas.bind("<B1-Motion>", smiley_brush))
+    button_smiley.pack()
 
     #spray 인스턴스 생성 
     global spray_brush
@@ -1447,7 +1449,13 @@ def set_modified():
     global is_modified
     is_modified = True
 
-
+# 웃는 얼굴 브러쉬 기능 추가
+def smiley_brush(event):
+    x, y = event.x, event.y
+    canvas.create_oval(x-20, y-20, x+20, y+20, outline="black", width=2)
+    canvas.create_oval(x-10, y-10, x-5, y-5, fill="")
+    canvas.create_oval(x+5, y-10, x+10, y-5, fill="")
+    canvas.create_arc(x-10, y-5, x+10, y+10, start=0, extent=-180, style=ARC)
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -1568,5 +1576,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
