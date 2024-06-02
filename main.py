@@ -636,11 +636,14 @@ def setup_paint_app(window):
     brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
+    brush_size_slider.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    brush_size_slider.bind("<Leave>", on_leave)# 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     
     brightness_slider = Scale(button_frame, from_=0, to=100, orient=HORIZONTAL, label="Background Brightness", command=change_background_brightness)
     brightness_slider.set(100)  # 초기 백그라운드 명도를 최대로 설정
     brightness_slider.pack(side=LEFT)
-    
+    brightness_slider.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    brightness_slider.bind("<Leave>", on_leave)# 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
@@ -652,8 +655,8 @@ def setup_paint_app(window):
     # 스프레이 버튼
     button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
     button_spray.pack(side=LEFT)
-    button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    button_spray.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_spray.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
     button_paint.pack(side=RIGHT)
@@ -724,15 +727,31 @@ def setup_paint_app(window):
 
 
     # 에어브러쉬 속성 조절 버튼 추가
-    Button(frame_distance, text="+", command=increase_dot_distance).pack(side=RIGHT)
+    button_increase = Button(frame_distance, text="+", command=increase_dot_distance)
+    button_increase.pack(side=RIGHT)
+    button_increase.bind("<Enter>", on_enter)# 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_increase.bind("<Leave>", on_leave)   # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+
     Label(frame_distance, text="Distance").pack(side=RIGHT)
     Label(frame_distance, textvariable=dot_distance).pack(side=RIGHT)  # 거리 표시
-    Button(frame_distance, text="-", command=decrease_dot_distance).pack(side=RIGHT)
+    button_decrease = Button(frame_distance, text="-", command=decrease_dot_distance)
+    button_decrease.pack(side=RIGHT)
+    button_decrease.bind("<Enter>", on_enter)# 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_decrease.bind("<Leave>", on_leave)# 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    Button(frame_count, text="+", command=increase_dot_count).pack(side=RIGHT)
+
+    
+    button_increase_count = Button(frame_count, text="+", command=increase_dot_count)
+    button_increase_count.pack(side=RIGHT)
+    button_increase_count.bind("<Enter>", on_enter)# 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_increase_count.bind("<Leave>", on_leave)# 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     Label(frame_count, text="Count").pack(side=RIGHT)
     Label(frame_count, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
-    Button(frame_count, text="-", command=decrease_dot_count).pack(side=RIGHT)
+    button_decrease_count = Button(frame_count, text="-", command=decrease_dot_count)
+    button_decrease_count.pack(side=RIGHT)
+    button_decrease_count.bind("<Enter>", on_enter)# 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_decrease_count.bind("<Leave>", on_leave)# 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
     button_paint.pack(side=RIGHT)
@@ -1536,6 +1555,8 @@ time_label.pack()
 # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
+text_box_button.bind("<Enter>", on_enter)
+text_box_button.bind("<Leave>", on_leave)
 
 # 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
@@ -1576,5 +1597,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
