@@ -31,7 +31,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker"]
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "star"]
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -230,6 +230,31 @@ def paint_marker(event, canvas):
     x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
+#랜덤으로 생성되는 별 그리기
+def draw_star_pen(canvas, x, y, size, color):
+    points = []
+    for i in range(10):
+        angle = math.radians(i * 36)
+        if i % 2 == 0:
+            # 별의 바깥쪽 포인트
+            x_point = x + size * math.cos(angle)
+            y_point = y + size * math.sin(angle)
+        else:
+            # 별의 안쪽 포인트 (별의 크기의 반으로 설정)
+            x_point = x + (size / 2) * math.cos(angle)
+            y_point = y + (size / 2) * math.sin(angle)
+        points.extend([x_point, y_point])
+    canvas.create_polygon(points, fill=color, outline=color)
+
+# 별 그리기 브러쉬
+def paint_star(event, canvas):
+    size = random.randint(brush_size, brush_size * 2)  # 랜덤 크기의 별
+    # 랜덤으로 조정된 위치에 별 그리기
+    offset_x = random.randint(-30, 30)  # 펜 위치로부터의 x축 방향 랜덤 오프셋
+    offset_y = random.randint(-30, 30)  # 펜 위치로부터의 y축 방향 랜덤 오프셋
+    draw_star_pen(canvas, event.x + offset_x, event.y + offset_y, size, brush_color)
+
+
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -251,6 +276,10 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     elif brush_mode == "marker":
         canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
         canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
+    elif brush_mode == "star":
+        canvas.bind("<B1-Motion>", lambda event: paint_star(event, canvas))
+        canvas.bind("<Button-1>", lambda event: paint_star(event, canvas))
+
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
