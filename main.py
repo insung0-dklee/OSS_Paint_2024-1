@@ -181,6 +181,7 @@ def bind_shortcuts():
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
+    window.bind("<r>", lambda event: toggle_ruler())
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
@@ -278,10 +279,6 @@ def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와�
 
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
-def bind_shortcuts_window(window):
-    window.bind("<Alt-Return>", toggle_fullscreen)  # Alt + Enter (Windows/Linux)
-    window.bind("<Command-Return>", toggle_fullscreen)  # Command + Enter (Mac)
 
 # 전체화면 토글 함수
 def toggle_fullscreen(event=None):
@@ -1404,6 +1401,12 @@ def on_resize(event):
         clear_ruler()
         draw_ruler()
 
+"""
+Enter키 입력 후 entry에 추가적인 내용 삽입을 막기 위한 함수
+"""
+def on_entry_input(event):
+    window.focus()
+
 def on_closing():
     # 프로그램 종료 시 호출되는 함수
     global is_modified
@@ -1557,9 +1560,9 @@ interval_entry = Entry(window)
 interval_entry.pack()
 interval_entry.insert(0, "10")  # 기본값 설정
 
-canvas.bind("<Configure>", on_resize)
+interval_entry.bind("<Return>", on_entry_input)
 
-bind_shortcuts_window(window)
+canvas.bind("<Configure>", on_resize)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
 
