@@ -31,7 +31,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker"]
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "light"]
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -230,6 +230,20 @@ def paint_marker(event, canvas):
     x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
+# 빛 모양 브러쉬
+def draw_light(canvas, x, y, rays, max_length):
+    for _ in range(rays): # 각 광선에 대해 랜덤한 각도와 길이를 계산
+        angle = random.uniform(0, 2 * math.pi)  # 랜덤한 각도
+        length = random.uniform(10, max_length)  # 랜덤한 길이
+        end_x = x + math.cos(angle) * length # 광선의 끝 점 계산
+        end_y = y + math.sin(angle) * length
+        canvas.create_line(x, y, end_x, end_y, fill=brush_color)
+
+def paint_light(event, canvas):
+    rays = random.randint(10, 15)  # 빛의 광선 수
+    max_length = random.randint(brush_size, brush_size * 3)  # 광선의 최대 길이
+    draw_light(canvas, event.x, event.y, rays, max_length)
+
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -251,6 +265,9 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     elif brush_mode == "marker":
         canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
         canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
+    elif brush_mode == "light":
+        canvas.bind("<B1-Motion>", lambda event: paint_light(event, canvas))
+        canvas.bind("<Button-1>", lambda event: paint_light(event, canvas))
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
