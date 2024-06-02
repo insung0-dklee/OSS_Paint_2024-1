@@ -1526,6 +1526,16 @@ def end_drag(event):
 def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
     return f"{hours:02}:{minutes:02}"
 
+def update_current_time():
+    current_time = time.strftime("%H:%M:%S")
+    current_time_label.config(text=f"현재 시간: {current_time}")
+    window.after(1000, update_current_time)
+
+# 현재 시간 레이블 생성 및 업데이트
+current_time_label = Label(window, text="")
+current_time_label.pack()
+update_current_time()
+
 
 current_time = time.localtime() 
 initial_hours = current_time.tm_hour
