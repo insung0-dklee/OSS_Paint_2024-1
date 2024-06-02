@@ -31,7 +31,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker"]
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker","airbrush","spray"] #line을 제외한 모든 펜기능 정리
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -193,7 +193,6 @@ def set_paint_mode_normal(canvas, set_origin_mode=False):
         # 추가적인 원점 모드 설정 코드
         pass
 
-
 def start_paint_pressure(event, canvas):
     global start_time
     start_time = time.time() #마우스를 클릭한 시간을 변수에 저장
@@ -251,6 +250,13 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     elif brush_mode == "marker":
         canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
         canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
+    elif brush_mode == "airbrush":
+        canvas.bind("<B1-Motion>", lambda event: paint_airbrush(event, canvas))
+        canvas.bind("<Button-1>", lambda event: paint_airbrush(event, canvas))
+    elif brush_mode == "spray":
+        canvas.bind("<B1-Motion>",  spray_brush.spray_paint)
+        canvas.bind("<Button-1>",  spray_brush.spray_paint)
+
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -422,8 +428,9 @@ def reset_brush(canvas):
 
 
 def setup_reset_brush_button(window, canvas):
-    button_reset = Button(window, text="Reset Brush", command=lambda: reset_brush(canvas))
-    button_reset.pack(side=LEFT)
+    global button_reset
+    button_reset = Button(labelframe_brush, text="Reset", command=lambda: reset_brush(canvas))
+    button_reset.pack(side=BOTTOM)
     button_reset.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_reset.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
@@ -550,7 +557,7 @@ def choose_use_case_element(event=None):
     choose_use_case_element: 유스케이스 다이어그램 요소 선택 함수
     액터, 유스케이스, 관계를 선택할 수 있는 팝업 메뉴를 생성한다.
     """
-    popup = Menu(window, tearoff=0)
+    popup = Menu(labelframe_shape, tearoff=0)
     popup.add_command(label="Actor", command=add_actor) # 액터 추가
     popup.add_command(label="Use Case", command=add_use_case) # 유스케이스 추가
     popup.add_command(label="Relationship", command=add_relationship) # 관계 추가
@@ -562,20 +569,30 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame
+    global brush_size, brush_color, button_frame, labelframe_shape, labelframe_brush, labelframe_flip
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
 
     global canvas
     canvas = Canvas(window, bg="white")
-    canvas.pack(fill="both", expand=True)
+    canvas.pack(fill=BOTH, expand=True,side= BOTTOM)
 
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
-    button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
+    button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
+
+    labelframe_shape = LabelFrame(button_frame, text="shape mode") #모양 기능을 정리한 프레임
+    labelframe_shape.pack(side = LEFT,fill=Y)
+
+    labelframe_brush = LabelFrame(button_frame, text="brush mode") #브러시 설정을 정리한 프레임
+    labelframe_brush.pack(side = LEFT,fill=Y)
+
+    labelframe_flip = LabelFrame(button_frame, text="flip") #브러시 설정을 정리한 프레임
+    labelframe_flip.pack(side = LEFT,fill=Y)
+
 
     button_toggle_mode = Button(window, text="Toggle Dark Mode", command=toggle_dark_mode)
     button_toggle_mode.pack(side=LEFT) # 다크 모드 토글 버튼을 윈도우에 배치
@@ -610,12 +627,6 @@ def setup_paint_app(window):
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     
-
-    #spray 인스턴스 생성 
-    global spray_brush
-    spray_brush = SprayBrush(canvas, brush_color)
-    
-
     button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
     button_erase_last_stroke.pack(side=LEFT)
     button_erase_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
@@ -626,36 +637,20 @@ def setup_paint_app(window):
     button_redo_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_redo_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-
-    brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
+    brush_size_slider = Scale(labelframe_brush, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
-    
-
-    
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
-    button_line = Button(window, text="Line Brush", command=lambda: set_brush_mode_line(canvas))
-    button_line.pack(side=LEFT)
+    button_line = Button(labelframe_brush, text="Line", command=lambda: set_brush_mode_line(canvas))
+    button_line.pack(side= RIGHT)
     button_line.bind("<Enter>", on_enter)  
     button_line.bind("<Leave>", on_leave)
 
-    # 스프레이 버튼
-    button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
-    button_spray.pack(side=LEFT)
-    button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+        #spray 인스턴스 생성 
+    global spray_brush
+    spray_brush = SprayBrush(canvas, brush_color)
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
@@ -665,26 +660,27 @@ def setup_paint_app(window):
     canvas.bind("<Button-3>", lambda event: add_text(event, canvas, text_box))
     window.bind("<F11>", toggle_fullscreen)
 
-    button_flip = Button(window, text="Flip Horizontal", command=lambda: flip_horizontal(canvas))
-    button_flip.pack(side=LEFT)
+    button_flip = Button(labelframe_flip, text="Horizontal", command=lambda: flip_horizontal(canvas))
+    button_flip.pack(side=TOP)
     button_flip.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_flip.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_flip_vertical = Button(window, text="Flip Vertical", command=lambda: flip_vertical(canvas))
-    button_flip_vertical.pack(side=LEFT)
+    button_flip_vertical = Button(labelframe_flip, text="Vertical", command=lambda: flip_vertical(canvas))
+    button_flip_vertical.pack(side=TOP)
     button_flip_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_flip_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
-    brush_combobox = ttk.Combobox(button_frame, values=brush_modes, state="readonly")
+    #브러시  모드를 선택하는 콤보박스
+    brush_combobox = ttk.Combobox(labelframe_brush, values=brush_modes, state="readonly")
     brush_combobox.current(0)
     brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
     brush_combobox.pack(side=LEFT)
     
 
     #도형 모양 선택하는 버튼 생성
-    button_choose_shape = Button(window, text="shape", command=choose_shape)
+    button_choose_shape = Button(labelframe_shape, text="shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
     button_choose_shape.pack(side=LEFT)
     button_choose_shape.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
@@ -713,8 +709,6 @@ def setup_paint_app(window):
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
 
-
-
     # 에어브러쉬 속성 조절 버튼 추가
     Button(frame_distance, text="+", command=increase_dot_distance).pack(side=RIGHT)
     Label(frame_distance, text="Distance").pack(side=RIGHT)
@@ -725,11 +719,6 @@ def setup_paint_app(window):
     Label(frame_count, text="Count").pack(side=RIGHT)
     Label(frame_count, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
     Button(frame_count, text="-", command=decrease_dot_count).pack(side=RIGHT)
-
-    button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
@@ -1160,7 +1149,7 @@ def finish_diamond(event):
 
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
-    popup = Menu(window, tearoff=0)
+    popup = Menu(labelframe_shape, tearoff=0)
     popup.add_command(label="Rectangle", command=lambda: create_rectangle(event))
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
@@ -1568,3 +1557,5 @@ timer.start()
 update_timer()
 
 window.mainloop()
+
+
