@@ -1569,4 +1569,53 @@ update_timer()
 
 window.mainloop()
 
+#그림판 도안 
+class ColoringBook:
+    def __init__(self, master):
+        self.master = master
+        self.canvas = Canvas(master, width=500, height=500, bg='white')  # 캔버스 생성
+        self.canvas.pack()
 
+        # 도안 선택 버튼 추가
+        self.pattern_buttons = []
+        patterns = ['circle', 'rectangle', 'line']  # 도안 종류: 원, 사각형, 선
+        for i, pattern in enumerate(patterns):
+            # 도안 선택 버튼 생성
+            button = Button(master, text=pattern.capitalize(), command=lambda p=pattern: self.draw_pattern(p))
+            button.grid(row=0, column=i)
+            self.pattern_buttons.append(button)
+
+        # 기본으로 선택된 도안 설정
+        self.selected_pattern = 'circle'
+        self.draw_pattern(self.selected_pattern)
+
+    def draw_pattern(self, pattern):
+        # 선택된 도안으로 캔버스에 예시 도안 그리기
+        self.selected_pattern = pattern
+        self.canvas.delete("all")  # 캔버스 초기화
+        if pattern == 'circle':
+            self.canvas.create_oval(240, 240, 260, 260, outline='black')
+        elif pattern == 'rectangle':
+            self.canvas.create_rectangle(230, 230, 270, 270, outline='black')
+        elif pattern == 'line':
+            self.canvas.create_line(240, 240, 260, 260, fill='black')
+
+    def on_canvas_click(self, event):
+        # 캔버스 클릭 시 선택된 도안 예시를 그림
+        x, y = event.x, event.y
+        if self.selected_pattern == 'circle':
+            self.canvas.create_oval(x - 20, y - 20, x + 20, y + 20, outline='black')
+        elif self.selected_pattern == 'rectangle':
+            self.canvas.create_rectangle(x - 20, y - 20, x + 20, y + 20, outline='black')
+        elif self.selected_pattern == 'line':
+            self.canvas.create_line(x - 20, y - 20, x + 20, y + 20, fill='black')
+
+def start():
+    root = Tk()  
+    root.title("Coloring Book")  
+    app = ColoringBook(root) 
+    root.bind("<Button-1>", app.on_canvas_click)  
+    root.mainloop()  
+
+if __name__ == "__main__":
+    start()  
