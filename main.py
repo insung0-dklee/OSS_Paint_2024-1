@@ -1159,6 +1159,40 @@ def finish_diamond(event):
     canvas.unbind("<ButtonRelease-1>")
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
+        
+# 화살표 그리기
+def create_arrow(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_arrow)
+# 화살표 그릴 위치 정하고 생성하는 함수 호출
+def start_arrow(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", draw_arrow)
+    canvas.bind("<ButtonRelease-1>", finish_arrow)
+#화살표 생성하기
+def draw_arrow(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    end_x, end_y = event.x, event.y
+    # 화살표의 선 부분
+    current_shape = canvas.create_line(start_x, start_y, end_x, end_y, fill=shape_outline_color, tags="temp_shape")
+    # 화살표 머리 부분 계산
+    arrow_size = 10
+    angle = math.atan2(end_y - start_y, end_x - start_x)
+    left_x = end_x - arrow_size * math.cos(angle - math.pi / 6)
+    left_y = end_y - arrow_size * math.sin(angle - math.pi / 6)
+    right_x = end_x - arrow_size * math.cos(angle + math.pi / 6)
+    right_y = end_y - arrow_size * math.sin(angle + math.pi / 6)
+    canvas.create_polygon(end_x, end_y, left_x, left_y, right_x, right_y, fill=shape_outline_color, outline=shape_outline_color, tags="temp_shape")
+#화살표 그리기 종료
+def finish_arrow(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
 
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
@@ -1171,6 +1205,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Arrow", command=lambda: create_arrow(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
