@@ -204,7 +204,7 @@ def paint_pressure(event, canvas):
     radius = min(max(int(elapsed_time * 20), 1), 8) * brush_size / 4  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
-    
+
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
 
@@ -278,7 +278,7 @@ def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와�
 
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
+
 def bind_shortcuts_window(window):
     window.bind("<Alt-Return>", toggle_fullscreen)  # Alt + Enter (Windows/Linux)
     window.bind("<Command-Return>", toggle_fullscreen)  # Command + Enter (Mac)
@@ -609,12 +609,12 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+
 
     #spray 인스턴스 생성 
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
-    
+
 
     button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
     button_erase_last_stroke.pack(side=LEFT)
@@ -630,9 +630,9 @@ def setup_paint_app(window):
     brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
-    
 
-    
+
+
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
@@ -681,7 +681,7 @@ def setup_paint_app(window):
     brush_combobox.current(0)
     brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
     brush_combobox.pack(side=LEFT)
-    
+
 
     #도형 모양 선택하는 버튼 생성
     button_choose_shape = Button(window, text="shape", command=choose_shape)
@@ -737,7 +737,7 @@ def setup_paint_app(window):
 
     set_paint_mode_normal(canvas)
 
-    
+
 
 #+=================================================================================
     menu_bar = Menu(window) # 메뉴 바 생성
@@ -769,7 +769,7 @@ def setup_paint_app(window):
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
-    
+
     # button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     # button_new_window.pack(side=LEFT)
 
@@ -964,21 +964,21 @@ def draw_star(event):
     outer_radius = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
     inner_radius = outer_radius / 2.5  # 내각 반지름은 외각 반지름의 2.5분의 1
     points = []
-    
+
     for i in range(5):
         angle_outer = math.radians(i * 72 - 90)
         angle_inner = math.radians(i * 72 + 36 - 90)
-        
+
         x_outer = start_x + outer_radius * math.cos(angle_outer)
         y_outer = start_y + outer_radius * math.sin(angle_outer)
         x_inner = start_x + inner_radius * math.cos(angle_inner)
         y_inner = start_y + inner_radius * math.sin(angle_inner)
-        
+
         points.append(x_outer)
         points.append(y_outer)
         points.append(x_inner)
         points.append(y_inner)
-    
+
     current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 별 모양 그리기 종료
@@ -1563,10 +1563,23 @@ bind_shortcuts_window(window)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
 
+# 새로운 함수 추가: 취소 기능
+def undo():
+    canvas.delete("all")
+
+# 새로운 함수 추가: 재실행 기능
+def redo():
+    pass
+
+# 취소 및 재실행 기능을 추가한 버튼 생성
+button_undo = Button(button_frame, text="Undo", command=undo)
+button_undo.pack(side=LEFT)
+
+button_redo = Button(button_frame, text="Redo", command=redo)
+button_redo.pack(side=LEFT)
+
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
 
 window.mainloop()
-
-
