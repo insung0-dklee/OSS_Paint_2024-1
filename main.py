@@ -920,6 +920,44 @@ def finish_star(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 하트 모양 그리기
+def create_heart(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_heart)
+
+# 하트 모양 그릴 위치 정하고 생성하는 함수 호출
+def start_heart(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_heart(event))
+    canvas.bind("<ButtonRelease-1>", finish_heart)
+
+# 하트 모양 생성하기
+def draw_heart(event):
+    global start_x, start_y, current_shape, brush_size
+    canvas.delete("temp_shape")
+    current_size = brush_size * 2  # 브러시 크기의 2배로 하트 모양 크기 설정
+    x0, y0 = start_x, start_y  # 시작점 저장
+    x1, y1 = event.x, event.y  # 현재 마우스 위치 저장
+    distance = ((x1 - x0)**2 + (y1 - y0)**2)**0.5  # 시작점과 현재 마우스 위치 사이의 거리 계산
+    points = []
+    for t in range(0, 360):
+        x = current_size * 16 * math.sin(t) ** 3
+        y = current_size * (-13 * math.cos(t) + 5 * math.cos(2*t) + 2 * math.cos(3*t) + math.cos(4*t))  # y 좌표를 위아래로 뒤집음
+        # 현재 마우스 위치와 시작점 사이의 거리에 비례하여 좌표 조절
+        points.append(start_x + x * distance / 100)
+        points.append(start_y + y * distance / 100)
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 하트 모양 그리기 종료
+def finish_heart(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -927,6 +965,7 @@ def choose_shape(event):
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
+    popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
