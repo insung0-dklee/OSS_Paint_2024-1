@@ -21,6 +21,7 @@ from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
+from tkinter import Scale
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1244,6 +1245,23 @@ def add_text_to_canvas(text):
         canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
         canvas.tag_bind(text_item, "<B1-Motion>", drag)
         canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
+
+def setup_alpha_slider(window):
+    global alpha_slider
+    alpha_slider = Scale(window, from_=0, to=255, orient=HORIZONTAL, label="Alpha", command=change_alpha)
+    alpha_slider.set(255)  # 초기 알파 값을 완전히 불투명으로 설정
+    alpha_slider.pack(side=RIGHT)
+
+def change_alpha(new_alpha):
+    global brush_color
+    alpha_value = int(new_alpha)
+    # 기존 브러시 색상에서 알파 값을 변경하여 새로운 브러시 색상을 생성
+    brush_color = brush_color[:-2] + str(alpha_value)  # RGB 값에서 알파 값을 변경
+
+def setup_paint_app(window):
+    ...
+
+    setup_alpha_slider(window)  # 알파 슬라이더 설정 추가
 
 # 문자열 드래그 시작
 def start_drag(event):
