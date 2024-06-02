@@ -24,6 +24,11 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import requests
+from PIL import Image, ImageTk
+import io
+import base64
+from tkinter import Tk, Canvas, Entry, Button, NW
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1516,6 +1521,42 @@ def end_drag(event):
 #작업 시작 시간 기능
 def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
     return f"{hours:02}:{minutes:02}"
+
+
+def generate_image_from_prompt(prompt):
+    """
+    주어진 프롬프트로부터 이미지를 생성하여 반환합니다.
+    param prompt: 텍스트 프롬프트
+    return: PIL 이미지 객체
+    """
+    api_key = os.getenv("DALLE_API_KEY")
+    headers = {
+        "Authorization": f"Bearer " + api_key,
+        "Content-Type": "application/json"
+    }
+    data = {
+        "prompt": prompt,
+        "n": 1,
+        "size": "256x256"
+    }
+
+    response = requests.post("https://api.dalle.ai/generate", headers=headers, json=data)
+    response.raise_for_status()
+    image_data = response.json()["data"][0]["b64_json"]
+
+    image = Image.open(io.BytesIO(base64.b64decode(image_data)))
+    return image
+
+
+def display_image_on_canvas(image, canvas):
+    """
+    주어진 이미지를 캔버스에 표시합니다.
+    param image: PIL 이미지 객체
+    param canvas: 이미지를 표시할 Tkinter 캔버스
+    """
+    canvas_image = ImageTk.PhotoImage(image)
+    canvas.create_image(0, 0, anchor=NW, image=canvas_image)
+    canvas.image = canvas_image
 
 
 current_time = time.localtime() 
