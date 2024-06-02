@@ -1266,6 +1266,18 @@ def end_drag(event):
     drag_data["x"] = 0
     drag_data["y"] = 0
 
+#그림판이 열린 시간이 오는 기능
+def format_time(hours, minutes):
+    return f"{hours:02}:{minutes:02}"
+#시간과 분을 받아서 시:분 형태의 문자열로 반환
+
+current_time = time.localtime() #현재 시간을 가져온다.
+initial_hours = current_time.tm_hour #현재 시간
+initial_minutes = current_time.tm_min #현재 분 
+
+time_label = Label(window, text=f"시작 시간: {format_time(initial_hours, initial_minutes)}")
+time_label.pack()
+
 # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
