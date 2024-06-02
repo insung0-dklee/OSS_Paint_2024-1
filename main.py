@@ -20,6 +20,7 @@ import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
+import tkinter as tk
 import os
 
 # 초기 설정 값들
@@ -1310,4 +1311,38 @@ update_timer()
 
 window.mainloop()
 
+# 레이저 펜 기능 
+class LaserPen:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Laser Pen Drawing")    # 윈도우 창 제목 설정
 
+        self.canvas = tk.Canvas(root, bg="white", width=800, height=600)    # tkinter의 Canvas 위젯을 생성,초기화할 때 배경 색상,크기 설정
+        self.canvas.pack()    # Canvas 위젯을 부모 위젯에 배치
+
+        self.last_x, self.last_y = None, None  # 마지막 좌표 저장
+
+        self.canvas.bind("<ButtonPress-1>", self.laser_on_button_press)     # 마우스 왼쪽 버튼 클릭될 때 호출됨
+        self.canvas.bind("<B1-Motion>", self.laser_on_mouse_drag)           # 마우스 왼쪽 버튼이 클릭된 상태에서 이동할 때 호출됨
+        self.canvas.bind("<ButtonRelease-1>", self.laser_on_button_release)    # 마우스 왼쪽 버튼이 놓였을 때 호출됨
+        self.root.protocol("WM_DELETE_WINDOW", self.laser_on_close)  # 윈도우 창이 닫힐 때 호출되는 함수 지정
+
+    def laser_on_button_press(self, event):    
+        self.last_x, self.last_y = event.x, event.y  # 마우스 클릭할 때 호출, 클릭한 좌표 저장
+
+    def laser_on_mouse_drag(self, event):
+        if self.last_x and self.last_y:
+            # 마우스 드래그할 때 호출, 이전 좌표와 현재 좌표를 사용하여 선을 그림
+            self.canvas.create_line(self.last_x, self.last_y, event.x, event.y, fill="red", width=2)    # 선 두께, 색상 설정
+            self.last_x, self.last_y = event.x, event.y  # 현재 좌표를 마지막 좌표로 업데이트
+
+    def laser_on_button_release(self, event):
+        self.last_x, self.last_y = None, None  # 마우스 버튼 놓을 때 호출,  마우스 버튼을 놓으면 좌표 초기화
+
+    def laser_on_close(self):
+        self.root.quit()  # 윈도우를 닫을 때 프로그램 종료
+
+if __name__ == "__main__":
+    root = tk.Tk()    # 새로운 윈도우 창 생성
+    app = LaserPen(root)    # LaserPen 클래스의 객체 생성
+    root.mainloop() 
