@@ -1266,6 +1266,41 @@ def end_drag(event):
     drag_data["x"] = 0
     drag_data["y"] = 0
 
+# 그리드 가이드 구현
+def draw_grid(canvas, grid_size):
+    canvas.delete("grid_line")  # 기존 그리드를 삭제합니다.
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+    for i in range(0, width, grid_size):
+        canvas.create_line([(i, 0), (i, height)], tag="grid_line", fill="lightgray")
+    for i in range(0, height, grid_size):
+        canvas.create_line([(0, i), (width, i)], tag="grid_line", fill="lightgray")
+
+def toggle_grid(canvas, grid_size):
+    if canvas.find_withtag("grid_line"):
+        canvas.delete("grid_line")
+    else:
+        draw_grid(canvas, grid_size)
+
+def on_canvas_resize(event):
+    draw_grid(canvas, grid_size)
+
+window = Tk()
+window.title("Drawing Guide Example")
+window.geometry("800x600")
+
+grid_size = 50  # 그리드 크기 설정
+canvas = Canvas(window, bg="white")
+canvas.pack(fill=BOTH, expand=True)
+
+# 윈도우 크기가 변경될 때 그리드를 다시 그립니다.
+canvas.bind("<Configure>", on_canvas_resize)
+
+# 그리드 토글 버튼 추가
+toggle_grid_button = Button(window, text="Toggle Grid", command=lambda: toggle_grid(canvas, grid_size))
+toggle_grid_button.pack()
+
+
 # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
