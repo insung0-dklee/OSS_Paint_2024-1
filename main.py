@@ -1266,6 +1266,43 @@ def end_drag(event):
     drag_data["x"] = 0
     drag_data["y"] = 0
 
+# 원근법 가이드 구현
+def draw_perspective_guide(canvas, vanishing_point, lines):
+    canvas.delete("perspective_line")
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+
+    for angle in range(0, 360, int(360/lines)):
+        end_x = vanishing_point[0] + math.cos(math.radians(angle)) * width
+        end_y = vanishing_point[1] + math.sin(math.radians(angle)) * height
+        canvas.create_line(vanishing_point[0], vanishing_point[1], end_x, end_y, fill="lightgray", tag="perspective_line")
+
+def toggle_perspective_guide(canvas, vanishing_point, lines):
+    if canvas.find_withtag("perspective_line"):
+        canvas.delete("perspective_line")
+    else:
+        draw_perspective_guide(canvas, vanishing_point, lines)
+
+def on_canvas_resize(event):
+    draw_perspective_guide(canvas, vanishing_point, lines)
+
+window = Tk()
+window.title("Perspective Guide Example")
+window.geometry("800x600")
+
+canvas = Canvas(window, bg="white")
+canvas.pack(fill=BOTH, expand=True)
+
+vanishing_point = (400, 300)  # 소실점 설정
+lines = 20  # 소실점에서 나오는 선의 개수
+
+# 윈도우 크기가 변경될 때 원근법 가이드를 다시 그립니다.
+canvas.bind("<Configure>", on_canvas_resize)
+
+# 원근법 가이드 토글 버튼 추가
+toggle_perspective_button = Button(window, text="Toggle Perspective Guide", command=lambda: toggle_perspective_guide(canvas, vanishing_point, lines))
+toggle_perspective_button.pack()
+
 # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
