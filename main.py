@@ -1055,27 +1055,35 @@ def change_grid_spacing(value):
 
 class GridDialog:
     def __init__(self, window):
+        # 새로운 Toplevel 창 형성
         self.top = Toplevel(window)
-        self.top.title("Grid scale")
+        self.top.title("Grid scale") # 창 제목 설정
 
+        # "그리드 간격:" 레이블 추가
         Label(self.top, text="그리드 간격:").pack()
+        # Scale 위젯 추가: 최솟값 50, 최댓값 100, 간격 5, 수평 방향
         self.gridscale_slider = Scale(self.top, from_=50, to=100, resolution=5, orient=HORIZONTAL)
-        self.gridscale_slider.set(50)
+        self.gridscale_slider.set(50) # 슬라이더 초기값 설정
         self.gridscale_slider.pack()
 
+        # "ok" 버튼 추가 및 클릭시 ok 메서드 호출
         self.ok_button = Button(self.top, text="OK", command=self.ok)
         self.ok_button.pack()
 
+        # "cancel" 버튼 추가 및 클릭 시 cancel 메서드 호출
         self.cancel_button = Button(self.top, text="Cancel", command=self.cancel)
         self.cancel_button.pack()
 
+        # 결과를 저장할 변수 초기화
         self.result = None
 
     def ok(self):
+        # 슬라이더 값을 result 변수에 저장하고 창 닫기
         self.result = self.gridscale_slider.get()
         self.top.destroy()
 
     def cancel(self):
+        # 창 닫기
         self.top.destroy()
 
 def open_grid_dialog():
