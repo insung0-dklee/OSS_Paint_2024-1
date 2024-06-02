@@ -21,6 +21,8 @@ from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
+import cv2
+import numpy as np
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1244,6 +1246,44 @@ def add_text_to_canvas(text):
         canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
         canvas.tag_bind(text_item, "<B1-Motion>", drag)
         canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
+
+def remove_coat(image_path):
+    # 이미지 불러오기
+    image = cv2.imread(image_path)
+    if image is None:
+        print("이미지를 불러올 수 없습니다.")
+        return
+
+    # 초기 마스크 생성
+    mask = np.zeros(image.shape[:2], np.uint8)
+
+    # 배경과 전경을 나타내는 임시 배열 생성
+    bgd_model = np.zeros((1, 65), np.float64)
+    fgd_model = np.zeros((1, 65), np.float64)
+
+    # 전경과 배경 사각형 좌표 설정
+    height, width = image.shape[:2]
+    rect = (50, 50, width-50, height-50)
+
+    # 그랩컷 알고리즘 적용
+    cv2.grabCut(image, mask, rect, bgd_model, fgd_model, 5, cv2.GC_INIT_WITH_RECT)
+
+    # 마스크를 전경(1)과 확실한 배경(0)으로 설정
+    mask2 = np.where((mask==2) | (mask==0), 0, 1).astype('uint8')
+
+    # 이미지에 새로운 마스크 적용
+    result = image * mask2[:, :, np.newaxis]
+
+    # 결과 이미지 출력
+    cv2.imshow('Result', result)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+# 이미지 경로
+image_path = 'your_image.jpg'
+
+# 누끼 제거 함수 호출
+remove_coat(image_path)
 
 # 문자열 드래그 시작
 def start_drag(event):
