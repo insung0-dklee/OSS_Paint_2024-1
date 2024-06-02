@@ -21,6 +21,7 @@ from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
+import threading
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1310,4 +1311,66 @@ update_timer()
 
 window.mainloop()
 
+#저장 및 불러오기 기능 구현현
+def choose_color():
+    global shape_outline_color, shape_fill_color
+    color = askcolor()[1]
+    if color:
+        shape_outline_color = color
+        shape_fill_color = color
+
+def set_brush_size(size):
+    global brush_size
+    brush_size = size
+
+def save_canvas():
+    file = filedialog.asksaveasfilename(defaultextension=".png")
+    if file:
+        canvas.postscript(file=file + ".eps")
+        # EPS 파일을 PNG로 변환 (Pillow 라이브러리 필요)
+        from PIL import Image
+        img = Image.open(file + ".eps")
+        img.save(file, "png")
+
+def load_canvas():
+    file = filedialog.askopenfilename(defaultextension=".png")
+    if file:
+        from PIL import Image, ImageTk
+        img = Image.open(file)
+        img = ImageTk.PhotoImage(img)
+        canvas.create_image(0, 0, anchor=tk.NW, image=img)
+        canvas.image = img
+
+# tkinter 초기화 및 캔버스 설정
+root = tk.Tk()
+
+# 색상 선택 버튼 추가
+color_button = tk.Button(root, text="색상 선택", command=choose_color)
+color_button.pack()
+
+# 브러시 크기 조절 슬라이더 추가
+brush_size_slider = tk.Scale(root, from_=1, to=20, orient=tk.HORIZONTAL, label="브러시 크기", command=lambda size: set_brush_size(int(size)))
+brush_size_slider.pack()
+
+# 저장 및 불러오기 버튼 추가
+save_button = tk.Button(root, text="저장", command=save_canvas)
+save_button.pack()
+
+load_button = tk.Button(root, text="불러오기", command=load_canvas)
+load_button.pack()
+
+canvas = tk.Canvas(root, width=800, height=600)
+canvas.pack()
+
+shape_outline_color = 'black'
+shape_fill_color = 'white'
+brush_size = 1
+
+# 마우스 이벤트 바인딩
+canvas.bind("<Button-1>", start_rectangle)
+
+# 예제 타이머 설정
+set_timer(5)  # 5초 후에 타이머 종료 메시지 출력
+
+root.mainloop()
 
