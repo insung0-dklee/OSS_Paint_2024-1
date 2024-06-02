@@ -16,7 +16,7 @@ from tkinter import filedialog
 from tkinter import PhotoImage
 from tkinter import messagebox
 from tkinter import simpledialog
-import tkinter as tk
+from tkinterdnd2 import DND_FILES, TkinterDnD
 import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from PIL import Image, ImageTk
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -93,17 +94,12 @@ def on_leave(event):
     event.widget.config(bg="SystemButtonFace")
 
 def upload_image():
-    path = filedialog.askopenfilename()
+    path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.gif")])
     if path:
-        # 업로드 파일이 PNG파일인지 확인
-        if not path.lower().endswith('.png'):
-            messagebox.showerror("Invalid File", "PNG 파일만 업로드할 수 있습니다.")
-            return
-
-        # 업로드 파일이 PNG일 때 업로드 성공
-        image = PhotoImage(file=path)
-        canvas.create_image(0, 0, anchor=NW, image=image)
-        canvas.image = image
+        try:
+            load_image(path)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load image: {e}")
 
 # 라인 브러쉬 기능 추가 
 def set_brush_mode_line(canvas):
@@ -559,7 +555,26 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+def drop(event):
+    file_path = event.data
+    if os.path.isfile(file_path) and file_path.lower().endswith(('png', 'jpg', 'jpeg', 'gif')):
+        try:
+            load_image(file_path)
+        except Exception as e:
+            print(f"Error loading image: {e}")
 
+
+def load_image(file_path):
+    img = Image.open(file_path)
+
+    # 이미지 모드가 RGBA일 경우 RGB로 변환
+    if img.mode in ('RGBA', 'P'):
+        img = img.convert('RGB')
+
+    img = img.resize((300, 300))  # 이미지 크기 조정 (필요에 따라 변경)
+    img = ImageTk.PhotoImage(img)
+    canvas.create_image(150, 150, anchor=NW, image=img)
+    canvas.image = img  # 이미지가 가비지 컬렉션 되지 않도록 참조 유지
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame
@@ -576,6 +591,10 @@ def setup_paint_app(window):
 
     button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
+
+    # 드래그 앤 드롭 기능 활성화
+    window.drop_target_register(DND_FILES)
+    window.dnd_bind('<<Drop>>', drop)
 
     button_toggle_mode = Button(window, text="Toggle Dark Mode", command=toggle_dark_mode)
     button_toggle_mode.pack(side=LEFT) # 다크 모드 토글 버튼을 윈도우에 배치
@@ -1449,7 +1468,7 @@ def set_modified():
 
 
 
-window = Tk()
+window = TkinterDnD.Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 version = "1.0.0"  # 프로그램 버전
 window.title(f"그림판 v{version}")
@@ -1546,6 +1565,7 @@ frame_count.pack(side=RIGHT)
 ruler_on = False
 ruler_lines = []
 ruler_texts = []
+
 
 
 
