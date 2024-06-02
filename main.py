@@ -11,6 +11,8 @@ import time #시간 계산을 위한 모듈
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 import math  # 수학 모듈을 가져옴
 import tkinter as tk
+from tkinter import filedialog
+from PIL import ImageGrab, ImageTk
 from tkinter import ttk
 
 # 초기 설정 값들
@@ -261,4 +263,59 @@ layer_listbox.bind("<<ListboxSelect>>", on_layer_select)
 toggle_layer_button = ttk.Button(control_frame, text="레이어 토글", command=toggle_layer)
 toggle_layer_button.pack(pady=10)
 
+root.mainloop()
+
+# 그림을 그리는 함수
+def paint(event):
+    global old_x, old_y
+    if old_x and old_y:
+        if custom_brush_mode and brush_image:
+            # 커스텀 브러쉬 모드일 때 브러쉬 이미지를 그린다
+            canvas.create_image(event.x, event.y, image=brush_image)
+        else:
+            # 기본 선 그리기
+            canvas.create_line(old_x, old_y, event.x, event.y, width=5, fill="black", capstyle=tk.ROUND, smooth=tk.TRUE)
+    old_x, old_y = event.x, event.y
+
+# 마우스 버튼을 놓았을 때 좌표 초기화
+def reset(event):
+    global old_x, old_y
+    old_x, old_y = None, None
+
+# 현재 캔버스를 이미지로 저장하고 커스텀 브러쉬로 사용
+def save_brush():
+    global brush_image
+    x, y = root.winfo_rootx() + canvas.winfo_x(), root.winfo_rooty() + canvas.winfo_y()
+    x1, y1 = x + canvas.winfo_width(), y + canvas.winfo_height()
+    image = ImageGrab.grab().crop((x, y, x1, y1))
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
+    if file_path:
+        image.save(file_path)
+        brush_image = ImageTk.PhotoImage(image)
+
+# 커스텀 브러쉬 모드 활성화
+def use_custom_brush():
+    global custom_brush_mode
+    custom_brush_mode = True
+
+# 메인 윈도우 설정
+root = tk.Tk()
+root.title("Custom Brush Drawing App")
+
+# 전역 변수 초기화
+old_x, old_y, brush_image, custom_brush_mode = None, None, None, False
+
+# 캔버스 생성
+canvas = tk.Canvas(root, bg="white", width=600, height=400)
+canvas.pack()
+
+# 마우스 이벤트 바인딩
+canvas.bind("<B1-Motion>", paint)
+canvas.bind("<ButtonRelease-1>", reset)
+
+# 버튼 생성 및 배치
+tk.Button(root, text="브러쉬 저장", command=save_brush).pack(side=tk.LEFT)
+tk.Button(root, text="커스텀 브러쉬 사용", command=use_custom_brush).pack(side=tk.LEFT)
+
+# 메인 루프 실행
 root.mainloop()
