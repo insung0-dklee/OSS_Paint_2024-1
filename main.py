@@ -19,7 +19,6 @@ import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
-import turtle
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -905,33 +904,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
-
-def draw_turtle():
-    """
-    turtle 모듈을 이용하여 거북이를 그리기
-    """
-    # 거북이 객체 생성
-    t = turtle.Turtle()
-    
-    # 거북이 모양 설정
-    t.shape("turtle")
-    
-    # 거북이 색상 설정
-    t.color("gray")
-    
-    # 거북이 이동 속도 설정
-    t.speed(2)
-    
-    # 거북이 이동 및 회전
-    t.forward(100)
-    t.left(90)
-    t.forward(100)
-    t.left(90)
-    t.forward(100)
-    t.left(90)
-    t.forward(100)
-    
-    # 화면 유지
-    turtle.done()
