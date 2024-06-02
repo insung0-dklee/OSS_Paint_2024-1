@@ -409,7 +409,7 @@ def setup_palette(window):
 
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
-    file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("PostScript files", "*.ps"), ("All files", "*.*")]) # 저장 디폴트 파일 형식은 .png파일. .ps도 선택가능
     if file_path:
         canvas.postscript(file=file_path)
 
