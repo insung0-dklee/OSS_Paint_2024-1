@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from datetime import datetime, date
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1516,6 +1517,19 @@ def end_drag(event):
 #작업 시작 시간 기능
 def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
     return f"{hours:02}:{minutes:02}"
+
+current_time_label = Label(window, text="")
+current_time_label.pack()
+
+# 현재 시간, 날짜를 나타내는 기능
+def update_current_time():
+    now = datetime.now()
+    current_time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+    current_time_label.config(text=f"Current Time: {current_time_str}")
+    window.after(1000, update_current_time)  # 1초마다 현재 시간 갱신
+
+update_current_time()
+
 
 
 current_time = time.localtime() 
