@@ -58,11 +58,11 @@ is_dark_mode = False  # 기본 모드는 라이트 모드
 
 def toggle_dark_mode(): # 다크 모드를 토글하는 함수
     global is_dark_mode
-    if is_dark_mode: # 지금 다크 모드라면
-        apply_light_mode() # 라이트 모드 적용
-    else: # 지금 라이트 모드라면
-        apply_dark_mode() # 다크 모드 적용
-    is_dark_mode = not is_dark_mode # 다크 모드 상태 변경
+    is_dark_mode = not is_dark_mode  # 토글 동작을 상태 변경 전에 수행
+    if is_dark_mode:  # 지금 라이트 모드라면 [수정된 조건 검사]
+        apply_dark_mode()  # 다크 모드 적용
+    else: # 지금 다크 모드라면
+        apply_light_mode()  # 라이트 모드 적용
 
 def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
