@@ -559,6 +559,31 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+# 벌집 색상 선택 함수
+def choose_hex_color():
+    color = askcolor()[1]
+    if color:
+        draw_honeycomb_pattern(canvas, hex_color=color)
+
+# 벌집 모양 패턴 함수
+def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    hex_height = math.sqrt(3) * hex_size  # 헥사곤의 높이 계산
+
+    def hex_corner(x, y, size, i):
+        angle_deg = 60 * i
+        angle_rad = math.pi / 180 * angle_deg
+        return x + size * math.cos(angle_rad), y + size * math.sin(angle_rad)
+
+    for y in range(0, canvas_height, int(hex_height)):
+        for x in range(0, canvas_width, int(3 * hex_size // 2)):
+            for dx in [0, hex_size * 3 // 2]:
+                for dy in [0, hex_height // 2]:
+                    hexagon = [hex_corner(x + dx, y + dy, hex_size, i) for i in range(6)]
+                    canvas.create_polygon(hexagon, outline=hex_color, fill='')
+
+
 
 
 def setup_paint_app(window):
@@ -603,6 +628,18 @@ def setup_paint_app(window):
     button_reset_timer.pack(side=RIGHT)
     button_reset_timer.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_reset_timer.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 벌집 모양 패턴 버튼
+    button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
+    button_honeycomb.pack(side=LEFT)
+    button_honeycomb.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_honeycomb.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 벌집 모양 패턴 색상 선택 버튼
+    button_honeycomb_color = Button(window, text="Choose Honeycomb Color", command=choose_hex_color)
+    button_honeycomb_color.pack(side=LEFT)
+    button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     start_button = Button(button_frame, text="Start", command=start_stop)
     start_button.pack(side = RIGHT)
