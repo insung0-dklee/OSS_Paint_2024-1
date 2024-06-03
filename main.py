@@ -173,6 +173,19 @@ def set_dotted_brush_mode(event):
 def set_double_line_brush_mode(event):
     set_brush_mode(canvas, "double_line")
 
+## 지속적으로 브러쉬 크기를 증가시킬 수 있는 모듈 추가
+def increase_brush_size(self):
+    global brush_size
+    brush_size = brush_size+1
+
+## 지속적으로 브러쉬 크기를 감소시킬 수 있는 모듈 추가
+def decrease_brush_size(self):
+    global brush_size
+    brush_size = brush_size-1
+    if brush_size==0: # 브러쉬가 0보다 작아질 수 없기 때문에 최소값 지정
+        brush_size=1
+
+
     # 맞춤형 단축키 기능 추가
 def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas)) #clear 단축키 c
@@ -182,6 +195,11 @@ def bind_shortcuts():
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
+    window.bind("=",increase_brush_size) #단축키 = / 브러쉬 사이즈 증가
+    window.bind("-",decrease_brush_size) #단축키 - / 브러쉬 사이즈 감소
+
+
+    
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
@@ -1563,6 +1581,8 @@ canvas.bind("<Configure>", on_resize)
 bind_shortcuts_window(window)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
+
+
 
 #프로그램 시작 시 타이머 시작
 timer.start()
