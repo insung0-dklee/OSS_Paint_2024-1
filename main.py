@@ -971,3 +971,23 @@ def on_drag(event):
 # canvas.bind("<B1-Motion>", on_drag)
 #
 # root.mainloop()
+
+
+# 사람 모양 도형 그리기
+def draw_person(canvas, x, y):
+    """
+    캔버스 위에 주어진 위치(x, y)에 사람 모양을 그립니다.
+    머리(원), 몸통(선), 팔(선), 다리(선)로 구성됩니다.
+    """
+    # 머리 그리기
+    canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill="black")
+    # 몸통 그리기
+    canvas.create_line(x, y + 15, x, y + 50, width=2)
+    # 왼쪽 팔 그리기
+    canvas.create_line(x, y + 20, x - 20, y + 30, width=2)
+    # 오른쪽 팔 그리기
+    canvas.create_line(x, y + 20, x + 20, y + 30, width=2)
+    # 왼쪽 다리 그리기
+    canvas.create_line(x, y + 50, x - 15, y + 80, width=2)
+    # 오른쪽 다리 그리기
+    canvas.create_line(x, y + 50, x + 15, y + 80, width=2)
