@@ -130,6 +130,18 @@ def invert_selection():
         canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
         canvas.image = tk_image
 
+def pixelate_image(pixel_size):
+    global image, tk_image
+    if image:
+        width, height = image.size
+        small_image = image.resize((width // pixel_size, height // pixel_size), resample=Image.NEAREST)
+        pixelated_image = small_image.resize((width, height), Image.NEAREST)
+        image = pixelated_image
+        tk_image = ImageTk.PhotoImage(image)
+        canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+        canvas.image = tk_image
+
+
 
 root = tk.Tk()
 root.title("이미지 편집기")
@@ -191,6 +203,13 @@ copy_button.pack(side=tk.LEFT)
 
 invert_selection_button = tk.Button(root, text="선택 영역 반전", command=invert_selection)
 invert_selection_button.pack(side=tk.LEFT)
+
+pixelate_button = tk.Button(root, text="픽셀화", command=lambda: pixelate_image(int(entry_pixel_size.get())))
+pixelate_button.pack(side=tk.LEFT)
+
+tk.Label(root, text="픽셀 크기:").pack(side=tk.LEFT)
+entry_pixel_size = tk.Entry(root, width=5)
+entry_pixel_size.pack(side=tk.LEFT)
 
 
 root.mainloop()
