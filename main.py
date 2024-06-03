@@ -862,7 +862,47 @@ def create_circle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_circle)
 
-# 사각형 그릴 위치 정하고 생성하는 함수 호출
+# 오른쪽 화살표 그리기
+def create_rarrow(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_rarrow)
+
+# 오른쪽 화살표 그릴 위치 정하고 생성하는 함수 호출
+def start_arrow(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", draw_arrow)
+    canvas.bind("<ButtonRelease-1>", finish_arrow)  # 마우스 버튼을 떼면 화살표 그리기 종료
+
+# 오른쪽 화살표 생성하기
+def draw_arrow(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    x, y = event.x, event.y
+    scale_factor = 0.5  # 크기를 줄이는 비율
+    arrow_width = scale_factor * abs(y - start_y) / 2
+    arrow_length = scale_factor * abs(x - start_x)
+
+    # 화살표의 좌표 계산
+    points = [
+        (start_x, start_y - arrow_width),
+        (start_x, start_y + arrow_width),
+        (start_x + arrow_length, start_y + arrow_width),
+        (start_x + arrow_length, start_y + 2 * arrow_width),
+        (start_x + arrow_length + arrow_width, start_y),
+        (start_x + arrow_length, start_y - 2 * arrow_width),
+        (start_x + arrow_length, start_y - arrow_width)
+    ]
+    current_shape = canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
+
+# 오른쪽 화살표 그리기 종료
+def finish_arrow(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")# 사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
     global start_x, start_y, current_shape
     start_x, start_y = event.x, event.y
@@ -1169,6 +1209,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Right Arrow", command=lambda: start_arrow(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
