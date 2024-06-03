@@ -1158,12 +1158,51 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 부채꼴 도형 그리기
+def create_circular_sector(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_circular_sector)
+
+# 부채꼴 도형 그릴 위치 정하고 생성하는 함수 호출
+def start_circular_sector(event):
+    global start_x, start_y
+    start_x, start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", draw_circular_sector)
+    canvas.bind("<ButtonRelease-1>", finish_circular_sector)
+
+# 부채꼴 도형 생성하기
+def draw_circular_sector(event):
+    global current_shape
+    canvas.delete("temp_shape")
+    
+    radius = ((event.x - start_x)**2 + (event.y - start_y)**2)**0.5
+    
+    start_angle = math.degrees(math.atan2(start_y - event.y, event.x - start_x))
+    extent_angle = math.degrees(math.atan2(event.y - start_y, event.x - start_x)) - start_angle
+    
+    if extent_angle < 0:
+        extent_angle += 360
+    
+    current_shape = canvas.create_arc(start_x - radius, start_y - radius, start_x + radius, start_y + radius, 
+                                      start=start_angle, extent=extent_angle, 
+                                      outline=shape_outline_color, 
+                                      fill=shape_fill_color, 
+                                      tags="temp_shape")
+
+# 부채꼴 도형 그리기 종료
+def finish_circular_sector(event):
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
     popup.add_command(label="Rectangle", command=lambda: create_rectangle(event))
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
+    popup.add_command(label="Circular Sector", command=lambda: create_circular_sector(event))
     popup.add_command(label="Star", command=lambda: create_star(event))
     popup.add_command(label="Six Pointed Star", command=lambda: create_six_pointed_star(event))
     popup.add_command(label="Heart", command=lambda: create_heart(event))
