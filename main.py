@@ -1175,7 +1175,7 @@ def draw_arrow(event):
     global current_shape
     if current_shape:
         canvas.delete(current_shape)
-    current_shape = canvas.create_line(start_x, start_y, event.x, event.y, arrow="last")
+    current_shape = canvas.create_line(start_x, start_y, event.x, event.y, arrow="last", fill=shape_outline_color)
 
 def finish_arrow(event):
     canvas.unbind("<B1-Motion>")
