@@ -108,6 +108,12 @@ def on_enter(event):
 def on_leave(event):
     event.widget.config(bg="SystemButtonFace")
 
+def on_enter_clock(event):
+    event.widget.config(background='light blue')
+
+def on_leave_clock(event):
+    event.widget.config(background='gray')
+
 def upload_image():
     path = filedialog.askopenfilename()
     if path:
@@ -155,6 +161,19 @@ def reset_timer():
 def start_stop():
     if not timer.running:
         timer.start()
+
+#실시간 시계 기능 
+def update_clock(button):
+    if is_24_hour_format:
+        current_time = time.strftime("%H:%M:%S")
+    else:
+        current_time = time.strftime("%I:%M:%S %p")
+    button.config(text=current_time)
+    button.after(1000, update_clock, button)
+
+def toggle_time_format():
+    global is_24_hour_format
+    is_24_hour_format = not is_24_hour_format
 
 
 def paint_airbrush(event, canvas):
@@ -585,8 +604,8 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame
-
+    global brush_size, brush_color, button_frame,is_24_hour_format
+    is_24_hour_format = True
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
 
@@ -615,6 +634,18 @@ def setup_paint_app(window):
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
+    
+    #시계 기능 추가(오른쪽 하단)
+    clock_button = Button(window, font=('calibri', 10, 'bold'), background='gray', foreground='white', command=toggle_time_format)
+    clock_button.pack(side=RIGHT)
+    update_clock(clock_button)
+    clock_button.bind("<Enter>", on_enter_clock)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    clock_button.bind("<Leave>", on_leave_clock)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+
+    frame_count = Frame(button_frame)
+    frame_count.pack(side=RIGHT)
+
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
@@ -626,6 +657,8 @@ def setup_paint_app(window):
     button_reset_timer.pack(side=RIGHT)
     button_reset_timer.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_reset_timer.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    
 
     start_button = Button(button_frame, text="Start", command=start_stop)
     start_button.pack(side = RIGHT)
@@ -695,6 +728,7 @@ def setup_paint_app(window):
     text_box.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     text_box.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
+    
     canvas.bind("<Button-3>", lambda event: add_text(event, canvas, text_box))
     window.bind("<F11>", toggle_fullscreen)
 
@@ -743,8 +777,7 @@ def setup_paint_app(window):
     frame_distance = Frame(window)
     frame_distance.pack(side=RIGHT)
 
-    frame_count = Frame(window)
-    frame_count.pack(side=RIGHT)
+    
 
 
 
