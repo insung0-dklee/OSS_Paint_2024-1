@@ -304,3 +304,79 @@ if __name__ == "__main__":
     app = PaintApp(root)
     root.mainloop()
 
+
+# 팔레트에 브러쉬 색상 저장 기능
+import tkinter as tk
+from tkinter.colorchooser import askcolor
+
+class PaintApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("그림판")
+        self.canvas = tk.Canvas(root, bg="white", width=800, height=600)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.brush_size = 1
+        self.selected_color = "black"
+        self.favorite_colors = []
+
+        # UI 요소 추가
+        self.color_button = tk.Button(root, text="색상 선택", command=self.choose_color)
+        self.color_button.pack(side=tk.LEFT)
+
+        self.save_color_button = tk.Button(root, text="현재 색상 저장", command=self.save_color)
+        self.save_color_button.pack(side=tk.LEFT)
+
+        self.color_palette = tk.Frame(root)
+        self.color_palette.pack(side=tk.LEFT)
+
+        self.root.bind("<KeyPress>", self.adjust_brush_size)
+        self.canvas.bind("<Button-1>", self.start_drawing)
+        self.canvas.bind("<B1-Motion>", self.draw)
+
+        # 초기 마우스 좌표 설정
+        self.previous_x = None
+        self.previous_y = None
+
+    def choose_color(self):
+        color = askcolor()[1]
+        if color:
+            self.selected_color = color
+
+    def save_color(self):
+        if self.selected_color not in self.favorite_colors:
+            self.favorite_colors.append(self.selected_color)
+            self.update_color_palette()
+
+    def update_color_palette(self):
+        for widget in self.color_palette.winfo_children():
+            widget.destroy()
+
+        for color in self.favorite_colors:
+            color_button = tk.Button(self.color_palette, bg=color, width=2, command=lambda col=color: self.set_color(col))
+            color_button.pack(side=tk.LEFT)
+
+    def set_color(self, color):
+        self.selected_color = color
+
+    def adjust_brush_size(self, event):
+        try:
+            size = int(event.char)
+            if size > 0:
+                self.brush_size = size
+                print(f"Brush size set to {self.brush_size}")
+        except ValueError:
+            pass  # 숫자가 아닌 키 입력은 무시
+
+    def start_drawing(self, event):
+        self.previous_x, self.previous_y = event.x, event.y
+
+    def draw(self, event):
+        if self.previous_x is not None and self.previous_y is not None:
+            self.canvas.create_line(self.previous_x, self.previous_y, event.x, event.y, fill=self.selected_color, width=self.brush_size)
+        self.previous_x, self.previous_y = event.x, event.y
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PaintApp(root)
+    root.mainloop()
