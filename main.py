@@ -141,6 +141,20 @@ def pixelate_image(pixel_size):
         canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
         canvas.image = tk_image
 
+def mosaic_image(block_size):
+    global image, tk_image
+    if image:
+        width, height = image.size
+        for y in range(0, height, block_size):
+            for x in range(0, width, block_size):
+                box = (x, y, x + block_size, y + block_size)
+                region = image.crop(box)
+                average_color = region.resize((1, 1), resample=Image.NEAREST).getpixel((0, 0))
+                image.paste(Image.new("RGB", (block_size, block_size), average_color), box)
+        tk_image = ImageTk.PhotoImage(image)
+        canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+        canvas.image = tk_image
+
 
 
 root = tk.Tk()
@@ -210,6 +224,13 @@ pixelate_button.pack(side=tk.LEFT)
 tk.Label(root, text="픽셀 크기:").pack(side=tk.LEFT)
 entry_pixel_size = tk.Entry(root, width=5)
 entry_pixel_size.pack(side=tk.LEFT)
+
+mosaic_button = tk.Button(root, text="모자이크", command=lambda: mosaic_image(int(entry_block_size.get())))
+mosaic_button.pack(side=tk.LEFT)
+
+tk.Label(root, text="블록 크기:").pack(side=tk.LEFT)
+entry_block_size = tk.Entry(root, width=5)
+entry_block_size.pack(side=tk.LEFT)
 
 
 root.mainloop()
