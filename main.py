@@ -230,6 +230,34 @@ def paint_marker(event, canvas):
     x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
+def paint_paw(event):
+    global last_paw_x, last_paw_y, spacing
+    spacing = 50  # 발바닥 도트 사이의 간격을 설정
+
+    if last_paw_x is not None and last_paw_y is not None:
+        dx = event.x - last_paw_x
+        dy = event.y - last_paw_y
+        distance = (dx ** 2 + dy ** 2) ** 0.5
+        if distance >= spacing:
+            draw_paw(event.x, event.y)
+            last_paw_x, last_paw_y = event.x, event.y
+    else:
+        last_paw_x, last_paw_y = event.x, event.y
+
+def draw_paw(cx, cy):
+    paw_color = brush_color
+    canvas.create_oval(cx - 12, cy - 12, cx + 12, cy + 12, fill=paw_color, outline=paw_color)
+    canvas.create_oval(cx - 18, cy - 24, cx - 6, cy - 12, fill=paw_color, outline=paw_color)
+    canvas.create_oval(cx + 6, cy - 24, cx + 18, cy - 12, fill=paw_color, outline=paw_color)
+    canvas.create_oval(cx - 24, cy - 6, cx - 12, cy + 6, fill=paw_color, outline=paw_color)
+    canvas.create_oval(cx + 12, cy - 6, cx + 24, cy + 6, fill=paw_color, outline=paw_color)
+    
+def set_paw_mode():
+    global last_paw_x, last_paw_y
+    last_paw_x, last_paw_y = None, None
+    canvas.bind("<B1-Motion>", paint_paw)
+
+
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -646,6 +674,9 @@ def setup_paint_app(window):
     button_spray.pack(side=LEFT)
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_paw = Button(window, text="Paw Brush", command=set_paw_mode)
+    button_paw.pack(side=LEFT)
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
     button_paint.pack(side=RIGHT)
