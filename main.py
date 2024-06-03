@@ -904,3 +904,41 @@ timer.start()
 update_timer()
 
 window.mainloop()
+
+
+import tkinter as tk
+
+# 버튼을 눌러 도형을 오른쪽으로 이동시키는 애니메이션 기능
+def start_animation(canvas):
+    try:
+        canvas.move("all", 5, 0)  # 캔버스에 있는 모든 객체를 오른쪽으로 5픽셀 이동시킵니다.
+    except tk.TclError as e:
+        print(f"Error: {e}")
+
+def create_button(root, text, command):
+    button = tk.Button(root, text=text, command=command)
+    button.pack()
+    return button
+
+def _main():
+    root = tk.Tk()
+    canvas = tk.Canvas(root, width=400, height=400)
+    canvas.pack()
+
+    # 캔버스에 예제 객체 추가 (예: 직사각형)
+    canvas.create_rectangle(50, 50, 150, 150, fill="pink")
+
+    start_button = create_button(root, "Start Animation", lambda: start_animation(canvas))
+
+    root.mainloop()
+
+"""if __name__ == "__main__":
+    _main()
+"""
+"""
+이 스크립트가 직접 실행될 경우에만 _main() 함수를 호출합니다.
+이 구문은 스크립트가 직접 실행되는 상황과 모듈로 임포트되어 사용되는 상황을 구분하기 위해 사용됩니다.
+만약 이 스크립트가 다른 Python 파일에서 import되어 사용된다면, _main() 함수는 실행되지 않습니다.
+이 방식을 통해, 스크립트가 모듈로 사용될 때는 필요한 클래스나 함수만을 제공하고,
+스크립트가 직접 실행될 때만 특정 로직(여기서는 _main() 함수 내의 로직)을 실행할 수 있습니다.
+"""
