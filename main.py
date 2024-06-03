@@ -208,7 +208,6 @@ def paint_pressure(event, canvas):
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
 
-
 # 점선 브러쉬 함수
 def dotted_paint(event, canvas):
     global last_x, last_y
@@ -229,7 +228,7 @@ def paint_marker(event, canvas):
     x1, y1 = (event.x - radius), (event.y - radius)
     x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
-
+    
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -250,8 +249,8 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
     elif brush_mode == "marker":
         canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
-        canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
-
+        canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))  
+        
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
     global brush_size
@@ -736,8 +735,11 @@ def setup_paint_app(window):
     canvas.bind("<ButtonRelease-1>", paint_end)
 
     set_paint_mode_normal(canvas)
-
     
+    # 랜덤 색상 펜 버튼
+    canvas.bind("<ButtonPress-1>", on_randomcolorpen_press)
+    canvas.bind("<B1-Motion>", on_randomcolorpen_paint)
+    canvas.bind("<ButtonRelease-1>", on_randomcolorpen_release)
 
 #+=================================================================================
     menu_bar = Menu(window) # 메뉴 바 생성
@@ -1447,7 +1449,34 @@ def set_modified():
     global is_modified
     is_modified = True
 
-
+# 버튼 클릭 시 랜덤 색상 펜 모드로 전환하는 함수
+def set_random_color_pen_mode():
+    global brush_mode
+    brush_mode = "random color pen"
+# 랜덤 색상 생성 함수
+def get_random_color():
+    return "#{:06x}".format(random.randint(0, 0xFFFFFF))
+# 버튼을 누를 때 호출되는 함수
+def on_randomcolorpen_press(event):
+    global last_x, last_y, brush_color
+    last_x, last_y = event.x, event.y
+    if brush_mode == "random color pen":  # 랜덤 색상 펜 모드인 경우
+        brush_color = get_random_color()  # 랜덤 색상 선택
+# 랜덤 색상 펜으로 그리는 함수
+def on_randomcolorpen_paint(event):
+    global last_x, last_y, brush_color
+    if eraser_mode:
+        erase(event, canvas)
+    else:
+        x, y = event.x, event.y
+        if brush_mode == "random color pen":  # 랜덤 색상 펜 모드인 경우
+            brush_color = get_random_color()  # 랜덤 색상 선택
+        canvas.create_line(last_x, last_y, x, y, fill=brush_color, width=brush_size)
+        last_x, last_y = x, y
+# 버튼을 놓을 때 호출되는 함수
+def on_randomcolorpen_release(event):
+    global last_x, last_y
+    last_x, last_y = None, None
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -1458,6 +1487,12 @@ window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
 editor = ImageEditor(canvas)
+
+# 랜덤 색상 펜 버튼 추가
+random_color_pen_button = Button(window, text="Random Color Pen", command=set_random_color_pen_mode)
+random_color_pen_button.pack()
+
+
 
 # 타이머 라벨
 timer_label = Label(window, text="Time: 0 s")
