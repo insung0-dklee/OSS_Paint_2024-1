@@ -37,6 +37,7 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+current_brush = "default"  # 현재 브러쉬 모드를 저장할 변수
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -609,7 +610,9 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+    #랜덤 브러쉬 버튼 추가
+    button_random_brush = Button(window, text="Random Brush", command=set_random_brush)
+    button_random_brush.pack()
 
     #spray 인스턴스 생성 
     global spray_brush
@@ -1447,7 +1450,19 @@ def set_modified():
     global is_modified
     is_modified = True
 
-
+#랜덤 브러쉬 기능 추가
+def paint_random(event):
+    if current_brush == "random":
+        size = random.randint(1, 10)  # 랜덤 크기 설정
+        color = "#%06x" % random.randint(0, 0xFFFFFF)  # 랜덤 색상 설정
+        x1, y1 = (event.x - size), (event.y - size)
+        x2, y2 = (event.x + size), (event.y + size)
+        canvas.create_oval(x1, y1, x2, y2, fill=color, outline=color)
+        
+def set_random_brush():
+    global current_brush
+    current_brush = "random"
+    canvas.bind("<B1-Motion>", paint_random) 
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -1568,5 +1583,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
