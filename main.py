@@ -56,7 +56,7 @@ def show_info_window(): #정보를 표시하는 기능
 
 is_dark_mode = False  # 기본 모드는 라이트 모드
 
-def toggle_dark_mode(): # 다크 모드를 토글하는 함수
+def toggle_dark_mode():
     global is_dark_mode
     if is_dark_mode: # 지금 다크 모드라면
         apply_light_mode() # 라이트 모드 적용
@@ -68,8 +68,11 @@ def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
     canvas.config(bg="white") # 캔버스 배경색
     button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
-        widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
+    for widget in button_frame.winfo_children():
+        if 'bg' in widget.config():
+            widget.config(bg="light grey")
+        if 'fg' in widget.config():
+            widget.config(fg="black")
     timer_label.config(bg="white", fg="black") # 타이머 라벨 배경색, 글자색
 
 def apply_dark_mode(): # 다크 모드 적용
@@ -77,7 +80,10 @@ def apply_dark_mode(): # 다크 모드 적용
     canvas.config(bg="grey30") # 캔버스 배경색
     button_frame.config(bg="grey20") # 버튼 프레임 배경색
     for widget in button_frame.winfo_children():
-        widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
+        if 'bg' in widget.config():
+            widget.config(bg="grey40")
+        if 'fg' in widget.config():
+            widget.config(fg="white")
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
 #이미지 파일 불러오기 
@@ -174,10 +180,11 @@ def set_double_line_brush_mode(event):
 
     # 맞춤형 단축키 기능 추가
 def bind_shortcuts():
-    window.bind("<c>", lambda event: clear_paint(canvas)) #clear 단축키 c
+    window.bind("<Control-c>", lambda event: clear_paint(canvas)) #clear 단축키 c
     window.bind("<Control-s>", save_canvas) #save 단축키 crtl+s
     window.bind("<Control-z>", erase_last_stroke) #undo 단축키 crtl+z
-    window.bind("d", lambda event: toggle_dark_mode()) #dark 모드 단축키 d
+    window.bind("<Control-y>", lambda event: rewrite_last_stroke())  # Redo 단축키 Ctrl + Y
+    window.bind("<Control-d>", lambda event: toggle_dark_mode()) #dark 모드 단축키 d
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
