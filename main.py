@@ -54,6 +54,88 @@ def show_info_window(): #정보를 표시하는 기능
     messagebox.showinfo("Info", "OSS_Paint_2024\n 그림판 v1.0.0")
 #+=================================================================================
 
+# 손떨림 보정을 위한 변수 설정
+smoothing_factor = 0.2  # 손떨림 보정 강도 (0.0에서 1.0 사이의 값)
+smoothed_x, smoothed_y = None, None
+stabilization_enabled = False  # 기본 상태는 비활성화 상태
+
+# 손떨림 보정 기능 추가
+def smooth(x, y):
+    """
+    현재 좌표를 이전 보정된 좌표와 결합하여 부드러운 움직임을 생성하는 함수
+    Args:
+        x (int): 현재 x 좌표
+        y (int): 현재 y 좌표
+    Returns:
+        tuple: 보정된 x, y 좌표
+    """
+    global smoothed_x, smoothed_y
+    if smoothed_x is None:
+        # 처음 좌표가 들어왔을 때 초기화
+        smoothed_x, smoothed_y = x, y
+    else:
+        # 현재 좌표와 이전 보정된 좌표를 결합하여 새로운 보정된 좌표를 계산
+        smoothed_x += smoothing_factor * (x - smoothed_x)
+        smoothed_y += smoothing_factor * (y - smoothed_y)
+    return smoothed_x, smoothed_y
+
+def paint_with_smoothing(event):
+    """
+    손떨림 보정이 적용된 상태에서 페인팅을 수행하는 함수
+    Args:
+        event: 마우스 이벤트 객체
+    """
+    global last_x, last_y
+    x, y = smooth(event.x, event.y)
+    # 보정된 좌표로 선을 그림
+    canvas.create_line(last_x, last_y, x, y, fill=brush_color, width=brush_size)
+    last_x, last_y = x, y
+
+def paint_start_with_smoothing(event):
+    """
+    손떨림 보정이 적용된 상태에서 페인팅을 시작하는 함수
+    Args:
+        event: 마우스 이벤트 객체
+    """
+    global last_x, last_y
+    last_x, last_y = smooth(event.x, event.y)
+
+def paint(event):
+    """
+    일반 페인팅을 수행하는 함수
+    Args:
+        event: 마우스 이벤트 객체
+    """
+    global last_x, last_y
+    x, y = event.x, event.y
+    # 일반 좌표로 선을 그림
+    canvas.create_line(last_x, last_y, x, y, fill=brush_color, width=brush_size)
+    last_x, last_y = x, y
+
+def paint_start(event):
+    """
+    일반 페인팅을 시작하는 함수
+    Args:
+        event: 마우스 이벤트 객체
+    """
+    global last_x, last_y
+    last_x, last_y = event.x, event.y
+
+def toggle_stabilization():
+    """
+    손떨림 보정 기능을 활성화/비활성화하는 함수
+    """
+    global stabilization_enabled
+    stabilization_enabled = not stabilization_enabled
+    if stabilization_enabled:
+        # 손떨림 보정 활성화 시 보정된 페인팅 함수 바인딩
+        canvas.bind("<B1-Motion>", paint_with_smoothing)
+        canvas.bind("<ButtonPress-1>", paint_start_with_smoothing)
+    else:
+        # 손떨림 보정 비활성화 시 일반 페인팅 함수 바인딩
+        canvas.bind("<B1-Motion>", paint)
+        canvas.bind("<ButtonPress-1>", paint_start)
+
 is_dark_mode = False  # 기본 모드는 라이트 모드
 
 def toggle_dark_mode(): # 다크 모드를 토글하는 함수
