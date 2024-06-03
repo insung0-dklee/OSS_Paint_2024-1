@@ -1590,7 +1590,7 @@ def random_shape():
     elif(a==8):
         canvas.bind("<Button-1>", start_diamond)
 
-button_random_shape= Button(window, text="random_spape", command=lambda: random_shape())
+button_random_shape= Button(window, text="random_shape", command=lambda: random_shape())
 button_random_shape.pack(side=LEFT)
 button_random_shape.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
 button_random_shape.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
