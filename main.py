@@ -609,7 +609,9 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+    # 줄무늬 브러쉬 버튼 추가
+    button_striped = Button(window, text="Striped Brush", command=lambda: canvas.bind("<B1-Motion>", paint_striped))
+    button_striped.pack()
 
     #spray 인스턴스 생성 
     global spray_brush
@@ -1447,7 +1449,14 @@ def set_modified():
     global is_modified
     is_modified = True
 
-
+# 줄무늬 브러쉬 기능 추가
+def paint_striped(event):
+    brush_size = 30  # 브러쉬 굵기를 아주 굵게 설정
+    for i in range(0, brush_size, 2):
+        for j in range(0, brush_size, 2):
+            x1, y1 = (event.x + i), (event.y + j)
+            x2, y2 = (event.x + i + 1), (event.y + j + 1)
+            canvas.create_oval(x1, y1, x2, y2, fill="", outline="black")
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -1568,5 +1577,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
