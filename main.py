@@ -221,3 +221,48 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PaintApp(root)
     root.mainloop()
+
+
+# r,g,b키를 눌러 도형 색상 변경하는 기능
+import tkinter as tk
+
+class PaintApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("그림판")
+        self.canvas = tk.Canvas(root, bg="white", width=800, height=600)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.selected_object = None
+        self.create_sample_shapes()
+
+        self.canvas.bind("<Button-1>", self.select_shape)
+        self.root.bind("<Key>", self.change_color)
+
+    def create_sample_shapes(self):
+        self.canvas.create_rectangle(100, 100, 300, 200, outline="black", fill="red", tags="movable")
+        self.canvas.create_oval(400, 100, 500, 200, outline="black", fill="blue", tags="movable")
+
+    def select_shape(self, event):
+        # 클릭한 위치의 도형 선택
+        x, y = event.x, event.y
+        self.selected_object = self.canvas.find_closest(x, y)[0]
+        print(f"Selected object ID: {self.selected_object}")
+
+    def change_color(self, event):
+        if self.selected_object:
+            color = ""
+            if event.char == 'r':
+                color = "red"
+            elif event.char == 'g':
+                color = "green"
+            elif event.char == 'b':
+                color = "blue"
+            if color:
+                self.canvas.itemconfig(self.selected_object, fill=color)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PaintApp(root)
+    root.mainloop()
+
