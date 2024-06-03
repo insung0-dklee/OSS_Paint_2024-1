@@ -55,6 +55,16 @@ def show_info_window(): #정보를 표시하는 기능
 
 is_dark_mode = False  # 기본 모드는 라이트 모드
 
+def erase(event, canvas):#지우개 펜 함수
+    eraser_size = 20  # 지우개 크기 설정
+    bg_color = canvas.cget("bg")
+    x1, y1 = (event.x - eraser_size), (event.y - eraser_size)
+    x2, y2 = (event.x + eraser_size), (event.y + eraser_size)
+    canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color)
+
+def set_eraser_mode(canvas):
+    canvas.bind("<B1-Motion>", lambda event: erase(event, canvas))
+
 #그림판의 밝기 조절 기능(오직 흰 도화지 사용 시) 
 def change_background_brightness(slider_value):
     brightness_factor = int(slider_value) / 100  # 슬라이더 값을 정수로 변환하여 0~1 사이의 값으로 변환
@@ -631,6 +641,11 @@ def setup_paint_app(window):
     button_redo_last_stroke.pack(side=LEFT)
     button_redo_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_redo_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_eraser = Button(button_frame, text="Eraser", command=lambda: set_eraser_mode(canvas))
+    button_eraser.pack(side=LEFT)
+    button_eraser.bind("<Enter>", on_enter)
+    button_eraser.bind("<Leave>", on_leave)
 
 
     brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
