@@ -1240,6 +1240,7 @@ def double_line_paint(event, canvas):
         last_x, last_y = event.x, event.y
 
 # 패턴을 그리는 함수들 추가
+# 타일 패턴을 그리는 함수
 def draw_tile_pattern(canvas, tile_size=50):
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
@@ -1247,6 +1248,7 @@ def draw_tile_pattern(canvas, tile_size=50):
         for y in range(0, canvas_height, tile_size):
             canvas.create_rectangle(x, y, x + tile_size, y + tile_size, outline="black")
 
+# 물결 패턴을 그리는 함수
 def draw_wave_pattern(canvas, wave_length=50, amplitude=20):
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
@@ -1255,6 +1257,7 @@ def draw_wave_pattern(canvas, wave_length=50, amplitude=20):
             canvas.create_arc(x, y, x + wave_length, y + wave_length, start=0, extent=180, style=ARC)
             canvas.create_arc(x, y + amplitude, x + wave_length, y + wave_length + amplitude, start=180, extent=180, style=ARC)
 
+# 대각선 패턴을 그리는 함수
 def draw_diagonal_pattern(canvas, line_spacing=50):
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
@@ -1265,6 +1268,7 @@ def draw_diagonal_pattern(canvas, line_spacing=50):
         canvas.create_line(0, y, y, 0, fill="black")
         canvas.create_line(canvas_width, canvas_height - y, canvas_width - y, canvas_height, fill="black")
 
+# 그리드를 그리는 함수
 def draw_grid(canvas, step):
     canvas.delete("grid_line") #새로 grid를 그리기 위해 기존 grid를 삭제
     width = canvas.winfo_width()
@@ -1274,18 +1278,22 @@ def draw_grid(canvas, step):
     for y in range(0, height, step):
         canvas.create_line(0, y, width, y, fill="lightgray", tags="grid_line")
 
+# 그리드 토글 함수
 def toggle_grid(canvas):
     if canvas.find_withtag("grid_line"):
         canvas.delete("grid_line")
     else:
         draw_grid(canvas, 50)
 
+# 그리드 간격을 변경하는 함수
 def change_grid_spacing(value):
     draw_grid(canvas, value)
 
 def change_grid_spacing(value):
     draw_grid(canvas, value)
 
+
+# 사용자가 그리드 간격을 설정할 수 있는 대화 상자 창
 class GridDialog:
     def __init__(self, window):
         self.top = Toplevel(window)
