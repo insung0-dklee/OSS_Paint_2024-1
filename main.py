@@ -80,6 +80,40 @@ def apply_dark_mode(): # 다크 모드 적용
         widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
+def draw_symmetry(event): # 대칭 그림 그리기
+    global last_x, last_y #마지막x, y 좌표
+    if last_x and last_y: #마지막 x,y 좌표 있을 경우
+        x, y = event.x, event.y #현좌표를 이벤트에서 가져오기
+
+        if symmetry_axis == 'vertical': #수직
+            x_sym = canvas.winfo_width() - x # 현재 x 좌표에 대한 대칭 좌표 계산
+            canvas.create_line(last_x, last_y, x, y, fill="black") # 이전 좌표, 현재 좌표 연결하는 선 그리기
+            canvas.create_line(canvas.winfo_width() - last_x, last_y, x_sym, y, fill="black") #대칭좌표 선 그리기
+        
+        elif symmetry_axis == 'horizontal': #수평
+            y_sym = canvas.winfo_height() - y #위와 동일
+            canvas.create_line(last_x, last_y, x, y, fill="black")
+            canvas.create_line(last_x, canvas.winfo_height() - last_y, x, y_sym, fill="black")
+
+        last_x, last_y = x, y #좌표 업데이트
+    else: #좌표 없는 경우
+        last_x, last_y = event.x, event.y
+
+
+def reset_coords(event): #좌표 초기화
+    global last_x, last_y
+    last_x, last_y = None, None
+
+
+def toggle_symmetry_mode(): #대칭 모드 토글 
+    global symmetry_mode #전역 변수로 가져옴
+    symmetry_mode = not symmetry_mode #대칭 모드 반전
+    if symmetry_mode: #대칭모드인 경우
+        canvas.bind("<B1-Motion>", draw_symmetry)
+        canvas.bind("<ButtonRelease-1>", reset_coords)
+    else: #대칭모드 비활성화
+        set_paint_mode_normal(canvas) #일반모드
+        
 #이미지 파일 불러오기 
 def open_image():
     file_path = filedialog.askopenfilename()
@@ -562,10 +596,12 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame
+    global brush_size, brush_color, button_frame, symmetry_mode
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
+    symmetry_mode = False  # 초기 대칭 모드 비활성화
+
 
     global canvas
     canvas = Canvas(window, bg="white")
@@ -591,6 +627,12 @@ def setup_paint_app(window):
     button_clear.pack(side=LEFT)
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 대칭 모드 버튼 추가
+    button_symmetry_mode = Button(window, text="Toggle Symmetry Mode", command=toggle_symmetry_mode) #대칭 모드 토글 버튼
+    button_symmetry_mode.pack(side=LEFT) #위치 설정
+    button_symmetry_mode.bind("<Enter>", on_enter)
+    button_symmetry_mode.bind("<Leave>", on_leave)
 
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
@@ -1458,6 +1500,8 @@ window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
 editor = ImageEditor(canvas)
+global symmetry_axis
+symmetry_axis = 'vertical' #대칭모드를 위한 전역변수 설정 vertical 또는 horizontal 가능
 
 # 타이머 라벨
 timer_label = Label(window, text="Time: 0 s")
