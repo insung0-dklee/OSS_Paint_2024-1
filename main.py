@@ -26,3 +26,26 @@ button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
 
 window.mainloop()
+
+import tkinter as tk
+
+class TextEditor:
+    def __init__(self, master):
+        self.master = master
+        master.title("텍스트 편집기")
+
+        # 텍스트 상자 생성
+        self.text_box = tk.Text(master, width=50, height=10)
+        self.text_box.pack()
+
+        # "모두 선택" 버튼 생성
+        self.select_all_button = tk.Button(master, text="모두 선택", command=self.select_all)
+        self.select_all_button.pack()
+
+    def select_all(self):
+        # 텍스트 상자 안의 모든 글자 선택
+        self.text_box.tag_add("sel", "1.0", "end")
+
+root = tk.Tk()
+app = TextEditor(root)
+root.mainloop()
