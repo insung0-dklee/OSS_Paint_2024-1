@@ -269,9 +269,9 @@ def calculate_heart_points(center_x, center_y, size):
     points = []
     for t in range(0, 360, 10):
         t = math.radians(t)
-        x = center_x + size * 16 * math.sin(t)**3
-        y = center_y - size * (13 * math.cos(t) - 5 * math.cos(2*t) - 2 * math.cos(3*t) - math.cos(4*t))
-        points.append((x, y))
+        x = size * 16 * math.sin(t)**3
+        y = -size * (13 * math.cos(t) - 5 * math.cos(2*t) - 2 * math.cos(3*t) - math.cos(4*t))
+        points.append((center_x + x, center_y + y))
     return points
 
 window = Tk()
@@ -299,82 +299,70 @@ canvas.bind("<B1-Motion>", paint)
 button_frame = Frame(window)
 button_frame.pack(fill=X)
 
+# 첫 번째 줄 버튼들
 button_clear = Button(button_frame, text="All Clear", command=clear_paint)
-button_clear.pack(side=LEFT)
+button_clear.grid(row=0, column=0)
 
-# 펜 굵기를 조절할 수 있는 슬라이더 추가
 brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
 brush_size_slider.set(brush_size)  # 슬라이더 초기값 설정
-brush_size_slider.pack(side=LEFT)
+brush_size_slider.grid(row=0, column=1)
 
-button_solid = Button(window, text="Solid Brush", command=lambda: set_brush_mode("solid"))  # 버튼을 누르면 실선 모드로 바꾼다
-button_solid.pack()  # 실선 브러쉬 버튼을 윈도우에 배치
+button_solid = Button(button_frame, text="Solid Brush", command=lambda: set_brush_mode("solid"))  # 버튼을 누르면 실선 모드로 바꾼다
+button_solid.grid(row=0, column=2)  # 실선 브러쉬 버튼을 윈도우에 배치
 
-button_dotted = Button(window, text="Dotted Brush", command=lambda: set_brush_mode("dotted"))  # 버튼을 누르면 점선 모드로 바꾼다
-button_dotted.pack()  # 점선 브러쉬 버튼을 윈도우에 배치
+button_dotted = Button(button_frame, text="Dotted Brush", command=lambda: set_brush_mode("dotted"))  # 버튼을 누르면 점선 모드로 바꾼다
+button_dotted.grid(row=0, column=3)  # 점선 브러쉬 버튼을 윈도우에 배치
 
-button_paint = Button(window, text="normal", command=set_paint_mode_normal)  # 기본 그리기 모드로 전환하는 기능
-button_paint.pack(side=RIGHT)
+button_paint = Button(button_frame, text="normal", command=set_paint_mode_normal)  # 기본 그리기 모드로 전환하는 기능
+button_paint.grid(row=0, column=4)
 
-button_paint = Button(window, text="pressure", command=set_paint_mode_pressure)  # 감압 브러시 그리기 모드로 전환하는 기능
-button_paint.pack(side=RIGHT)
+button_paint = Button(button_frame, text="pressure", command=set_paint_mode_pressure)  # 감압 브러시 그리기 모드로 전환하는 기능
+button_paint.grid(row=0, column=5)
 
-text_box = Entry(window)  # 텍스트를 입력할 공간을 생성합니다.
-text_box.pack(side=LEFT)
+text_box = Entry(button_frame)  # 텍스트를 입력할 공간을 생성합니다.
+text_box.grid(row=0, column=6)
 canvas.bind("<Button-3>", add_text)  # 입력한 텍스트를 오른쪽 클릭으로 텍스트를 찍어냅니다.
 window.bind("<F11>", toggle_fullscreen)
 
-button_new_window = Button(window, text="새 창 열기", command=create_new_window)  # "새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦
-button_new_window.pack(side=LEFT)  # "새 창 열기"버튼을 윈도우에 배치
+# 두 번째 줄 버튼들
+button_new_window = Button(button_frame, text="새 창 열기", command=create_new_window)  # "새 창 열기"라는 버튼 생성 command: 버튼 클릭 시 create_new_window: 새로운 창을 만듦
+button_new_window.grid(row=1, column=0)  # "새 창 열기"버튼을 윈도우에 배치
 
-button_flip = Button(window, text="Flip Horizontal", command=flip_horizontal)
-button_flip.pack(side=LEFT)
+button_flip = Button(button_frame, text="Flip Horizontal", command=flip_horizontal)
+button_flip.grid(row=1, column=1)
 
-canvas.bind("<B3-Motion>", erase)
+button_undo = Button(button_frame, text="Undo", command=undo_action)
+button_undo.grid(row=1, column=2)
 
-brush_color = "black"
+button_redo = Button(button_frame, text="Redo", command=redo_action)
+button_redo.grid(row=1, column=3)
 
-button_bg_color = Button(window, text="Change Background Color", command=change_bg_color)
-button_bg_color.pack(side=LEFT)
+button_screenshot = Button(button_frame, text="Take Screenshot", command=take_screenshot)
+button_screenshot.grid(row=1, column=4)
 
-button_brush_color = Button(window, text="Change Brush Color", command=change_brush_color)
-button_brush_color.pack(side=LEFT)
+button_save = Button(button_frame, text="Save", command=save_paint)
+button_save.grid(row=1, column=5)
 
-# Undo 버튼 추가
-button_undo = Button(window, text="Undo", command=undo_action)
-button_undo.pack(side=LEFT)
+button_bg_color = Button(button_frame, text="Change Background Color", command=change_bg_color)
+button_bg_color.grid(row=1, column=6)
 
-# Redo 버튼 추가
-button_redo = Button(window, text="Redo", command=redo_action)
-button_redo.pack(side=LEFT)
+button_brush_color = Button(button_frame, text="Change Brush Color", command=change_brush_color)
+button_brush_color.grid(row=1, column=7)
 
-# 스크린샷 버튼 추가
-button_screenshot = Button(window, text="Take Screenshot", command=take_screenshot)
-button_screenshot.pack(side=LEFT)
+button_insert_circle = Button(button_frame, text="Insert Circle", command=insert_circle)
+button_insert_circle.grid(row=1, column=8)
 
-# 그림 저장 버튼 추가
-button_save = Button(window, text="Save", command=save_paint)
-button_save.pack(side=LEFT)
+button_insert_rectangle = Button(button_frame, text="Insert Rectangle", command=insert_rectangle)
+button_insert_rectangle.grid(row=1, column=9)
 
-# 원 삽입 버튼 추가
-button_insert_circle = Button(window, text="Insert Circle", command=insert_circle)
-button_insert_circle.pack(side=LEFT)
+button_insert_triangle = Button(button_frame, text="Insert Triangle", command=insert_triangle)
+button_insert_triangle.grid(row=1, column=10)
 
-# 네모 삽입 버튼 추가
-button_insert_rectangle = Button(window, text="Insert Rectangle", command=insert_rectangle)
-button_insert_rectangle.pack(side=LEFT)
+button_insert_star = Button(button_frame, text="Insert Star", command=insert_star)
+button_insert_star.grid(row=1, column=11)
 
-# 삼각형 삽입 버튼 추가
-button_insert_triangle = Button(window, text="Insert Triangle", command=insert_triangle)
-button_insert_triangle.pack(side=LEFT)
-
-# 별 삽입 버튼 추가
-button_insert_star = Button(window, text="Insert Star", command=insert_star)
-button_insert_star.pack(side=LEFT)
-
-# 하트 삽입 버튼 추가
-button_insert_heart = Button(window, text="Insert Heart", command=insert_heart)
-button_insert_heart.pack(side=LEFT)
+button_insert_heart = Button(button_frame, text="Insert Heart", command=insert_heart)
+button_insert_heart.grid(row=1, column=12)
 
 set_paint_mode_normal()  # 프로그램 시작 시 기본 그리기 모드 설정
 
