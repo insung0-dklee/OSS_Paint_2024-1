@@ -266,3 +266,41 @@ if __name__ == "__main__":
     app = PaintApp(root)
     root.mainloop()
 
+
+# 숫자 키를 이용하여 브러쉬 굵기 변경 기능
+import tkinter as tk
+
+class PaintApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("그림판")
+        self.canvas = tk.Canvas(root, bg="white", width=800, height=600)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.brush_size = 1  # 브러쉬 기본 굵기
+        self.selected_color = "black"
+
+        self.root.bind_all("<KeyPress>", self.adjust_brush_size)
+        self.canvas.bind("<Button-1>", self.start_drawing)
+        self.canvas.bind("<B1-Motion>", self.draw)
+
+    def adjust_brush_size(self, event):
+        try:
+            size = int(event.char)
+            if size > 0:  # 숫자 키를 누르면 브러쉬 굵기 변경
+                self.brush_size = size
+                print(f"Brush size set to {self.brush_size}")
+        except ValueError:
+            print(f"Invalid key: {event.char}")
+
+    def start_drawing(self, event):
+        self.canvas.create_oval(event.x, event.y, event.x, event.y, outline="", fill=self.selected_color, width=self.brush_size)
+
+    def draw(self, event):
+        self.canvas.create_line(event.x, event.y, event.x, event.y, fill=self.selected_color, width=self.brush_size)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PaintApp(root)
+    root.mainloop()
+
