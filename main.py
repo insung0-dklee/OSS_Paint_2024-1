@@ -45,6 +45,19 @@ previous_x, previous_y = None, None
 
 
 
+
+
+
+# 명언 리스트 임의 추가 가능
+famous_quotes = [
+    "삶이 있는 한 희망은 있다. - 키케로",
+    "사람은 사랑할 때 누구나 시인이 된다. - 바이런",
+    "행복은 습관이다. 그것을 몸에 지니라. - 허버드",
+    "먼저 자신을 비웃어라. 그러면 다른 사람이 따라웃을 것이다. - 엘러리",
+    "가난은 가난하다고 느끼는 곳에 존재한다. - 에머슨"
+]
+
+
 #+=================================================================================
 def close_program(): #프로그램을 종료하는 기능
     if messagebox.askokcancel("Quit", "Do you want to quit?"): #프로그램을 종료할 것인지 확인 매시지를 띄움
@@ -104,6 +117,22 @@ def upload_image():
         image = PhotoImage(file=path)
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
+
+# 현재 명언을 표시하고 업데이트하는 함수
+def update_quote(label):
+    # 명언 리스트에서 무작위로 하나를 선택하게 함
+    quote = random.choice(famous_quotes)
+    # 라벨 텍스트를 업데이트
+    label.config(text=quote)
+
+# 명언을 캔버스에 올리는 함수
+def place_quote(label):
+    current_quote = label.cget("text")
+    text_id = canvas.create_text(250, 100, text=current_quote, font=("Arial", 12), anchor="center")
+    if hasattr(place_quote, 'quote_id'):
+        canvas.delete(place_quote.quote_id)
+    place_quote.quote_id = text_id 
+
 
 # 라인 브러쉬 기능 추가 
 def set_brush_mode_line(canvas):
@@ -631,8 +660,25 @@ def setup_paint_app(window):
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
     
+    # 명언을 표시할 라벨을 정의
+    quote_label = tk.Label(window, text="", wraplength=300)
+    quote_label.pack(pady=20)
 
-    
+    # 초기 명언 표시
+    update_quote(quote_label)
+
+    # 새로운 명언을 업데이트 할 버튼 생성
+    update_button = tk.Button(window, text="새로운 명언", command=lambda: update_quote(quote_label))
+    update_button.pack()
+
+
+    # 마음드는 명언 캔퍼스에 추가 
+    place_button = tk.Button(window, text="마음에 드는 명언 캔퍼스에 올리기")
+    place_button.pack()
+
+   # 버튼이 클릭되었을 때 place_quote 함수 호출
+    place_button.bind("<Button-1>", lambda event: place_quote(quote_label))
+
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
@@ -712,6 +758,7 @@ def setup_paint_app(window):
 
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
+
 
 
 
