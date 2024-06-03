@@ -203,3 +203,107 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PaintApp(root)
     root.mainloop()
+
+import tkinter as tk
+from tkinter.colorchooser import askcolor
+
+class PaintApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("그림판")
+        
+        self.pen_color = 'black'
+        self.eraser_on = False
+        self.shape_mode = None
+        
+        self.canvas = tk.Canvas(self.root, bg='white', width=600, height=400)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        
+        self.button_frame = tk.Frame(self.root)
+        self.button_frame.pack(fill=tk.X)
+        
+        self.color_button = tk.Button(self.button_frame, text='색 변경', command=self.choose_color)
+        self.color_button.pack(side=tk.LEFT)
+        
+        self.eraser_button = tk.Button(self.button_frame, text='지우개', command=self.use_eraser)
+        self.eraser_button.pack(side=tk.LEFT)
+        
+        self.pen_button = tk.Button(self.button_frame, text='펜', command=self.use_pen)
+        self.pen_button.pack(side=tk.LEFT)
+        
+        self.clear_button = tk.Button(self.button_frame, text='All Clear', command=self.clear_paint)
+        self.clear_button.pack(side=tk.LEFT)
+        
+        self.canvas.bind('<B1-Motion>', self.paint)
+        self.canvas.bind('<Button-1>', self.start_draw_shape)
+        self.root.bind('<Key>', self.set_shape_mode)
+        self.root.bind('<z>', self.undo)
+        
+        self.undo_stack = []
+        self.start_x, self.start_y = None, None
+
+    def choose_color(self):
+        color = askcolor(color=self.pen_color)[1]
+        if color:
+            self.pen_color = color
+            self.eraser_on = False
+    
+    def use_eraser(self):
+        self.eraser_on = True
+        self.shape_mode = None
+    
+    def use_pen(self):
+        self.eraser_on = False
+        self.shape_mode = None
+    
+    def paint(self, event):
+        if self.shape_mode:
+            return
+        
+        paint_color = 'white' if self.eraser_on else self.pen_color
+        x1, y1 = (event.x - 1), (event.y - 1)
+        x2, y2 = (event.x + 1), (event.y + 1)
+        item = self.canvas.create_oval(x1, y1, x2, y2, fill=paint_color, outline=paint_color)
+        self.undo_stack.append(item)
+    
+    def start_draw_shape(self, event):
+        self.start_x, self.start_y = event.x, event.y
+        self.canvas.bind('<ButtonRelease-1>', self.draw_shape)
+    
+    def draw_shape(self, event):
+        if not self.shape_mode:
+            return
+        
+        end_x, end_y = event.x, event.y
+        paint_color = self.pen_color
+        if self.shape_mode == 'rectangle':
+            item = self.canvas.create_rectangle(self.start_x, self.start_y, end_x, end_y, outline=paint_color)
+        elif self.shape_mode == 'circle':
+            x1, y1 = self.start_x, self.start_y
+            x2, y2 = end_x, end_y
+            r = ((x2 - x1)**2 + (y2 - y1)**2)**0.5
+            item = self.canvas.create_oval(x1 - r, y1 - r, x1 + r, y1 + r, outline=paint_color)
+        
+        self.undo_stack.append(item)
+        self.canvas.unbind('<ButtonRelease-1>')
+    
+    def set_shape_mode(self, event):
+        if event.char.lower() == 's':
+            self.shape_mode = 'rectangle'
+        elif event.char.lower() == 'c':
+            self.shape_mode = 'circle'
+        else:
+            self.shape_mode = None
+    
+    def clear_paint(self):
+        self.canvas.delete("all")
+    
+    def undo(self, event=None):
+        if self.undo_stack:
+            last_item = self.undo_stack.pop()
+            self.canvas.delete(last_item)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PaintApp(root)
+    root.mainloop()
