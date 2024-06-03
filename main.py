@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from datetime import datetime  # 날짜와 시간을 가져오기 위한 모듈
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -53,6 +54,15 @@ def close_program(): #프로그램을 종료하는 기능
 def show_info_window(): #정보를 표시하는 기능
     messagebox.showinfo("Info", "OSS_Paint_2024\n 그림판 v1.0.0")
 #+=================================================================================
+
+def update_time():
+    """
+    현재 날짜와 시간을 업데이트하는 함수
+    """
+    now = datetime.now()
+    current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+    datetime_label.config(text=current_time)
+    window.after(1000, update_time)  # 1초마다 시간을 업데이트
 
 is_dark_mode = False  # 기본 모드는 라이트 모드
 
@@ -1566,6 +1576,12 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
+
+# 현재 날짜와 시간을 표시할 라벨
+datetime_label = tk.Label(window, text="", font=("Helvetica", 16))
+datetime_label.pack()
+
+update_time() # 시간 업데이트 시작
 
 window.mainloop()
 
