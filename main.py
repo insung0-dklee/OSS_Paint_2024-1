@@ -44,7 +44,7 @@ previous_time = None
 previous_x, previous_y = None, None
 
 #+=================================================================================
-class ToolTip(object): # 툴팁을 생성하고 관리하는 클래스
+class _tool_tip(object): # 툴팁을 생성하고 관리하는 클래스
     def __init__(self, widget):
         self.widget = widget  # 툴팁이 연결된 위젯
         self.tipwindow = None  # 툴팁 창
@@ -75,8 +75,8 @@ class ToolTip(object): # 툴팁을 생성하고 관리하는 클래스
         if tw:
             tw.destroy()  # 툴팁 창 제거
 
-def createToolTip(widget, text, enter, leave): # 툴팁을 생성하는 기능
-    toolTip = ToolTip(widget)  # 툴팁 객체 생성
+def create_tool_tip(widget, text, enter, leave): # 툴팁을 생성하는 기능
+    toolTip = _tool_tip(widget)  # 툴팁 객체 생성
     def enter_event(event):
         print("a")
         toolTip.showtip(text)  # 마우스가 위젯 위에 올라갔을 때 툴팁 표시
@@ -624,29 +624,29 @@ def setup_paint_app(window):
 
     button_toggle_mode = Button(window, text="Toggle Dark Mode", command=toggle_dark_mode)
     button_toggle_mode.pack(side=LEFT) # 다크 모드 토글 버튼을 윈도우에 배치
-    createToolTip(button_toggle_mode, "turn the dark mode of the UI On/Off.", on_enter, on_leave)
+    create_tool_tip(button_toggle_mode, "turn the dark mode of the UI On/Off.", on_enter, on_leave)
 
     button_use_case = Button(button_frame, text="Use Case Diagram", command=choose_use_case_element)
     button_use_case.pack(side=LEFT) # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
-    createToolTip(button_use_case, "Draw the components of a use case diagram", on_enter, on_leave)
+    create_tool_tip(button_use_case, "Draw the components of a use case diagram", on_enter, on_leave)
 
     button_clear = Button(window, text="All Clear", command=lambda: clear_paint(canvas))
     button_clear.pack(side=LEFT)
-    createToolTip(button_clear, "All clear canvas's screen.", on_enter, on_leave)
+    create_tool_tip(button_clear, "All clear canvas's screen.", on_enter, on_leave)
 
     # 타이머 멈춤 버튼
     button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
     button_stop_timer.pack(side=RIGHT)
-    createToolTip(button_stop_timer, "Stop the timer", on_enter, on_leave)
+    create_tool_tip(button_stop_timer, "Stop the timer", on_enter, on_leave)
 
     #타이머 리셋 버튼
     button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
     button_reset_timer.pack(side=RIGHT)
-    createToolTip(button_reset_timer, "Reset the timer", on_enter, on_leave)
+    create_tool_tip(button_reset_timer, "Reset the timer", on_enter, on_leave)
 
     start_button = Button(button_frame, text="Start", command=start_stop)
     start_button.pack(side = RIGHT)
-    createToolTip(start_button, "Start the timer", on_enter, on_leave)
+    create_tool_tip(start_button, "Start the timer", on_enter, on_leave)
 
     
 
@@ -657,17 +657,17 @@ def setup_paint_app(window):
 
     button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
     button_erase_last_stroke.pack(side=LEFT)
-    createToolTip(button_erase_last_stroke, "Erase last stroke", on_enter, on_leave)
+    create_tool_tip(button_erase_last_stroke, "Erase last stroke", on_enter, on_leave)
 
     button_redo_last_stroke = Button(button_frame, text="Rewrite Last Stroke", command=rewrite_last_stroke)
     button_redo_last_stroke.pack(side=LEFT)
-    createToolTip(button_redo_last_stroke, "Rewrite last stroke", on_enter, on_leave)
+    create_tool_tip(button_redo_last_stroke, "Rewrite last stroke", on_enter, on_leave)
 
 
     brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
-    createToolTip(brush_size_slider, "Adjust the brush size", on_enter, on_leave)
+    create_tool_tip(brush_size_slider, "Adjust the brush size", on_enter, on_leave)
     
 
     
@@ -676,20 +676,20 @@ def setup_paint_app(window):
 
     button_line = Button(window, text="Line Brush", command=lambda: set_brush_mode_line(canvas))
     button_line.pack(side=LEFT)
-    createToolTip(button_line, "Select Line brush", on_enter, on_leave)
+    create_tool_tip(button_line, "Select Line brush", on_enter, on_leave)
 
     # 스프레이 버튼
     button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
     button_spray.pack(side=LEFT)
-    createToolTip(button_spray, "Select spray brush", on_enter, on_leave)
+    create_tool_tip(button_spray, "Select spray brush", on_enter, on_leave)
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
     button_paint.pack(side=RIGHT)
-    createToolTip(button_paint, "Select normal brush", on_enter, on_leave)
+    create_tool_tip(button_paint, "Select normal brush", on_enter, on_leave)
 
     button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
     button_paint.pack(side=RIGHT)
-    createToolTip(button_paint, "Select pressure brush", on_enter, on_leave)
+    create_tool_tip(button_paint, "Select pressure brush", on_enter, on_leave)
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
@@ -699,11 +699,11 @@ def setup_paint_app(window):
 
     button_flip = Button(window, text="Flip Horizontal", command=lambda: flip_horizontal(canvas))
     button_flip.pack(side=LEFT)
-    createToolTip(button_flip, "Flip the canvas horizontally", on_enter, on_leave)
+    create_tool_tip(button_flip, "Flip the canvas horizontally", on_enter, on_leave)
 
     button_flip_vertical = Button(window, text="Flip Vertical", command=lambda: flip_vertical(canvas))
     button_flip_vertical.pack(side=LEFT)
-    createToolTip(button_flip_vertical, "Flip the canvas vertically", on_enter, on_leave)
+    create_tool_tip(button_flip_vertical, "Flip the canvas vertically", on_enter, on_leave)
 
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
@@ -717,7 +717,7 @@ def setup_paint_app(window):
     button_choose_shape = Button(window, text="shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
     button_choose_shape.pack(side=LEFT)
-    createToolTip(button_choose_shape, "Select the shape", on_enter, on_leave)
+    create_tool_tip(button_choose_shape, "Select the shape", on_enter, on_leave)
 
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
@@ -757,7 +757,7 @@ def setup_paint_app(window):
 
     button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
     button_paint.pack(side=RIGHT)
-    createToolTip(button_paint, "Select air brush", on_enter, on_leave)
+    create_tool_tip(button_paint, "Select air brush", on_enter, on_leave)
 
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
@@ -1556,7 +1556,7 @@ time_label.pack()
 # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
-createToolTip(text_box_button, "Add textbox", on_enter, on_leave)
+create_tool_tip(text_box_button, "Add textbox", on_enter, on_leave)
 
 # 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
