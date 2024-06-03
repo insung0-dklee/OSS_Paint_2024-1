@@ -322,6 +322,28 @@ def change_bg_color(canvas):
     bg_color = askcolor()
     canvas.config(bg=bg_color[1])
 
+# 배경 토트 무늬 설정
+def set_dotted_bg(canvas):
+    bg_color = askcolor()[1] # 사용자에게 배경 색상 선택 요청
+    canvas.config(bg=bg_color) # 캔버스의 배경색 설정
+
+    # 캔버스의 너비와 높이 가져오기
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    
+    # 점의 반지름과 점 사이의 간격 설정
+    dot_radius = 5
+    dot_spacing = 20
+    
+    # 캔버스 위에 점 그리기
+    for x in range(0, canvas_width, dot_spacing): # x, y 좌표는 점 사이의 간격만큼 증가하며 반복
+        for y in range(0, canvas_height, dot_spacing):
+            canvas.create_oval( # 각 점의 위치에 동그라미 그리기
+                x - dot_radius, y - dot_radius,# 점의 위치, 크기 설정
+                x + dot_radius, y + dot_radius,
+                fill='white', outline='white' # 점의 색상 지정
+            )
+
 def change_brush_color(event=None):
     global brush_color
     selected_color = askcolor()[1]
@@ -761,6 +783,7 @@ def setup_paint_app(window):
     color_menu.add_command(label="Set Palette", command=lambda: setup_palette(window)) # Color 메뉴에 Set Palette 기능 버튼 추가
     color_menu.add_command(label="Change Background Color", command=lambda: change_bg_color(canvas)) # Color 메뉴에 Change Background Color 기능 버튼 추가
     color_menu.add_command(label="Change Brush Color", command=lambda: change_brush_color()) # Color 메뉴에 Change Brush Color 기능 버튼 추가
+    color_menu.add_command(label="Set Dotted Background", command=lambda: set_dotted_bg(canvas)) # Color 메뉴에 Set Dotted Backgroud 기능 버튼 추가
 
     tool_menu.add_command(label="Toggle FullScreen", command=toggle_fullscreen) # Tools 메뉴에 Toggle FullScreen 기능 버튼 추가
     tool_menu.add_command(label="Toggle Ruler", command=toggle_ruler) # Tools 메뉴에 Toggle Ruler 기능 버튼 추가
