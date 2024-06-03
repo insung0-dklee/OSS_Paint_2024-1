@@ -695,6 +695,9 @@ def setup_paint_app(window):
     canvas.bind("<Button-3>", show_coordinates)
     canvas.bind("<ButtonRelease-3>", hide_coordinates)
 
+    canvas.bind("<Button-3>", change_eraser_cursor)
+    canvas.bind("<ButtonRelease-3>", change_cursor)
+
     canvas.bind("<MouseWheel>", zoom)
 
     bind_shortcuts()
@@ -820,6 +823,9 @@ def change_cursor(event):
 # 연필 형태 커서를 원래대로 변경하기
 def default_cursor(event):
     canvas.config(cursor="")
+
+def change_eraser_cursor(event):
+    canvas.config(cursor="circle")
 
 # 우클릭을 누르면 우측 상단에 x, y 좌표값을 백분율로 표시
 def show_coordinates(event):
