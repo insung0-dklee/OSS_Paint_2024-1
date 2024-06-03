@@ -559,8 +559,15 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+def initialize_brush_color():
+    return brush_color
 
-
+def reset_brush_color():
+    global brush_color
+    # 브러쉬 색을 초기화하는 코드 작성
+    brush_color = "black"
+    print("브러쉬 색이 초기화되었습니다:")
+    
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame
 
@@ -609,7 +616,8 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+    reset_button = Button(button_frame, text="브러쉬 색 초기화", command=reset_brush_color)
+    reset_button.pack(side=RIGHT)
 
     #spray 인스턴스 생성 
     global spray_brush
