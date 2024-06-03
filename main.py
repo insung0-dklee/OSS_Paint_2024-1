@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import matplotlib.pyplot as plt
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -43,7 +44,8 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
-
+# 컬러 히스토그램을 위한 색상 사용 추적
+color_usage = {}
 
 #+=================================================================================
 def close_program(): #프로그램을 종료하는 기능
@@ -140,6 +142,36 @@ def start_stop():
     if not timer.running:
         timer.start()
 
+# 색상 선택 시 brush_color를 설정하고 사용 빈도를 업데이트하는 함수
+# 사용자가 색상을 선택하면 해당 색상을 기록하고 빈도를 증가시킴
+def choose_color():
+    global brush_color
+    color = askcolor()[1]
+    if color:
+        brush_color = color
+        if color in color_usage:
+            color_usage[color] += 1
+        else:
+            color_usage[color] = 1
+
+# 사용된 색상의 빈도를 히스토그램으로 표시하는 함수
+# 색상 사용 빈도를 막대 그래프로 시각화하여 표시함
+def show_color_histogram():
+    if not color_usage:
+        messagebox.showinfo("Info", "No colors used yet.")
+        return
+
+    colors = list(color_usage.keys())
+    usage_counts = list(color_usage.values())
+
+    plt.figure(figsize=(10, 5))
+    plt.bar(colors, usage_counts, color=colors)  # 색상과 사용 빈도를 막대 그래프로 표시
+    plt.xlabel("Colors")  # x축 라벨 설정
+    plt.ylabel("Usage Count")  # y축 라벨 설정
+    plt.title("Color Usage Histogram")  # 그래프 제목 설정
+    plt.xticks(rotation=45, ha="right")  # x축 라벨 회전 및 정렬
+    plt.tight_layout()  # 그래프 레이아웃 조정
+    plt.show()
 
 def paint_airbrush(event, canvas):
     for _ in range(dot_count.get()):  # 에어브러쉬 효과를 위해 여러 개의 작은 점을 그림
