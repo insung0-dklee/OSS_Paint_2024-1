@@ -27,9 +27,17 @@ from tkinter import Scale
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
+
+#======================================================================================================
+is_first_brush_color = True #선택하고 있는 색이 첫번째일 경우
+main_color = "black" # 메인 브러쉬 색을 저장할 변수
+sub_color = "white" #서브 브러쉬 색을 저장할 변수
+main_color_button, sub_color_button = None, None# 저장한 색을 불러오는 버튼
+#======================================================================================================
+
 brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
-brush_color = "black"  # 기본 색상은 검은색으로 설정
+brush_color = main_color  # 기본 색상은 검은색(메인 색)으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 brush_modes = ["solid", "dotted", "double_line", "pressure", "marker"]
 current_color = "black"  # 기본 색상은 검은색으로 설정
@@ -43,8 +51,40 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+#+=================================================================================
+def select_main_color(): #메인 색을 선택하여 브러쉬 색을 바꾸는 기능
+    global is_first_brush_color, brush_color, main_color
+    is_first_brush_color = True
+    brush_color = main_color
 
+def select_sub_color(): #서브 색을 선택하여 브러쉬 색을 바꾸는 기능
+    global is_first_brush_color, brush_color, sub_color
+    is_first_brush_color = False
+    brush_color = sub_color   
 
+def swap_selected_color(event): #선택된 색을 서로 교체하는 기능
+    global is_first_brush_color, brush_color, main_color, sub_color, main_color_button, sub_color_button
+    temp = sub_color
+    sub_color = main_color
+    main_color = temp
+    # 색을 서로 교체
+    main_color_button.config(bg=main_color)
+    sub_color_button.config(bg=sub_color)
+    # 교체된 색에 맞추어 버튼 색을 교체
+    if is_first_brush_color:
+        brush_color = main_color
+    else:
+        brush_color = sub_color
+    # 교체된 색을 바탕으로 현재 브러쉬 색을 업데이트
+
+def change_selected_color(color): #선택된 색을 교체할때 사용하는 기능
+    global is_first_brush_color, main_color, sub_color, main_color_button, sub_color_button
+    if is_first_brush_color:
+        main_color = color
+        main_color_button.config(bg=color)
+    else:
+        sub_color = color
+        sub_color_button.config(bg=color)
 #+=================================================================================
 def close_program(): #프로그램을 종료하는 기능
     if messagebox.askokcancel("Quit", "Do you want to quit?"): #프로그램을 종료할 것인지 확인 매시지를 띄움
@@ -181,6 +221,7 @@ def bind_shortcuts():
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
+    window.bind("x", swap_selected_color)
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
@@ -341,6 +382,7 @@ def set_brush_color(color):
     brush_color = color
     # spray_brush의 색상 변경을 위한 코드 추가
     spray_brush.set_brush_color(brush_color)
+    change_selected_color(color)
 
 # 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
 def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
@@ -713,6 +755,14 @@ def setup_paint_app(window):
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
 
+#+=================================================================================
+    #스왑가능한 색상 컬러 버튼
+    global main_color, sub_color, main_color_button, sub_color_button
+    sub_color_button = Button(window, bg=sub_color, width=2, height=1, command= select_sub_color)
+    sub_color_button.pack(side=RIGHT, padx=2, pady=2)
+    main_color_button = Button(window, bg=main_color, width=2, height=1, command= select_main_color)
+    main_color_button.pack(side=RIGHT, padx=2, pady=2)
+#+=================================================================================
 
 
     # 에어브러쉬 속성 조절 버튼 추가
