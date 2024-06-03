@@ -942,3 +942,32 @@ def _main():
 이 방식을 통해, 스크립트가 모듈로 사용될 때는 필요한 클래스나 함수만을 제공하고,
 스크립트가 직접 실행될 때만 특정 로직(여기서는 _main() 함수 내의 로직)을 실행할 수 있습니다.
 """
+
+# 물방울 모양 브러쉬 추가
+def draw_droplet(canvas, x, y):
+    """
+    주어진 위치에 물방울 모양을 그립니다.
+    """
+    # 물방울 본체 (타원)
+    canvas.create_oval(x - 10, y - 10, x + 10, y + 10, fill="blue", outline="blue")
+    # 물방울 꼬리 (삼각형)
+    points = [x, y - 20, x - 10, y - 5, x + 10, y - 5]
+    canvas.create_polygon(points, fill="blue", outline="blue")
+
+def on_drag(event):
+    """
+    마우스 드래그 이벤트를 처리합니다.
+    """
+    draw_droplet(canvas, event.x, event.y)
+
+# 기능 추가만 해두고 실행하지 않음, 실행 예시
+# root = tk.Tk()
+# root.title("Water Droplet Brush")
+#
+# canvas = tk.Canvas(root, width=400, height=400)
+# canvas.pack()
+#
+# # 마우스 드래그 이벤트와 on_drag 함수를 연결
+# canvas.bind("<B1-Motion>", on_drag)
+#
+# root.mainloop()
