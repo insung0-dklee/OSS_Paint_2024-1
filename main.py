@@ -1158,6 +1158,59 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 정사각형 그리기
+def create_square(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_square)
+
+# 정사각형을 그릴 위치 지정 및 그리기 함수 호출
+def start_square(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_square(event, start_x, start_y))
+    canvas.bind("<ButtonRelease-1>", finish_square)
+
+
+"""
+정사각형 그리기 함수
+width : 가로 길이 계산값
+height : 세로 길이 계산값
+max_length : 가로와 세로 증 더 큰 값, 이를 기준으로 정사각형 생성
+"""
+def draw_square(event, start_x, start_y):
+    global current_shape
+    canvas.delete("temp_shape")
+    x2, y2 = event.x, event.y
+
+    width = abs(x2 - start_x)
+    height = abs(y2 - start_y)
+
+    max_length = max(width, height)
+    if x2 < start_x:
+        start_x = start_x - max_length
+    if y2 < start_y:
+        start_y = start_y - max_length
+
+    # 정사각형의 네 꼭짓점 좌표 계산
+    points = [
+        start_x, start_y,
+        start_x + max_length, start_y,
+        start_x + max_length, start_y + max_length,
+        start_x, start_y + max_length
+    ]
+
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 정사각형 그리기 종료
+def finish_square(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -1169,6 +1222,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Square", command=lambda: create_square(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
