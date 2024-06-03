@@ -571,6 +571,17 @@ def setup_paint_app(window):
     canvas = Canvas(window, bg="white")
     canvas.pack(fill="both", expand=True)
 
+# 마우스 좌표값을 표시
+    def show_coordinates(event):
+        canvas.delete("coord_text")  # 이전 좌표값 삭제
+        width = canvas.winfo_width()
+        height = canvas.winfo_height()
+        x_percent = (event.x / width) * 100
+        y_percent = (event.y / height) * 100
+        coord_text = f"<{x_percent:.1f}% / {100-y_percent:.1f}%>"
+        coord_label.config(text=coord_text)
+
+
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
@@ -693,8 +704,9 @@ def setup_paint_app(window):
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
 
-    canvas.bind("<Button-3>", show_coordinates)
-    canvas.bind("<ButtonRelease-3>", hide_coordinates)
+    canvas.bind("<Motion>", show_coordinates)
+    coord_label = Label(window, text="", font=("Arial", 8), bg="white", anchor="nw")
+    coord_label.place(x=0, y=0)
 
     canvas.bind("<MouseWheel>", zoom)
 
