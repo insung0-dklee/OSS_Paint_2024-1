@@ -652,11 +652,6 @@ def setup_paint_app(window):
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
     text_box = Entry(window)
     text_box.pack(side=LEFT)
     text_box.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
@@ -810,7 +805,7 @@ def setup_paint_app(window):
 def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
     new_window.title("새 그림판")
-    new_window.geometry("800x600+200+200")
+    new_window.geometry("1280x800+200+200")
     new_window.configure(bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     setup_paint_app(new_window)
 
@@ -1453,11 +1448,21 @@ window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 version = "1.0.0"  # 프로그램 버전
 window.title(f"그림판 v{version}")
-window.geometry("1280x960+200+200")
+window.geometry("1280x800+200+200")
 window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
 editor = ImageEditor(canvas)
+
+# 창을 화면 가운데에 위치시키기
+window.update_idletasks()
+screen_width = window.winfo_screenwidth()
+screen_height = window.winfo_screenheight()
+window_width = window.winfo_width()
+window_height = window.winfo_height()
+x = (screen_width - window_width) // 2
+y = (screen_height - window_height) // 2
+window.geometry(f"+{x}+{y}")
 
 # 타이머 라벨
 timer_label = Label(window, text="Time: 0 s")
