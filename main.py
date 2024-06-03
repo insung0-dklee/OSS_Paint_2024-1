@@ -68,7 +68,7 @@ def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
     canvas.config(bg="white") # 캔버스 배경색
     button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
+    for widget in button_frame.winfo_children():
         widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="white", fg="black") # 타이머 라벨 배경색, 글자색
 
@@ -80,7 +80,7 @@ def apply_dark_mode(): # 다크 모드 적용
         widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
-#이미지 파일 불러오기 
+#이미지 파일 불러오기
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -105,7 +105,7 @@ def upload_image():
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
 
-# 라인 브러쉬 기능 추가 
+# 라인 브러쉬 기능 추가
 def set_brush_mode_line(canvas):
     canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
 
@@ -121,7 +121,7 @@ def draw_line(event, canvas):
 
 #타이머 기능 추가
 timer = Timer()
-#타이머의 경과시간 업데이트 
+#타이머의 경과시간 업데이트
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
@@ -331,7 +331,7 @@ def change_brush_color(event=None):
 """
 TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
-해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다. 
+해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다.
 인자를 받지 않기 위해 None로 설정
 """
 
@@ -492,7 +492,7 @@ def draw_relationship_preview(event):
 def draw_relationship_end(event, relationship_type):
     """
     draw_relationship_end: 관계 그리기를 종료하는 함수
-    드래그 종료 지점에서 실제 선을 그린다. 
+    드래그 종료 지점에서 실제 선을 그린다.
     관계 유형에 따라 화살표와 텍스트를 추가한다.
     """
     global x1, y1, preview_line
@@ -611,7 +611,7 @@ def setup_paint_app(window):
 
     
 
-    #spray 인스턴스 생성 
+    #spray 인스턴스 생성
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
     
@@ -638,7 +638,7 @@ def setup_paint_app(window):
 
     button_line = Button(window, text="Line Brush", command=lambda: set_brush_mode_line(canvas))
     button_line.pack(side=LEFT)
-    button_line.bind("<Enter>", on_enter)  
+    button_line.bind("<Enter>", on_enter)
     button_line.bind("<Leave>", on_leave)
 
     # 스프레이 버튼
@@ -895,7 +895,7 @@ def start_triangle(event):
 
 # 삼각형 생성하기
 def draw_triangle(event):
-    global start_x, start_y, current_shape 
+    global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     x2, y2 = event.x, event.y
 
@@ -1059,8 +1059,8 @@ def draw_heart(event):
         x = 16 * math.sin(t_rad)**3
         y = -(13 * math.cos(t_rad) - 5 * math.cos(2*t_rad) - 2 * math.cos(3*t_rad) - math.cos(4*t_rad))
 
-        x_scaled = start_x + x * size  
-        y_scaled = start_y + y * size  
+        x_scaled = start_x + x * size
+        y_scaled = start_y + y * size
 
         points.append(x_scaled)
         points.append(y_scaled)
@@ -1074,7 +1074,7 @@ def finish_heart(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
-# 십자형 도형 그리기 
+# 십자형 도형 그리기
 def create_cross(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_cross)
@@ -1097,17 +1097,17 @@ def draw_cross(event):
 
     # 중심점을 기준으로 십자형의 4개 arm 그리기
     points = [
-        start_x - cross_width, start_y - height,  
-        start_x + cross_width, start_y - height, 
-        start_x + cross_width, start_y - cross_width, 
-        start_x + width, start_y - cross_width,  
-        start_x + width, start_y + cross_width,  
+        start_x - cross_width, start_y - height,
+        start_x + cross_width, start_y - height,
+        start_x + cross_width, start_y - cross_width,
+        start_x + width, start_y - cross_width,
+        start_x + width, start_y + cross_width,
         start_x + cross_width, start_y + cross_width,
-        start_x + cross_width, start_y + height,  
-        start_x - cross_width, start_y + height, 
+        start_x + cross_width, start_y + height,
+        start_x - cross_width, start_y + height,
         start_x - cross_width, start_y + cross_width,
-        start_x - width, start_y + cross_width, 
-        start_x - width, start_y - cross_width,  
+        start_x - width, start_y + cross_width,
+        start_x - width, start_y - cross_width,
         start_x - cross_width, start_y - cross_width
     ]
 
@@ -1488,7 +1488,23 @@ def add_text_to_canvas(text):
         canvas.tag_bind(text_item, "<B1-Motion>", drag)
         canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
 
+def increase_width(event=None):
+    width = window.winfo_width()
+    window.geometry(f"{width + 20}x{window.winfo_height()}")
 
+def decrease_width(event=None):
+    width = window.winfo_width()
+    if width > 100:  # 최소 너비 설정
+        window.geometry(f"{width - 20}x{window.winfo_height()}")
+
+def increase_height(event=None):
+    height = window.winfo_height()
+    window.geometry(f"{window.winfo_width()}x{height + 20}")
+
+def decrease_height(event=None):
+    height = window.winfo_height()
+    if height > 100:  # 최소 높이 설정
+        window.geometry(f"{window.winfo_width()}x{height - 20}")
 
 # 문자열 드래그 시작
 def start_drag(event):
@@ -1518,9 +1534,9 @@ def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간
     return f"{hours:02}:{minutes:02}"
 
 
-current_time = time.localtime() 
+current_time = time.localtime()
 initial_hours = current_time.tm_hour
-initial_minutes = current_time.tm_min 
+initial_minutes = current_time.tm_min
 
 time_label = Label(window, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
 time_label.pack()
@@ -1560,7 +1576,11 @@ interval_entry.insert(0, "10")  # 기본값 설정
 canvas.bind("<Configure>", on_resize)
 
 bind_shortcuts_window(window)
-
+# 단축키 바인딩 (Shift + Control + 방향키)
+window.bind('<Shift-Control-Left>', decrease_width)
+window.bind('<Shift-Control-Right>', increase_width)
+window.bind('<Shift-Control-Up>', increase_height)
+window.bind('<Shift-Control-Down>', decrease_height)
 window.protocol("WM_DELETE_WINDOW", on_closing)
 
 #프로그램 시작 시 타이머 시작
