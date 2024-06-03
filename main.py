@@ -230,6 +230,32 @@ def paint_marker(event, canvas):
     x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
+def stamp_smiley(event):
+    stamp_color = brush_color
+    distance = brush_size * 20  # 도장 사이의 거리를 펜 굵기의 4배로 설정
+    radius = brush_size * 2  # 웃는 얼굴 도장의 반지름을 펜 굵기에 비례하여 설정
+
+    # 웃는 얼굴 중심 좌표 계산
+    center_x, center_y = event.x, event.y
+
+    # 웃는 얼굴 그리기
+    x1, y1 = center_x - radius, center_y - radius
+    x2, y2 = center_x + radius, center_y + radius
+    canvas.create_oval(x1, y1, x2, y2, outline=stamp_color, width=2)
+
+    # 눈 그리기
+    eye_radius = brush_size // 5  # 눈의 크기를 펜 굵기에 비례하여 설정
+    canvas.create_oval(center_x - (radius // 2), center_y - (radius // 2), center_x - (radius // 2) + eye_radius, center_y - (radius // 2) + eye_radius, fill=stamp_color, outline=stamp_color)
+    canvas.create_oval(center_x + (radius // 2) - eye_radius, center_y - (radius // 2), center_x + (radius // 2), center_y - (radius // 2) + eye_radius, fill=stamp_color, outline=stamp_color)
+
+    # 입 그리기
+    canvas.create_arc(center_x - (radius // 2), center_y + (radius // 4), center_x + (radius // 2), center_y + (radius // 2), start=180, extent=180, style="arc", outline=stamp_color)
+
+# 새로운 도장 브러쉬 활성화
+def activate_smiley_stamp_mode(event=None):
+    canvas.bind("<B1-Motion>", stamp_smiley)
+
+
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -646,6 +672,9 @@ def setup_paint_app(window):
     button_spray.pack(side=LEFT)
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_smiley_stamp = Button(window, text="Activate Smiley Stamp Mode", command=activate_smiley_stamp_mode)
+    button_smiley_stamp.pack(side=LEFT)
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
     button_paint.pack(side=RIGHT)
