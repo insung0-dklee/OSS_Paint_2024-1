@@ -408,10 +408,45 @@ def setup_palette(window):
 
 
 # 캔버스를 파일로 저장하는 함수
-def save_canvas(canvas):
-    file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
+def save_canvas(canvas, file_path=None):
+    if not file_path:
+        file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
     if file_path:
         canvas.postscript(file=file_path)
+
+def show_auto_save_message(window): 
+    """
+    show_auto_save_message: 자동 저장 시 메시지를 띄워주는 함수
+    자동 저장되었을 때, 사용자가 알 수 있도록 메시지를 띄워준다.
+    """
+    message = tk.Label(window, text="자동 저장되었습니다", bg="yellow")
+    message.place(relx=0.5, rely=0.5, anchor="center")
+    window.after(2000, message.destroy) # 2초 후에 메시지 삭제
+
+# 자동 저장을 시작하는 함수
+def start_auto_save(canvas, interval=60000):
+    """
+    start_auto_save: 자동 저장을 시작하는 함수
+    처음에 auto_save를 호출하고, 그 뒤론 interval 시간 후에 auto_save 함수를 다시 호출해 재귀적으로 계속 자동으로 저장이 되게 한다.
+    @Param
+        interval : 자동 저장할 시간 간격(밀리초)
+    @Return
+        None
+    """
+
+    file_path = "autosave.ps" # 기본 파일 경로 설정
+    first_save = True # 프로그램 시작하자마자 자동저장 메시지가 뜨지 않게 플래그 변수 사용
+
+    # 자동 저장을 수행하는 내부 함수
+    def auto_save():
+        nonlocal first_save
+        save_canvas(canvas, file_path) # 캔버스를 파일 경로에 저장
+        if not first_save:
+            show_auto_save_message(window)  # 메시지 표시
+        first_save = False
+        window.after(interval, auto_save) # 일정 시간 후에 auto_save 함수를 다시 호출. 재귀적으로 자동 저장 설정
+
+    auto_save() # 처음에 auto_save 함수를 호출하여 자동 저장 시작
 
 def reset_brush(canvas):
     global brush_size, brush_color
@@ -1566,6 +1601,9 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
+
+# 자동 저장 기능 시작 (기본적으로 1분마다 autosave.ps 파일에 저장)
+start_auto_save(canvas)
 
 window.mainloop()
 
