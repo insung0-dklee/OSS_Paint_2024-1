@@ -13,6 +13,7 @@ class SprayBrush:
         self.brush_size = brush_size
 
     def spray_paint(self, event):
+
         radius = self.brush_size  
         dot = 50  
         for _ in range(dot):

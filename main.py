@@ -113,7 +113,25 @@ def upload_image():
 
 # 라인 브러쉬 기능 추가 
 def set_brush_mode_line(canvas):
+
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<ButtonRelease-1>")
+
+    # Line Brush 모드 활성화
     canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
+    canvas.bind("<B1-Motion>", lambda event: draw_line(event, canvas))
+
+
+def set_brush_mode_spray(canvas):
+    # 다른 브러시 모드와 Line Brush 비활성화
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<ButtonRelease-1>")
+
+    # Spray 모드 활성화
+    canvas.bind("<B1-Motion>", spray_brush.spray_paint)
+    canvas.bind("<Button-1>", spray_brush.spray_paint)
 
 def line_start(event, canvas):
     global x1, y1
@@ -191,6 +209,9 @@ def bind_shortcuts():
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<ButtonRelease-1>")
     canvas.bind("<B1-Motion>", lambda event: paint_airbrush(event, canvas))
 
 def set_paint_mode_normal(canvas, set_origin_mode=False):
@@ -245,6 +266,12 @@ set_brush_mode: 브러쉬 모드를 변경하는 함수
 def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     global brush_mode
     brush_mode = mode
+
+    # 모든 모드 비활성화
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<ButtonRelease-1>")
+
     if brush_mode == "solid":  # 브러쉬 모드가 solid면
         canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
@@ -649,7 +676,7 @@ def setup_paint_app(window):
     button_line.bind("<Leave>", on_leave)
 
     # 스프레이 버튼
-    button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
+    button_spray = Button(window, text="spray", command=lambda: set_brush_mode_spray(canvas))
     button_spray.pack(side=LEFT)
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
