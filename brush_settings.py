@@ -40,7 +40,7 @@ def set_brush_mode(canvas, mode):
     elif brush_mode == "dotted":
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))
 
-# 마우스 움직임에 따라 도형을 그리는 함수
+# 마우스 움직임에 따라 도형을 그리는 함수.
 def set_paint_mode_normal(canvas):
     canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
 
