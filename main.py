@@ -43,6 +43,43 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+# 달력 템플릿을 그리는 함수
+def draw_calendar_template(canvas):
+    canvas.delete("calendar")
+    draw_calendar_title_box(canvas)
+    draw_calendar_grid(canvas)
+
+def draw_calendar_title_box(canvas):
+    title_box_height = 30
+    canvas_width = canvas.winfo_width()
+    title_box_width = canvas_width / 3  # 제목 박스의 길이를 캔버스 너비의 1/3로 설정
+    margin = 10
+    title_line_y = title_box_height / 2
+    canvas.create_line((canvas_width - title_box_width) / 2, title_line_y, (canvas_width + title_box_width) / 2, title_line_y, width=2, tags="calendar")
+
+def draw_calendar_grid(canvas):
+    canvas_width = canvas.winfo_width()
+    calendar_width = canvas_width * 0.8  # 캘린더의 너비를 캔버스 너비의 80%로 설정
+    cell_height = 100
+    cell_width = calendar_width / 7  # 7일 간격의 셀
+
+    start_y = 80  # 제목 박스 아래부터 캘린더 시작
+    days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"]
+
+    # 요일 헤더 생성
+    for i, day in enumerate(days):
+        x = (canvas_width - calendar_width) / 2 + i * cell_width
+        canvas.create_text(x + cell_width / 2, start_y, text=day, tags="calendar")
+
+    start_y += 20 # 요일 헤더 아래부터 날짜 셀 시작
+
+    # 날짜 셀 생성 (기본 5주)
+    for week in range(5):
+        for day in range(7):
+            x = (canvas_width - calendar_width) / 2 + day * cell_width
+            y = start_y + week * cell_height
+            canvas.create_rectangle(x, y, x + cell_width, y + cell_height, outline="black", tags="calendar")
+
 # 악보 템플릿을 그리는 함수
 def draw_sheet_music_template(canvas):
     canvas.delete("sheet_music")
@@ -830,6 +867,12 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    # 달력 템플릿 버튼
+    button_calendar_template = Button(window, text="달력 템플릿", command=lambda: draw_calendar_template(canvas))
+    button_calendar_template.pack(side=LEFT)
+    button_calendar_template.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_calendar_template.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 악보 템플릿 버튼
     button_sheet_music_template = Button(window, text="악보 템플릿", command=lambda: draw_sheet_music_template(canvas))
