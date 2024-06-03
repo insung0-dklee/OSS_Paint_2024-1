@@ -1158,6 +1158,51 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 정삼각형 그리기
+def create_equilateral_triangle(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_equilateral_triangle)
+
+# 정삼각형 그릴 위치 정하고 생성하는 함수 호출
+def start_equilateral_triangle(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", draw_equilateral_triangle)
+    canvas.bind("<ButtonRelease-1>", finish_equilateral_triangle)
+
+"""
+정삼각형 생성하기
+side_length : 시작점과 마우스 사이의 거리 계산, 정삼각형 한 변의 길이
+height : 정삼각형의 높이
+"""
+def draw_equilateral_triangle(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    x2, y2 = event.x, event.y
+
+    side_length = math.sqrt((x2 - start_x) ** 2 + (y2 - start_y) ** 2)
+
+    height = side_length * math.sqrt(3) / 2
+
+    # 다른 두 꼭짓점의 위치 계산
+    x3 = start_x - side_length / 2
+    y3 = start_y + height
+
+    x4 = start_x + side_length / 2
+    y4 = start_y + height
+
+    current_shape = canvas.create_polygon(start_x, start_y, x3, y3, x4, y4, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 정삼각형 그리기 종료
+def finish_equilateral_triangle(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -1169,6 +1214,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Equilateral Triangle", command=lambda: create_equilateral_triangle(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
