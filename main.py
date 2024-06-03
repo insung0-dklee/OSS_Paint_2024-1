@@ -68,8 +68,11 @@ def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
     canvas.config(bg="white") # 캔버스 배경색
     button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
-        widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
+    for widget in button_frame.winfo_children():
+        if 'bg' in widget.config():
+            widget.config(bg="light grey")
+        if 'fg' in widget.config():
+            widget.config(fg="black")
     timer_label.config(bg="white", fg="black") # 타이머 라벨 배경색, 글자색
 
 def apply_dark_mode(): # 다크 모드 적용
@@ -77,10 +80,13 @@ def apply_dark_mode(): # 다크 모드 적용
     canvas.config(bg="grey30") # 캔버스 배경색
     button_frame.config(bg="grey20") # 버튼 프레임 배경색
     for widget in button_frame.winfo_children():
-        widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
-    timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
+        if 'bg' in widget.config():
+            widget.config(bg="grey40")
+        if 'fg' in widget.config():
+            widget.config(fg="white")
+        timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
-#이미지 파일 불러오기 
+# 이미지 파일 불러오기 
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -704,11 +710,6 @@ def setup_paint_app(window):
     button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
     text_box = Entry(window)
     text_box.pack(side=LEFT)
     text_box.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
@@ -1285,7 +1286,7 @@ def double_line_paint(event, canvas):
         # 첫 번째 선 그리기
         canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color, capstyle=ROUND)
         # 두 번째 선 그리기
-        canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color, capstyle=ROUND)
+        canvas.create_line(last_x + dx, last_y + dy, event.x + dx, event.y + dy, width=brush_size, fill=brush_color, capstyle=ROUND)
 
         last_x, last_y = event.x, event.y
     else:
@@ -1457,12 +1458,17 @@ def on_resize(event):
         draw_ruler()
 
 def on_closing():
-    # 프로그램 종료 시 호출되는 함수
     global is_modified
     if is_modified:
-        if messagebox.askokcancel("Quit", "그림을 저장하시겠습니까?"):
+        response = messagebox.askyesnocancel("Quit", "그림을 저장하시겠습니까?")
+        if response:  # Yes 선택 시
             save_canvas(canvas)  # 저장 함수 호출
-    window.destroy()
+            window.destroy()  # 프로그램 종료
+        elif response is False:  # No 선택 시
+            window.destroy()  # 프로그램 종료
+        # Cancel 선택 시 아무 작업도 하지 않음 (창 닫기 취소)
+    else:
+        window.destroy()  # 프로그램 종료
 
 def get_image_size(file_path):
     # 파일 경로가 주어졌을 때 해당 파일의 용량을 반환합니다.
