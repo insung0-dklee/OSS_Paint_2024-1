@@ -31,7 +31,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker"]
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "line"]
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -104,20 +104,6 @@ def upload_image():
         image = PhotoImage(file=path)
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
-
-# 라인 브러쉬 기능 추가 
-def set_brush_mode_line(canvas):
-    canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
-
-def line_start(event, canvas):
-    global x1, y1
-    x1, y1 = event.x, event.y
-    canvas.bind("<Button-1>", lambda event: draw_line(event, canvas))
-
-def draw_line(event, canvas):
-    global x1, y1
-    canvas.create_line(x1, y1, x1, y1, event.x, event.y, fill=brush_color, width=2)
-    x1, y1 = event.x, event.y
 
 #타이머 기능 추가
 timer = Timer()
@@ -230,6 +216,24 @@ def paint_marker(event, canvas):
     x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
+def paint_line_press(event):
+    global x1, y1, line_id
+    x1 = event.x
+    y1 = event.y
+    line_id = None
+
+def paint_line_drag(event, canvas):
+    global x1, y1, line_id
+    if line_id:
+        canvas.coords(line_id, x1, y1, event.x, event.y)
+    else:
+        line_id = canvas.create_line(x1, y1, event.x, event.y, tags="line", fill=brush_color, width=brush_size)
+
+def paint_line_release(event, canvas):
+    global x1, y1
+    canvas.create_line(x1, y1, event.x, event.y, tags="line", fill=brush_color, width=brush_size)
+
+
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -238,6 +242,7 @@ set_brush_mode: 브러쉬 모드를 변경하는 함수
 def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     global brush_mode
     brush_mode = mode
+    canvas.unbind("<ButtonRelease-1>")
     if brush_mode == "solid":  # 브러쉬 모드가 solid면
         canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
@@ -251,6 +256,10 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     elif brush_mode == "marker":
         canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
         canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
+    elif brush_mode == "line":
+        canvas.bind("<Button-1>", lambda event: paint_line_press(event))
+        canvas.bind("<B1-Motion>", lambda event: paint_line_drag(event, canvas))
+        canvas.bind("<ButtonRelease-1>", lambda event: paint_line_release(event, canvas))
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -635,11 +644,6 @@ def setup_paint_app(window):
     
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
-
-    button_line = Button(window, text="Line Brush", command=lambda: set_brush_mode_line(canvas))
-    button_line.pack(side=LEFT)
-    button_line.bind("<Enter>", on_enter)  
-    button_line.bind("<Leave>", on_leave)
 
     # 스프레이 버튼
     button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
