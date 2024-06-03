@@ -1,73 +1,62 @@
 import tkinter as tk
-from tkinter import filedialog, colorchooser
-from PIL import Image, ImageDraw, ImageFont, ImageTk
 
-class PaintApp:
+class DrawingApp:
     def __init__(self, root):
-        # 초기화 메서드, 기본 설정을 정의합니다.
+        # Tkinter 윈도우 생성
         self.root = root
-        self.root.title("Python 그림판")
-        self.root.geometry("800x600")
-        
-        # 그림을 그릴 캔버스를 만듭니다.
-        self.canvas = tk.Canvas(self.root, bg='white')
-        self.canvas.pack(fill=tk.BOTH, expand=True)
-        
-        # 사용자가 텍스트를 입력할 수 있는 입력 상자를 만듭니다.
-        self.text_entry = tk.Entry(self.root)
-        self.text_entry.pack()
-        
-        # 글자 뒤집기 버튼을 만듭니다.
-        self.btn_flip_text = tk.Button(self.root, text="글자 뒤집기", command=self.flip_text)
-        self.btn_flip_text.pack(side=tk.LEFT)
-        
-        # 글자 기울임 버튼을 만듭니다.
-        self.btn_skew_text = tk.Button(self.root, text="글자 기울임", command=self.skew_text)
-        self.btn_skew_text.pack(side=tk.LEFT)
-        
-        self.text_image = None  # 텍스트 이미지를 저장할 변수를 초기화합니다.
+        self.root.title("Simple Drawing App")
 
-    def flip_text(self):
-        # 텍스트 뒤집기 기능을 구현합니다.
-        text = self.text_entry.get()
-        if text:
-            # 텍스트를 이미지로 변환합니다.
-            font = ImageFont.truetype("arial.ttf", 40)
-            bbox = font.getbbox(text)
-            size = (bbox[2] - bbox[0], bbox[3] - bbox[1])
-            image = Image.new("RGBA", size, (255, 255, 255, 0))
-            draw = ImageDraw.Draw(image)
-            draw.text((-bbox[0], -bbox[1]), text, font=font, fill="black")
-            # 이미지를 좌우 반전시킵니다.
-            flipped_image = image.transpose(Image.FLIP_LEFT_RIGHT)
-            # 반전된 이미지를 캔버스에 표시합니다.
-            self.text_image = ImageTk.PhotoImage(flipped_image)
-            self.canvas.create_image(400, 300, image=self.text_image, anchor=tk.CENTER)
-    
-    def skew_text(self):
-        # 텍스트 기울임 기능을 구현합니다.
-        text = self.text_entry.get()
-        if text:
-            # 텍스트를 이미지로 변환합니다.
-            font = ImageFont.truetype("arial.ttf", 40)
-            bbox = font.getbbox(text)
-            size = (bbox[2] - bbox[0], bbox[3] - bbox[1])
-            image = Image.new("RGBA", size, (255, 255, 255, 0))
-            draw = ImageDraw.Draw(image)
-            draw.text((-bbox[0], -bbox[1]), text, font=font, fill="black")
-            # 이미지를 기울입니다.
-            skewed_image = image.transform(
-                (size[0] + 20, size[1]),
-                Image.AFFINE,
-                (1, -0.3, 0, 0, 1, 0),
-                resample=Image.BICUBIC
-            )
-            # 기울어진 이미지를 캔버스에 표시합니다.
-            self.text_image = ImageTk.PhotoImage(skewed_image)
-            self.canvas.create_image(400, 300, image=self.text_image, anchor=tk.CENTER)
+        # 그림을 그릴 캔버스 생성
+        self.canvas = tk.Canvas(self.root, width=400, height=400, bg="white")
+        self.canvas.pack()
 
-if __name__ == "__main__":
-    # 애플리케이션을 실행합니다.
-    root = tk.Tk()
-    app = PaintApp(root)
-    root.mainloop()
+        # 그림 히스토리를 저장할 리스트 생성
+        self.history = []
+
+        # 메뉴 생성
+        self.create_menu()
+
+        # 마우스 이벤트에 따라 그림을 그리는 이벤트 핸들러 바인딩
+        self.canvas.bind("<B1-Motion>", self.draw)
+
+    def create_menu(self):
+        # 메뉴 생성 및 연결
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
+        file_menu = tk.Menu(menubar)
+        menubar.add_cascade(label="File", menu=file_menu)
+
+        # 파일 메뉴에 저장, 불러오기, 지우기 항목 추가
+        file_menu.add_command(label="Save", command=self.save)
+        file_menu.add_command(label="Load", command=self.load)
+        file_menu.add_command(label="Clear", command=self.clear)
+
+    def draw(self, event):
+        # 마우스가 움직일 때마다 그림을 그림
+        x, y = event.x, event.y
+        self.canvas.create_oval(x-2, y-2, x+2, y+2, fill="black")
+        self.history.append((x, y))  # 그림 히스토리에 현재 좌표 추가
+
+    def save(self):
+        # 그림 히스토리를 파일로 저장
+        with open("drawing.txt", "w") as f:
+            for x, y in self.history:
+                f.write(f"{x},{y}\n")
+
+    def load(self):
+        # 그림 히스토리를 파일에서 불러와서 캔버스에 그림
+        self.clear()
+        with open("drawing.txt", "r") as f:
+            for line in f:
+                x, y = map(int, line.strip().split(","))
+                self.canvas.create_oval(x-2, y-2, x+2, y+2, fill="black")
+                self.history.append((x, y))  # 불러온 좌표를 그림 히스토리에 추가
+
+    def clear(self):
+        # 캔버스와 그림 히스토리를 지움
+        self.canvas.delete("all")
+        self.history = []
+
+root = tk.Tk()
+app = DrawingApp(root)
+root.mainloop()
