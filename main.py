@@ -608,6 +608,26 @@ def setup_paint_app(window):
     start_button.pack(side = RIGHT)
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+     # 새로운 버튼 추가
+    button_symmetry_vertical = Button(window, text="수직 대칭", command=lambda: set_symmetry_mode(canvas, "vertical"))
+    button_symmetry_vertical.pack(side=LEFT)
+    button_symmetry_vertical.bind("<Enter>", on_enter)
+    button_symmetry_vertical.bind("<Leave>", on_leave)
+
+    button_symmetry_horizontal = Button(window, text="수평 대칭", command=lambda: set_symmetry_mode(canvas, "horizontal"))
+    button_symmetry_horizontal.pack(side=LEFT)
+    button_symmetry_horizontal.bind("<Enter>", on_enter)
+    button_symmetry_horizontal.bind("<Leave>", on_leave)
+
+    button_pattern_hatching = Button(window, text="해칭 브러시", command=lambda: set_pattern_brush_mode(canvas, "hatching"))
+    button_pattern_hatching.pack(side=LEFT)
+    button_pattern_hatching.bind("<Enter>", on_enter)
+    button_pattern_hatching.bind("<Leave>", on_leave)
+
+    button_pattern_cross_hatching = Button(window, text="교차 해칭 브러시", command=lambda: set_pattern_brush_mode(canvas, "cross_hatching"))
+    button_pattern_cross_hatching.pack(side=LEFT)
+    button_pattern_cross_hatching.bind("<Enter>", on_enter)
+    button_pattern_cross_hatching.bind("<Leave>", on_leave)
 
     
 
@@ -1446,6 +1466,44 @@ def set_modified():
     # 사용자의 작업 내역이 발생할 때마다 호출되어 is_modified 변수를 True로 설정한다
     global is_modified
     is_modified = True
+# 대칭 그리기
+def set_symmetry_mode(canvas, axis):
+    global symmetry_axis
+    symmetry_axis = axis
+    canvas.bind("<B1-Motion>", lambda event: paint_symmetry(event, canvas))
+
+def paint_symmetry(event, canvas):
+    global x1, y1, brush_size, brush_color, symmetry_axis
+    x2, y2 = event.x, event.y
+    if symmetry_axis == "vertical":
+        canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size, capstyle=ROUND)
+        canvas.create_line(canvas.winfo_width() - x1, y1, canvas.winfo_width() - x2, y2, fill=brush_color, width=brush_size, capstyle=ROUND)
+    elif symmetry_axis == "horizontal":
+        canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size, capstyle=ROUND)
+        canvas.create_line(x1, canvas.winfo_height() - y1, x2, canvas.winfo_height() - y2, fill=brush_color, width=brush_size, capstyle=ROUND)
+    x1, y1 = x2, y2
+# 패턴 브러시
+def set_pattern_brush_mode(canvas, pattern_type):
+    global pattern_brush_type
+    pattern_brush_type = pattern_type
+    canvas.bind("<B1-Motion>", lambda event: paint_pattern(event, canvas))
+
+def paint_pattern(event, canvas):
+    global x1, y1, brush_size, brush_color, pattern_brush_type
+    x2, y2 = event.x, event.y
+    if pattern_brush_type == "hatching":
+        draw_hatching_pattern(x1, y1, x2, y2, canvas)
+    elif pattern_brush_type == "cross_hatching":
+        draw_cross_hatching_pattern(x1, y1, x2, y2, canvas)
+    x1, y1 = x2, y2
+
+def draw_hatching_pattern(x1, y1, x2, y2, canvas):
+    for i in range(0, brush_size * 2, 2):
+        canvas.create_line(x1 + i, y1, x2 + i, y2, fill=brush_color, width=1)
+
+def draw_cross_hatching_pattern(x1, y1, x2, y2, canvas):
+    draw_hatching_pattern(x1, y1, x2, y2, canvas)
+    draw_hatching_pattern(x1, y1, x2, y2, canvas)
 
 
 
