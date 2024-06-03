@@ -25,6 +25,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import random
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1563,6 +1564,38 @@ canvas.bind("<Configure>", on_resize)
 bind_shortcuts_window(window)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
+
+# 도형 랜덤으로 지정해주는 함수 추가
+def random_shape():
+    global shape_outline_color # 테두리 색 지정
+    global shape_fill_color # 안쪽 색 채우기 지정
+    shape_outline_color="black"
+    shape_fill_color = "black"
+    a=int(random.randrange(1,8)) # 1-8까지 랜덤값
+    
+    if(a==1):
+        canvas.bind("<Button-1>", start_rectangle)
+    elif(a==2):
+        canvas.bind("<Button-1>", start_triangle)
+    elif(a==3):
+        canvas.bind("<Button-1>", start_circle)
+    elif(a==4):
+        canvas.bind("<Button-1>", start_star)
+    elif(a==5):
+        canvas.bind("<Button-1>", start_six_pointed_star)
+    elif(a==6):
+        canvas.bind("<Button-1>", start_heart)
+    elif(a==7):
+        canvas.bind("<Button-1>", start_cross)
+    elif(a==8):
+        canvas.bind("<Button-1>", start_diamond)
+
+button_random_shape= Button(window, text="random_spape", command=lambda: random_shape())
+button_random_shape.pack(side=LEFT)
+button_random_shape.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+button_random_shape.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+
 
 #프로그램 시작 시 타이머 시작
 timer.start()
