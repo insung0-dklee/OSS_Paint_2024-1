@@ -1158,6 +1158,76 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+
+
+
+# 둥근 모서리 사각형 그리기
+def create_rounded_rectangle(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_rounded_rectangle)
+
+# 둥근 모서리 사각형 시작점 지정 및 그리기 함수 호출
+def start_rounded_rectangle(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_rounded_rectangle(event))
+    canvas.bind("<ButtonRelease-1>", finish_rounded_rectangle)
+
+"""
+둥근 모서리 사각형 그리기 함수
+radius : 모서리의 반지름, 모서리를 얼마나 둥글게 만들지 정하는 값, 클수록 둥글어짐.
+width : 사각형의 가로
+height : 사각형의 세로
+사각형의 크기에 따라 반지름의 길이를 조절
+smooth=True : 도형의 모서리, 곡선을 부드럽게 해줌
+"""
+def draw_rounded_rectangle(event):
+    global start_x, start_y, current_shape
+    x1, y1 = start_x, start_y
+    x2, y2 = event.x, event.y
+    radius = 20
+
+    if x1 > x2:
+        x1, x2 = x2, x1
+    if y1 > y2:
+        y1, y2 = y2, y1
+
+    width = x2 - x1
+    height = y2 - y1
+
+    if radius > width / 2:
+        radius = width / 2
+    if radius > height / 2:
+        radius = height / 2
+
+    points = [
+        x1 + radius, y1,
+        x2 - radius, y1,
+        x2, y1,
+        x2, y1 + radius,
+        x2, y2 - radius,
+        x2, y2,
+        x2 - radius, y2,
+        x1 + radius, y2,
+        x1, y2,
+        x1, y2 - radius,
+        x1, y1 + radius,
+        x1, y1,
+    ]
+
+    canvas.delete("temp_shape")
+    current_shape = canvas.create_polygon(points, smooth=True, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 둥근 모서리 사각형 그리기 종료
+def finish_rounded_rectangle(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -1169,6 +1239,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Rounded Rectangle", command=lambda: create_rounded_rectangle(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
