@@ -43,6 +43,31 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+# 악보 템플릿을 그리는 함수
+def draw_sheet_music_template(canvas):
+    canvas.delete("sheet_music")
+    draw_title_box(canvas)
+    draw_staff_lines(canvas)
+
+def draw_title_box(canvas):
+    title_box_height = 30
+    canvas_width = canvas.winfo_width()
+    title_box_width = canvas_width / 3  # 제목 박스의 길이를 캔버스 너비의 1/3로 설정
+    margin = 10
+    title_line_y = title_box_height / 2
+    canvas.create_line((canvas_width - title_box_width) / 2, title_line_y, (canvas_width + title_box_width) / 2, title_line_y, width=2, tags="sheet_music")
+
+def draw_staff_lines(canvas):
+    staff_spacing = 15
+    num_staff_lines = 5
+    canvas_width = canvas.winfo_width()  # 여기서 canvas_width를 새로 계산
+    staff_width = canvas_width * 0.8  # 오선 줄의 길이를 캔버스 너비의 80%로 설정
+    start_y = 40  # 제목 박스 아래부터 오선 시작
+
+    for i in range(10):  # 10줄의 오선을 그림
+        for j in range(num_staff_lines):
+            y = start_y + (i * (staff_spacing * num_staff_lines + staff_spacing * 2)) + (j * staff_spacing)
+            canvas.create_line((canvas_width - staff_width) / 2, y, (canvas_width + staff_width) / 2, y, fill="black", tags="sheet_music")
 
 # 벌집 색상 선택 함수
 def choose_hex_color():
@@ -805,6 +830,12 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    # 악보 템플릿 버튼
+    button_sheet_music_template = Button(window, text="악보 템플릿", command=lambda: draw_sheet_music_template(canvas))
+    button_sheet_music_template.pack(side=LEFT)
+    button_sheet_music_template.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_sheet_music_template.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
