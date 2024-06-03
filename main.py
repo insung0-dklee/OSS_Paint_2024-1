@@ -52,6 +52,8 @@ def close_program(): #프로그램을 종료하는 기능
 
 def show_info_window(): #정보를 표시하는 기능
     messagebox.showinfo("Info", "OSS_Paint_2024\n 그림판 v1.0.0")
+def show_shortcut_key():
+    messagebox.showinfo("shortcut","Clear : c / Save : ctrl + s / undo : ctrl + z / dark mode : D / solid brush : Q / dotted brush : W , double line brush : E / fullscreen : f11")
 #+=================================================================================
 
 is_dark_mode = False  # 기본 모드는 라이트 모드
@@ -768,6 +770,7 @@ def setup_paint_app(window):
     tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
+    help_menu.add_command(label="shortcut",command=show_shortcut_key)
 #+=================================================================================
     
     # button_new_window = Button(window, text="새 창 열기", command=create_new_window)
