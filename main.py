@@ -1158,6 +1158,30 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+#화살표 그리는 함수
+
+def create_arrow(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_arrow)
+    
+def start_arrow(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_arrow(event))
+    canvas.bind("<ButtonRelease-1>", finish_arrow)
+
+def draw_arrow(event):
+    global current_shape
+    if current_shape:
+        canvas.delete(current_shape)
+    current_shape = canvas.create_line(start_x, start_y, event.x, event.y, arrow="last")
+
+def finish_arrow(event):
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(window, tearoff=0)
@@ -1169,6 +1193,7 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Arrow", command=lambda: create_arrow(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
