@@ -176,6 +176,9 @@ def redo_action():
         elif action_type == "star":
             points, color = params
             action = canvas.create_polygon(points, outline=color, fill='')
+        elif action_type == "heart":
+            points, color = params
+            action = canvas.create_polygon(points, outline=color, fill='')
         actions.append((action, action_type, params))  # Undo 스택에 다시 추가
 
 # 스크린샷 기능 추가
@@ -216,6 +219,11 @@ def insert_star():
     selected_shape = "star"
     canvas.bind("<Button-1>", draw_shape)
 
+def insert_heart():
+    global selected_shape
+    selected_shape = "heart"
+    canvas.bind("<Button-1>", draw_shape)
+
 def draw_shape(event):
     if selected_shape == "circle":
         radius = 50
@@ -241,6 +249,11 @@ def draw_shape(event):
         points = calculate_star_points(event.x, event.y, size)
         action = canvas.create_polygon(points, outline="black", fill='')
         actions.append((action, "star", (points, "black")))
+    elif selected_shape == "heart":
+        size = 30
+        points = calculate_heart_points(event.x, event.y, size)
+        action = canvas.create_polygon(points, outline="black", fill='')
+        actions.append((action, "heart", (points, "black")))
     redo_actions.clear()
 
 def calculate_star_points(center_x, center_y, size):
@@ -249,6 +262,15 @@ def calculate_star_points(center_x, center_y, size):
         angle = math.radians(i * 144)
         x = center_x + size * math.cos(angle)
         y = center_y - size * math.sin(angle)
+        points.append((x, y))
+    return points
+
+def calculate_heart_points(center_x, center_y, size):
+    points = []
+    for t in range(0, 360, 10):
+        t = math.radians(t)
+        x = center_x + size * 16 * math.sin(t)**3
+        y = center_y - size * (13 * math.cos(t) - 5 * math.cos(2*t) - 2 * math.cos(3*t) - math.cos(4*t))
         points.append((x, y))
     return points
 
@@ -338,7 +360,7 @@ button_save.pack(side=LEFT)
 button_insert_circle = Button(window, text="Insert Circle", command=insert_circle)
 button_insert_circle.pack(side=LEFT)
 
-# 네모 삽입 버튼 추가.
+# 네모 삽입 버튼 추가
 button_insert_rectangle = Button(window, text="Insert Rectangle", command=insert_rectangle)
 button_insert_rectangle.pack(side=LEFT)
 
@@ -349,6 +371,10 @@ button_insert_triangle.pack(side=LEFT)
 # 별 삽입 버튼 추가
 button_insert_star = Button(window, text="Insert Star", command=insert_star)
 button_insert_star.pack(side=LEFT)
+
+# 하트 삽입 버튼 추가
+button_insert_heart = Button(window, text="Insert Heart", command=insert_heart)
+button_insert_heart.pack(side=LEFT)
 
 set_paint_mode_normal()  # 프로그램 시작 시 기본 그리기 모드 설정
 
