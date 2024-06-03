@@ -89,19 +89,33 @@ def choose_brick_line_color():
     if color:
         draw_brick_pattern(canvas, line_color=color)
 
-
 # 벽돌 모양 패턴 함수
 def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="black"):
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
 
+    # 사각형을 생성할 때 고유한 태그 부여(Brick Pattern이 그려진 상태에서 한 번 더 누르면 태그가 붙여진 사각형들을 삭제, 즉 Brick Pattern 사라짐)
     for y in range(0, canvas_height, brick_height):
         for x in range(0, canvas_width, brick_width):
             if (y // brick_height) % 2 == 0:
-                canvas.create_rectangle(x, y, x + brick_width, y + brick_height, outline=line_color, fill="")
+                canvas.create_rectangle(x, y, x + brick_width, y + brick_height, outline=line_color, fill="", tags="brick")
             else:
                 canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
-                                        outline=line_color, fill="")
+                                        outline=line_color, fill="", tags="brick")
+
+# 벽돌 모양 삭제 함수                
+def delete_brick_pattern(canvas):
+    canvas.delete("brick")
+
+# Brick Pattern 누르면 Brick Pattern 생성, Brick Pattern 눌려진 상태로 다시 누르면 tags가 붙여진 Brick Pattern 화면에서 삭제
+def draw_or_delete_brick_pattern(canvas):
+    # canvas에 "brick" 태그가 있는 사각형이 존재하는지 확인하여 판단
+    brick_exists = bool(canvas.find_withtag("brick"))
+    
+    if brick_exists:
+        delete_brick_pattern(canvas)
+    else:
+        draw_brick_pattern(canvas)
 
 def start_pencil(event):
     global last_x, last_y
@@ -803,7 +817,7 @@ def setup_paint_app(window):
     button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벽돌 패턴 버튼
-    button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
+    button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_or_delete_brick_pattern(canvas))
     button_brick_pattern.pack(side=LEFT)
     button_brick_pattern.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_pattern.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
