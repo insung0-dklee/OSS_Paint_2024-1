@@ -768,7 +768,8 @@ def setup_paint_app(window):
     tool_menu.add_command(label="Toggle Ruler", command=toggle_ruler) # Tools 메뉴에 Toggle Ruler 기능 버튼 추가
     tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas)) # Tools 메뉴에 Toggle Grid 기능 버튼 추가
     tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
-
+    tool_menu.add_command(label="Horizontal Lines", command=lambda: horizontal_lines(canvas))
+    
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
     
@@ -1405,6 +1406,13 @@ def on_resize(event):
     if ruler_on:
         clear_ruler()
         draw_ruler()
+
+def horizontal_lines(canvas):
+    canvas_width = canvas.winfo_width()
+    line_spacing = 40  # 줄 사이의 간격 설정
+
+    for y in range(0, canvas.winfo_height(), line_spacing):
+        canvas.create_line(0, y, canvas_width, y, fill="black")
 
 def on_closing():
     # 프로그램 종료 시 호출되는 함수
