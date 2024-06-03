@@ -325,24 +325,29 @@ def change_bg_color(canvas):
 # 배경 토트 무늬 설정
 def set_dotted_bg(canvas):
     bg_color = askcolor()[1] # 사용자에게 배경 색상 선택 요청
-    canvas.config(bg=bg_color) # 캔버스의 배경색 설정
 
     # 캔버스의 너비와 높이 가져오기
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
     
-    # 점의 반지름과 점 사이의 간격 설정
-    dot_radius = 5
-    dot_spacing = 20
+    # 흰색 점의 크기와 점들 사이의 거리 입력받기
+    dot_size = simpledialog.askinteger("입력", "흰색 점의 크기를 입력하세요:", minvalue=1, maxvalue=100)
+    dot_distance = simpledialog.askinteger("입력", "점들 사이의 거리를 입력하세요:", minvalue=1, maxvalue=100)
     
-    # 캔버스 위에 점 그리기
-    for x in range(0, canvas_width, dot_spacing): # x, y 좌표는 점 사이의 간격만큼 증가하며 반복
-        for y in range(0, canvas_height, dot_spacing):
-            canvas.create_oval( # 각 점의 위치에 동그라미 그리기
-                x - dot_radius, y - dot_radius,# 점의 위치, 크기 설정
-                x + dot_radius, y + dot_radius,
-                fill='white', outline='white' # 점의 색상 지정
-            )
+    if dot_size and dot_distance:  # 사용자가 값을 입력하고 취소하지 않았다면
+        # 배경색 설정
+        canvas.config(bg=bg_color)
+        canvas.delete("dot")  # 이전에 그린 점들을 삭제
+        
+        # 주어진 크기와 거리를 사용하여 흰색 점 그리기
+        width = canvas.winfo_width()
+        height = canvas.winfo_height()
+        
+        for x in range(0, width, dot_distance): # x, y 좌표는 점 사이의 간격만큼 증가하며 반복
+            for y in range(0, height, dot_distance):
+                 # 각 점의 위치에 동그라미 그리기
+                canvas.create_oval(x-dot_size, y-dot_size, x+dot_size, y+dot_size, fill="white", outline="white", tags="dot")
+
 
 def change_brush_color(event=None):
     global brush_color
