@@ -366,6 +366,7 @@ def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
 
 # 팔레트 설정 함수
 def setup_palette(window):
+    global palette_frame  # 팔레트 프레임을 전역 변수로 설정
     # 새로운 창 생성
     palette_window = Toplevel(window)
     palette_window.title("팔레트 설정")
@@ -406,7 +407,58 @@ def setup_palette(window):
     # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
     Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
 
+    # 색상 혼합 섹션 추가
+    mixing_frame = Frame(palette_window)
+    mixing_frame.pack(pady=10)
 
+    Label(mixing_frame, text="Color 1:").grid(row=0, column=0)
+    color1_button = Button(mixing_frame, text="Select Color 1", command=lambda: select_color(mixing_frame, 1))
+    color1_button.grid(row=0, column=1)
+
+    Label(mixing_frame, text="Color 2:").grid(row=1, column=0)
+    color2_button = Button(mixing_frame, text="Select Color 2", command=lambda: select_color(mixing_frame, 2))
+    color2_button.grid(row=1, column=1)
+
+    mix_button = Button(mixing_frame, text="Mix Colors", command=mix_colors)
+    mix_button.grid(row=2, columnspan=2, pady=10)
+
+    global mixed_color_label
+    mixed_color_label = Label(mixing_frame, text="Mixed Color:", bg="white", width=10)
+    mixed_color_label.grid(row=3, columnspan=2)
+
+# 선택된 색상을 저장할 변수
+selected_colors = {"color1": None, "color2": None}
+
+# 색상 선택 함수
+def select_color(frame, color_number):
+    color = askcolor()[1]
+    if color:
+        selected_colors[f"color{color_number}"] = color
+        if color_number == 1:
+            frame.grid_slaves(row=0, column=1)[0].config(bg=color)
+        elif color_number == 2:
+            frame.grid_slaves(row=1, column=1)[0].config(bg=color)
+
+# 색상 혼합 함수
+def mix_colors():
+    color1 = selected_colors["color1"]
+    color2 = selected_colors["color2"]
+    if color1 and color2:
+        r1, g1, b1 = window.winfo_rgb(color1)
+        r2, g2, b2 = window.winfo_rgb(color2)
+        mixed_r = (r1 + r2) // 2 // 256
+        mixed_g = (g1 + g2) // 2 // 256
+        mixed_b = (b1 + b2) // 2 // 256
+        mixed_color = f'#{mixed_r:02x}{mixed_g:02x}{mixed_b:02x}'
+        mixed_color_label.config(bg=mixed_color)
+        set_brush_color(mixed_color)
+        add_mixed_color_to_palette(mixed_color)
+
+# 혼합된 색상을 팔레트에 추가하는 함수
+def add_mixed_color_to_palette(color):
+    button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
+    button.pack(side=LEFT, padx=2, pady=2)
+        
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
