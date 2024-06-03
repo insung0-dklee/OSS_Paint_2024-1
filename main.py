@@ -68,6 +68,28 @@ def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
                     hexagon = [hex_corner(x + dx, y + dy, hex_size, i) for i in range(6)]
                     canvas.create_polygon(hexagon, outline=hex_color, fill='')
 
+# 체커보드 색상을 저장할 변수
+checkerboard_color = "black"
+
+# 체커보드 색상을 선택하는 함수
+def choose_checkerboard_color():
+    global checkerboard_color
+    color = askcolor()[1]
+    if color:
+        checkerboard_color = color
+        draw_checkerboard_pattern(canvas)
+
+# 체커보드 패턴을 그리는 함수
+def draw_checkerboard_pattern(canvas, square_size=20):
+    global checkerboard_color
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+
+    for y in range(0, canvas_height, square_size):
+        for x in range(0, canvas_width, square_size):
+            fill_color = checkerboard_color if (x // square_size + y // square_size) % 2 == 0 else "white"
+            canvas.create_rectangle(x, y, x + square_size, y + square_size, outline="black", fill=fill_color)
+
 # 연필 브러시 함수
 def pencil_brush(event, canvas):
     global last_x, last_y, brush_size
@@ -795,6 +817,18 @@ def setup_paint_app(window):
     button_honeycomb_color.pack(side=LEFT)
     button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 체커보드 패턴 버튼
+    button_checkerboard = Button(window, text="Checkerboard Pattern", command=lambda: draw_checkerboard_pattern(canvas))
+    button_checkerboard.pack(side=LEFT)
+    button_checkerboard.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_checkerboard.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 체커보드 색상 선택 버튼
+    button_checkerboard_color = Button(window, text="Choose Checkerboard Color", command=choose_checkerboard_color)
+    button_checkerboard_color.pack(side=LEFT)
+    button_checkerboard_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_checkerboard_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 연필 브러시 버튼 추가
     button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
