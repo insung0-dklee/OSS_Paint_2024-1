@@ -41,20 +41,25 @@ def set_brush_mode(canvas, mode):
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))
 
 # 마우스 움직임에 따라 도형을 그리는 함수.
+
+#기본모드 :마우스의 움직임에 따라 도형을그리는 함수를 바인딩
 def set_paint_mode_normal(canvas):
     canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
-
+# 압력모드 : 마우스의 클릭과 움직임에 따라 도형을 그리는 함수를 바인딩
 def set_paint_mode_pressure(canvas):
     canvas.bind("<Button-1>", lambda event: start_paint_pressure(event))
     canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
-
+#시간저장
 def start_paint_pressure(event):
     global start_time
     start_time = time.time()
 
+
 def paint_pressure(event, canvas):
     global start_time, brush_color
     elapsed_time = time.time() - start_time
+    #elapsed_time * 5를 지정하여 시간이 지날수록 반지름의 크기가 커지게함
+    # 최대 5, 최소 1 을 유지하도록 제한함
     radius = min(max(int(elapsed_time * 5), 1), 5)
     x1, y1 = (event.x - radius), (event.y - radius)
     x2, y2 = (event.x + radius), (event.y + radius)
@@ -68,6 +73,7 @@ def paint(event, canvas):
     global x1, y1, brush_size, brush_color
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
+   #다음에 그릴 때 시작점을 현재 좌표로 변경함
     x1, y1 = x2, y2
 
 """
