@@ -561,6 +561,17 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+def set_alarm():
+    delay_str = simpledialog.askstring("알람 설정", "알람이 울릴 시간(분)을 입력하세요:")
+    if delay_str:
+        delay_minutes = int(delay_str)
+        delay_seconds = delay_minutes * 60
+
+        window.after(1000 * delay_seconds, ring_alarm, delay_minutes)
+
+def ring_alarm(delay_minutes):
+    message = f"{delay_minutes}분 경과!"
+    messagebox.showinfo("알람", message)
 
 
 def setup_paint_app(window):
@@ -739,7 +750,8 @@ def setup_paint_app(window):
 
     set_paint_mode_normal(canvas)
 
-    
+    button_alarm = Button(window, text="알람 설정", command=set_alarm)
+    button_alarm.pack(side=RIGHT)
 
 #+=================================================================================
     menu_bar = Menu(window) # 메뉴 바 생성
