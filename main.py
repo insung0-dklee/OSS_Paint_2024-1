@@ -609,7 +609,9 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+    # 속이 빈 네모 브러쉬 버튼 추가
+    button_empty_square = Button(window, text="empty square brush", command=lambda: canvas.bind("<B1-Motion>", paint_empty_square))
+    button_empty_square.pack()
 
     #spray 인스턴스 생성 
     global spray_brush
@@ -1447,7 +1449,12 @@ def set_modified():
     global is_modified
     is_modified = True
 
-
+# 속이 빈 네모 브러쉬 기능 추가
+def paint_empty_square(event):
+    size = 20  # 브러쉬 굵기 설정
+    x1, y1 = (event.x - size // 2), (event.y - size // 2)
+    x2, y2 = (event.x + size // 2), (event.y + size // 2)
+    canvas.create_rectangle(x1, y1, x2, y2, fill="", outline="black")
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -1568,5 +1575,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
