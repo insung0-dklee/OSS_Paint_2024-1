@@ -9,6 +9,9 @@ button_delete : clear_paint의 버튼
 from tkinter import *
 from tkinter import ttk
 import time #시간 계산을 위한 모듈
+
+from PIL import Image, ImageTk
+
 import brush_settings  # brush_settings 모듈 임포트
 from brush_settings import change_brush_size, change_bg_color, change_brush_color, set_brush_mode, set_paint_mode_normal, set_paint_mode_pressure, paint_start, paint, dotted_paint
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
@@ -24,6 +27,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from tkinter import ttk
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -93,10 +97,12 @@ def open_image():
         editor.open_image(file_path)
 
 def on_enter(event):
-    event.widget.config(bg="light blue")
+    style = ttk.Style()
+    style.map('TButton', background=[('active', 'light blue')])
 
 def on_leave(event):
-    event.widget.config(bg="SystemButtonFace")
+    style = ttk.Style()
+    style.map('TButton', background=[('!active', 'SystemButtonFace')])
 
 def upload_image():
     path = filedialog.askopenfilename()
@@ -222,6 +228,10 @@ def set_paint_mode_normal(canvas, set_origin_mode=False):
         pass
 
 
+def set_paint_mode_pressure(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
+    canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
+    canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
+
 def start_paint_pressure(event, canvas):
     global start_time
     start_time = time.time() #마우스를 클릭한 시간을 변수에 저장
@@ -279,9 +289,6 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     elif brush_mode == "double_line": #브러쉬 모드가 double_line 면
         canvas.bind("<B1-Motion>", lambda event: double_line_paint(event, canvas))#이중 실선 브러쉬로 변경
         canvas.bind("<Button-1>", start_new_line)
-    elif brush_mode == "pressure":
-        canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
-        canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
     elif brush_mode == "marker":
         canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
         canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
@@ -439,6 +446,8 @@ def setup_palette(window):
 
     # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
     Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
+
+
 
 
 # 캔버스를 파일로 저장하는 함수
@@ -602,11 +611,90 @@ def setup_paint_app(window):
     brush_color = "black"  # 초기 브러시 색상
 
     global canvas
+
+    # 이미지 아이콘 딕셔너리 정의
+    icon_dict = {
+        "Line Brush": "line brush.png",
+        "Spray": "spray.png",
+        "Normal": "normal.png",
+        "Pressure": "fountain.png",
+        "Airbrush": "airbrush.png"
+    }
+
+    def set_icon_button(button, text):
+        # 텍스트가 딕셔너리에 있을 경우 이미지 아이콘으로 설정
+        if text in icon_dict:
+            image = Image.open(icon_dict[text])
+            # 이미지 크기를 고정 크기로 조정
+            image = image.resize((32, 32), Image.LANCZOS)
+            image = ImageTk.PhotoImage(image)
+            button.config(image=image, compound=LEFT)
+            button.image = image  # 버튼에 이미지를 연결
+        else:
+            button.config(text=text)
+
+
+    # 위쪽 버튼 프레임 생성
+    top_button_frame = Frame(window, bg="light gray")
+    top_button_frame.pack(side=TOP, fill=X)
+
+    # 버튼 텍스트 및 커맨드 리스트 정의
+    button_data = [
+        ("Line Brush", lambda: set_brush_mode_line(canvas)),
+        ("Spray", lambda: set_brush_mode_spray(canvas)),
+        ("Normal", lambda: set_paint_mode_normal(canvas)),
+        ("Pressure", lambda: set_paint_mode_pressure(canvas)),
+        ("Airbrush", lambda: set_paint_mode_airbrush(canvas))
+    ]
+
+    # 버튼 생성 및 배치
+    for text, command in button_data:
+        button = ttk.Button(top_button_frame, text=text, command=command)
+        set_icon_button(button, text)  # 버튼에 아이콘 설정
+        button.pack(side=LEFT, padx=5, pady=5)
+        button.bind("<Enter>", on_enter)
+        button.bind("<Leave>", on_leave)
+
+    # 사용자 정의 색상 입력창 생성 및 추가
+    custom_color_frame = Frame(top_button_frame)
+    custom_color_frame.pack(side=LEFT, pady=10)
+
+    # R 값 입력 라벨과 입력창 생성 및 추가
+    Label(custom_color_frame, text="R:").grid(row=0, column=0)
+    r_entry = Entry(custom_color_frame, width=3)
+    r_entry.grid(row=0, column=1)
+
+    # G 값 입력 라벨과 입력창 생성 및 추가
+    Label(custom_color_frame, text="G:").grid(row=0, column=2)
+    g_entry = Entry(custom_color_frame, width=3)
+    g_entry.grid(row=0, column=3)
+
+    # B 값 입력 라벨과 입력창 생성 및 추가
+    Label(custom_color_frame, text="B:").grid(row=0, column=4)
+    b_entry = Entry(custom_color_frame, width=3)
+    b_entry.grid(row=0, column=5)
+
+    # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
+    Button(custom_color_frame, text="Set Color",
+           command=lambda: set_custom_color(r_entry, g_entry, b_entry, top_button_frame)).grid(row=1, columnspan=6, pady=10)
+
+
+    # 팔레트 프레임 생성 및 추가
+    palette_frame = Frame(top_button_frame)
+    palette_frame.pack(side=LEFT, pady=10)
+
+    # 미리 정의된 색상 목록
+    colors = [
+        'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'white', 'pink', 'brown', 'grey'
+    ]
+
+    # 색상 버튼 생성 및 팔레트 프레임에 추가
+    for color in colors:
+        button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
+        button.pack(side=LEFT, padx=2, pady=2)
+
     canvas = Canvas(window, bg="white")
     canvas.pack(fill="both", expand=True)
-
-    last_x, last_y = None, None  # 마지막 좌표 초기화
-    brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
     button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
@@ -661,35 +749,13 @@ def setup_paint_app(window):
     button_redo_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
 
-    brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
-    brush_size_slider.set(brush_size)
-    brush_size_slider.pack(side=LEFT)
+
     
 
     
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
-    button_line = Button(window, text="Line Brush", command=lambda: set_brush_mode_line(canvas))
-    button_line.pack(side=LEFT)
-    button_line.bind("<Enter>", on_enter)  
-    button_line.bind("<Leave>", on_leave)
-
-    # 스프레이 버튼
-    button_spray = Button(window, text="spray", command=lambda: set_brush_mode_spray(canvas))
-    button_spray.pack(side=LEFT)
-    button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     text_box = Entry(window)
     text_box.pack(side=LEFT)
@@ -760,11 +826,6 @@ def setup_paint_app(window):
     Label(frame_count, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
     Button(frame_count, text="-", command=decrease_dot_count).pack(side=RIGHT)
 
-    button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
-    button_paint.pack(side=RIGHT)
-    button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
@@ -803,7 +864,8 @@ def setup_paint_app(window):
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
-    
+
+
     # button_new_window = Button(window, text="새 창 열기", command=create_new_window)
     # button_new_window.pack(side=LEFT)
 
