@@ -54,6 +54,39 @@ def show_info_window(): #정보를 표시하는 기능
     messagebox.showinfo("Info", "OSS_Paint_2024\n 그림판 v1.0.0")
 #+=================================================================================
 
+# 그라데이션 채우기 기능 추가
+def create_gradient(start_color, end_color, steps):
+    """
+    두 색상 사이의 그라데이션을 생성하는 함수
+    Args:
+        start_color (tuple): 시작 색상 (R, G, B)
+        end_color (tuple): 종료 색상 (R, G, B)
+        steps (int): 그라데이션 단계 수
+    Returns:
+        list: 그라데이션 색상 리스트
+    """
+    gradient = []
+    for i in range(steps):
+        ratio = i / (steps - 1)  # 현재 단계의 비율을 계산
+        r = int(start_color[0] + ratio * (end_color[0] - start_color[0]))  # 시작 색상과 종료 색상의 R값을 보간
+        g = int(start_color[1] + ratio * (end_color[1] - start_color[1]))  # 시작 색상과 종료 색상의 G값을 보간
+        b = int(start_color[2] + ratio * (end_color[2] - start_color[2]))  # 시작 색상과 종료 색상의 B값을 보간
+        gradient.append(f'#{r:02x}{g:02x}{b:02x}')  # RGB 값을 16진수로 변환하여 색상 리스트에 추가
+    return gradient
+
+def fill_gradient():
+    """
+    선택한 색상으로 캔버스에 그라데이션을 채우는 함수
+    """
+    start_color = askcolor()[0]  # 시작 색상 선택
+    end_color = askcolor()[0]  # 종료 색상 선택
+    if start_color and end_color:
+        start_color = tuple(map(int, start_color))  # 시작 색상을 정수 튜플로 변환
+        end_color = tuple(map(int, end_color))  # 종료 색상을 정수 튜플로 변환
+        gradient = create_gradient(start_color, end_color, canvas.winfo_height())  # 그라데이션 생성
+        for i, color in enumerate(gradient):  # 각 줄에 대해 그라데이션 색상을 적용
+            canvas.create_line(0, i, canvas.winfo_width(), i, fill=color)  # 현재 줄에 색상 채우기
+
 is_dark_mode = False  # 기본 모드는 라이트 모드
 
 def toggle_dark_mode(): # 다크 모드를 토글하는 함수
