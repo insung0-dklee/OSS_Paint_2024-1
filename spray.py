@@ -21,7 +21,7 @@ class SprayBrush:
             if offset_x**2 + offset_y**2 <= radius**2:
                 x = event.x + offset_x
                 y = event.y + offset_y
-                self.canvas.create_oval(x, y, x + 1, y + 1, fill=self.brush_color, outline=self.brush_color)
+                self.canvas.create_oval(x, y, x + 2, y + 2, fill=self.brush_color, outline=self.brush_color)
 """
 #class Spray Brush
   @fun()
