@@ -290,6 +290,13 @@ def clear_paint(canvas):
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
 
+def all_clear(canvas): #메세지 박스를 띄워서 다시 한번 확인 
+    result = messagebox.askyesno("확인", "정말 지우시겠습니까?")
+    if result:
+        clear_paint(canvas)
+    else:
+        print("Action cancelled.")
+
 def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
     text = text_box.get()
@@ -603,7 +610,7 @@ def setup_paint_app(window):
     button_use_case.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_use_case.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_clear = Button(window, text="All Clear", command=lambda: clear_paint(canvas))
+    button_clear = Button(window, text="All Clear", command=lambda: all_clear(canvas)) #all_clear로 교체
     button_clear.pack(side=LEFT)
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
