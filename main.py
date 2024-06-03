@@ -169,10 +169,13 @@ def redo_action():
             action = canvas.create_text(x, y, text=text, fill=color, font=(font_family, font_size))
         elif action_type == "rectangle":
             x1, y1, x2, y2, color = params
-            action = canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color)
+            action = canvas.create_rectangle(x1, y1, x2, y2, outline=color)
         elif action_type == "triangle":
             x1, y1, x2, y2, x3, y3, color = params
-            action = canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill=color, outline=color)
+            action = canvas.create_polygon(x1, y1, x2, y2, x3, y3, outline=color, fill='')
+        elif action_type == "star":
+            points, color = params
+            action = canvas.create_polygon(points, outline=color, fill='')
         actions.append((action, action_type, params))  # Undo 스택에 다시 추가
 
 # 스크린샷 기능 추가
@@ -193,43 +196,61 @@ def save_paint():
         y1 = y + canvas.winfo_height()
         ImageGrab.grab().crop((x, y, x1, y1)).save(file_path)
 
-# 원 삽입 기능 추가
-def set_insert_circle_mode():
-    canvas.bind("<Button-1>", insert_circle)
+def insert_circle():
+    global selected_shape
+    selected_shape = "circle"
+    canvas.bind("<Button-1>", draw_shape)
 
-def insert_circle(event):
-    radius = 20  # 원의 반지름 설정
-    x1, y1 = (event.x - radius), (event.y - radius)
-    x2, y2 = (event.x + radius), (event.y + radius)
-    action = canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
-    actions.append((action, "oval", (x1, y1, x2, y2, "black")))  # 작업 기록 저장
-    redo_actions.clear()  # Redo 스택 초기화
+def insert_rectangle():
+    global selected_shape
+    selected_shape = "rectangle"
+    canvas.bind("<Button-1>", draw_shape)
 
-# 네모 삽입 기능 추가
-def set_insert_rectangle_mode():
-    canvas.bind("<Button-1>", insert_rectangle)
+def insert_triangle():
+    global selected_shape
+    selected_shape = "triangle"
+    canvas.bind("<Button-1>", draw_shape)
 
-def insert_rectangle(event):
-    width, height = 40, 20  # 네모의 너비와 높이 설정
-    x1, y1 = (event.x - width // 2), (event.y - height // 2)
-    x2, y2 = (event.x + width // 2), (event.y + height // 2)
-    action = canvas.create_rectangle(x1, y1, x2, y2, fill="black", outline="black")
-    actions.append((action, "rectangle", (x1, y1, x2, y2, "black")))  # 작업 기록 저장
-    redo_actions.clear()  # Redo 스택 초기화
+def insert_star():
+    global selected_shape
+    selected_shape = "star"
+    canvas.bind("<Button-1>", draw_shape)
 
-# 삼각형 삽입 기능 추가
-def set_insert_triangle_mode():
-    canvas.bind("<Button-1>", insert_triangle)
+def draw_shape(event):
+    if selected_shape == "circle":
+        radius = 50
+        x1, y1 = (event.x - radius), (event.y - radius)
+        x2, y2 = (event.x + radius), (event.y + radius)
+        action = canvas.create_oval(x1, y1, x2, y2, outline="black")
+        actions.append((action, "oval", (x1, y1, x2, y2, "black")))
+    elif selected_shape == "rectangle":
+        width, height = 100, 50
+        x1, y1 = (event.x - width//2), (event.y - height//2)
+        x2, y2 = (event.x + width//2), (event.y + height//2)
+        action = canvas.create_rectangle(x1, y1, x2, y2, outline="black")
+        actions.append((action, "rectangle", (x1, y1, x2, y2, "black")))
+    elif selected_shape == "triangle":
+        size = 60
+        x1, y1 = event.x, (event.y - size//2)
+        x2, y2 = (event.x - size//2), (event.y + size//2)
+        x3, y3 = (event.x + size//2), (event.y + size//2)
+        action = canvas.create_polygon(x1, y1, x2, y2, x3, y3, outline="black", fill='')
+        actions.append((action, "triangle", (x1, y1, x2, y2, x3, y3, "black")))
+    elif selected_shape == "star":
+        size = 30
+        points = calculate_star_points(event.x, event.y, size)
+        action = canvas.create_polygon(points, outline="black", fill='')
+        actions.append((action, "star", (points, "black")))
+    redo_actions.clear()
 
-def insert_triangle(event):
-    side_length = 40  # 삼각형의 한 변의 길이 설정
-    height = (side_length * math.sqrt(3)) / 2
-    x1, y1 = event.x, event.y - (2 / 3) * height
-    x2, y2 = event.x - side_length / 2, event.y + (1 / 3) * height
-    x3, y3 = event.x + side_length / 2, event.y + (1 / 3) * height
-    action = canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill="black", outline="black")
-    actions.append((action, "triangle", (x1, y1, x2, y2, x3, y3, "black")))  # 작업 기록 저장
-    redo_actions.clear()  # Redo 스택 초기화
+def calculate_star_points(center_x, center_y, size):
+    points = []
+    for i in range(5):
+        angle = math.radians(i * 144)
+        x = center_x + size * math.cos(angle)
+        y = center_y - size * math.sin(angle)
+        points.append((x, y))
+    return points
 
 window = Tk()
 # Tk 객체를 생성하여 주 윈도우를 만들기
@@ -314,16 +335,20 @@ button_save = Button(window, text="Save", command=save_paint)
 button_save.pack(side=LEFT)
 
 # 원 삽입 버튼 추가
-button_insert_circle = Button(window, text="Insert Circle", command=set_insert_circle_mode)
+button_insert_circle = Button(window, text="Insert Circle", command=insert_circle)
 button_insert_circle.pack(side=LEFT)
 
-# 네모 삽입 버튼 추가
-button_insert_rectangle = Button(window, text="Insert Rectangle", command=set_insert_rectangle_mode)
+# 네모 삽입 버튼 추가.
+button_insert_rectangle = Button(window, text="Insert Rectangle", command=insert_rectangle)
 button_insert_rectangle.pack(side=LEFT)
 
 # 삼각형 삽입 버튼 추가
-button_insert_triangle = Button(window, text="Insert Triangle", command=set_insert_triangle_mode)
+button_insert_triangle = Button(window, text="Insert Triangle", command=insert_triangle)
 button_insert_triangle.pack(side=LEFT)
+
+# 별 삽입 버튼 추가
+button_insert_star = Button(window, text="Insert Star", command=insert_star)
+button_insert_star.pack(side=LEFT)
 
 set_paint_mode_normal()  # 프로그램 시작 시 기본 그리기 모드 설정
 
