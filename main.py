@@ -322,32 +322,73 @@ def change_bg_color(canvas):
     bg_color = askcolor()
     canvas.config(bg=bg_color[1])
 
-# 배경 토트 무늬 설정
+# 별 모양을 그리기
+def draw_star_bg(canvas, x, y, size, color, tag):
+    points = [
+        x, y - size,
+        x + size * 0.2, y - size * 0.2,
+        x + size, y - size * 0.2,
+        x + size * 0.4, y + size * 0.2,
+        x + size * 0.6, y + size,
+        x, y + size * 0.4,
+        x - size * 0.6, y + size,
+        x - size * 0.4, y + size * 0.2,
+        x - size, y - size * 0.2,
+        x - size * 0.2, y - size * 0.2,
+    ]
+    # 캔버스에 별 모양 그리기
+    canvas.create_polygon(points, fill=color, outline=color, tags=tag)
+
+# 사각형 모양 그리기
+def draw_square_bg(canvas, x, y, size, color, tag):
+    canvas.create_rectangle(x - size, y - size, x + size, y + size, fill=color, outline=color, tags=tag)
+
+# 다이아몬드 모양 그리기
+def draw_diamond_bg(canvas, x, y, size, color, tag):
+    points = [
+        x, y - size,
+        x + size, y,
+        x, y + size,
+        x - size, y,
+    ]
+    canvas.create_polygon(points, fill=color, outline=color, tags=tag)
+
+# 배경 도트 무늬 설정
 def set_dotted_bg(canvas):
-    bg_color = askcolor()[1] # 사용자에게 배경 색상 선택 요청
+    bg_color = askcolor()[1]  # 사용자에게 배경 색상 선택 요청
 
     # 캔버스의 너비와 높이 가져오기
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
     
     # 흰색 점의 크기와 점들 사이의 거리 입력받기
-    dot_size = simpledialog.askinteger("입력", "흰색 점의 크기를 입력하세요:", minvalue=1, maxvalue=100)
+    dot_size = simpledialog.askinteger("입력", "점의 크기를 입력하세요:", minvalue=1, maxvalue=100)
     dot_distance = simpledialog.askinteger("입력", "점들 사이의 거리를 입력하세요:", minvalue=1, maxvalue=100)
     
     if dot_size and dot_distance:  # 사용자가 값을 입력하고 취소하지 않았다면
+        # 점의 모양 입력 받기
+        dot_shape = simpledialog.askstring("입력", "점의 모양을 선택하세요 (dot, star, square, diamond):")
+        
+        # 올바른 점의 모양이 입력되지 않았다면 에러 메세지 출력
+        if dot_shape not in ["dot", "star", "square", "diamond"]:
+            tk.messagebox.showerror("오류", "올바른 점의 모양을 선택하세요.")
+            return
+        
         # 배경색 설정
         canvas.config(bg=bg_color)
         canvas.delete("dot")  # 이전에 그린 점들을 삭제
         
-        # 주어진 크기와 거리를 사용하여 흰색 점 그리기
-        width = canvas.winfo_width()
-        height = canvas.winfo_height()
-        
-        for x in range(0, width, dot_distance): # x, y 좌표는 점 사이의 간격만큼 증가하며 반복
-            for y in range(0, height, dot_distance):
-                 # 각 점의 위치에 동그라미 그리기
-                canvas.create_oval(x-dot_size, y-dot_size, x+dot_size, y+dot_size, fill="white", outline="white", tags="dot")
-
+        # 주어진 크기와 거리를 사용하여 점 그리기
+        for x in range(0, canvas_width, dot_distance):  # x, y 좌표는 점 사이의 간격만큼 증가하며 반복
+            for y in range(0, canvas_height, dot_distance):
+                if dot_shape == "dot": # 원형 점 그리기
+                    canvas.create_oval(x - dot_size, y - dot_size, x + dot_size, y + dot_size, fill="white", outline="white", tags="dot")
+                elif dot_shape == "star": # 별 모양 점 그리기
+                    draw_star_bg(canvas, x, y, dot_size, "white", "dot")
+                elif dot_shape == "square": # 사각형 점 그리기
+                    draw_square_bg(canvas, x, y, dot_size, "white", "dot")
+                elif dot_shape == "diamond": # 다이아몬드 점 그리기
+                    draw_diamond_bg(canvas, x, y, dot_size, "white", "dot")
 
 def change_brush_color(event=None):
     global brush_color
