@@ -12,6 +12,7 @@ import time #시간 계산을 위한 모듈
 import brush_settings  # brush_settings 모듈 임포트
 from brush_settings import change_brush_size, change_bg_color, change_brush_color, set_brush_mode, set_paint_mode_normal, set_paint_mode_pressure, paint_start, paint, dotted_paint
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
+from PIL import Image, ImageTk 
 from tkinter import filedialog
 from tkinter import PhotoImage
 from tkinter import messagebox
@@ -202,15 +203,20 @@ def on_leave(event):
 def upload_image():
     path = filedialog.askopenfilename()
     if path:
-        # 업로드 파일이 PNG파일인지 확인
-        if not path.lower().endswith('.png'):
-            messagebox.showerror("Invalid File", "PNG 파일만 업로드할 수 있습니다.")
+        # 업로드 파일이 JPG나 PNG 파일인지 확인
+        if not (path.lower().endswith('.png') or path.lower().endswith('.jpg')):
+            messagebox.showerror("잘못된 파일", "JPG나 PNG 파일만 업로드할 수 있습니다.")
             return
 
-        # 업로드 파일이 PNG일 때 업로드 성공
-        image = PhotoImage(file=path)
-        canvas.create_image(0, 0, anchor=NW, image=image)
-        canvas.image = image
+        # 업로드 파일이 JPG나 PNG일 때 업로드 성공
+    try:
+            image = Image.open(path)
+            image = ImageTk.PhotoImage(image)
+            canvas.create_image(0, 0, anchor=NW, image=image)
+            canvas.image = image
+    except Exception as e:
+            messagebox.showerror("오류", f"이미지를 열 수 없습니다: {e}")
+
 
 # 문자열 드래그 시작
 def start_drag(event):
@@ -335,6 +341,7 @@ def bind_shortcuts():
     window.bind("<Control-s>", save_canvas) #save 단축키 crtl+s
     window.bind("<Control-z>", erase_last_stroke) #undo 단축키 crtl+z
     window.bind("d", lambda event: toggle_dark_mode()) #dark 모드 단축키 d
+
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
