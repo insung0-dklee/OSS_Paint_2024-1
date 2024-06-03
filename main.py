@@ -1517,7 +1517,10 @@ def end_drag(event):
 def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
     return f"{hours:02}:{minutes:02}"
 
-
+def change_color(color):
+    
+    canvas.config(bg=color)
+    
 current_time = time.localtime() 
 initial_hours = current_time.tm_hour
 initial_minutes = current_time.tm_min 
@@ -1529,6 +1532,36 @@ time_label.pack()
 text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
 text_box_button.pack()
 
+
+colors = ["red"]
+for color in colors:
+    button_Color = Button(window, text="Red", command=lambda c=color: change_color(c))
+    button_Color.pack(side=LEFT)
+
+colors = ["green"]
+for color in colors:
+    button_Color = Button(window, text="green", command=lambda c=color: change_color(c))
+    button_Color.pack(side=LEFT)
+
+colors = ["yellow"]
+for color in colors:
+    button_Color = Button(window, text="yellow", command=lambda c=color: change_color(c))
+    button_Color.pack(side=LEFT)
+    
+colors = ["white"]
+for color in colors:
+    button_Color = Button(window, text="white", command=lambda c=color: change_color(c))
+    button_Color.pack(side=LEFT)
+
+colors = ["black"]
+for color in colors:
+    button_Color = Button(window, text="black", command=lambda c=color: change_color(c))
+    button_Color.pack(side=LEFT)
+
+"""
+체인지 컬러함수를 만들어 캔버스의 색깔을 빨간색, 초록색, 노란색, 하얀색, 검은색 5가지 색중 한가지의 색으로 변환할 수 있게 한다.
+"""
+    
 # 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
 dot_count.set(10)
@@ -1566,6 +1599,8 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
+
+
 
 window.mainloop()
 
