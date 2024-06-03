@@ -25,6 +25,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import random # random을 위한 모
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1563,6 +1564,20 @@ canvas.bind("<Configure>", on_resize)
 bind_shortcuts_window(window)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
+
+# 색 랜덤 호출 함수
+def random_color():
+    r=int(random.randrange(0,255))
+    g=int(random.randrange(0,255))
+    b=int(random.randrange(0,255))  
+    color = f'#{r:02x}{g:02x}{b:02x}'
+    set_brush_color(color)
+    
+button_random_color= Button(window, text="random_color", command=lambda: random_color())
+button_random_color.pack(side=LEFT)
+button_random_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+button_random_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
 
 #프로그램 시작 시 타이머 시작
 timer.start()
