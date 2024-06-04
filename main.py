@@ -1870,4 +1870,33 @@ update_timer()
 
 window.mainloop()
 
+#반짝이 브러쉬 생성
+class SparkleBrushApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Sparkle Brush")
+        
+        self.canvas = tk.Canvas(master, width=600, height=400, bg="white")
+        self.canvas.pack()
+        
+        self.canvas.bind("<B1-Motion>", self.draw_with_sparkle)
+        
+    def draw_with_sparkle(self, event):
+        x, y = event.x, event.y
+        sparkle_color = self.get_random_color()
+        sparkle_size = random.randint(5, 20)
+        self.canvas.create_oval(x - sparkle_size, y - sparkle_size, x + sparkle_size, y + sparkle_size, fill=sparkle_color)
+        
+    def get_random_color(self):
+        r = lambda: random.randint(0, 255)
+        return '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+
+def main():
+    root = tk.Tk()
+    app = SparkleBrushApp(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+     main()
+
 
