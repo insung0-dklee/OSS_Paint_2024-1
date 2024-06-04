@@ -114,21 +114,6 @@ def set_brightness(value):
     color = f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'  # RGB 값을 16진수 색상 코드로 변환
     canvas.configure(bg=color)
 
-def increase_brightness(event=None):
-    current_value = brightness_slider.get()
-    if current_value < 100:
-        brightness_slider.set(current_value + 5)  # 밝기를 5% 올리기
-        set_brightness(current_value + 5)
-
-def decrease_brightness(event=None):
-    current_value = brightness_slider.get()
-    if current_value > 0:
-        brightness_slider.set(current_value - 5)  # 밝기를 5% 낮추기
-        set_brightness(current_value - 5)
-
-
-
-
 #드래그로 그림 움직이기
 #오른쪽 마우스 눌렀을 때 드래그 시작하는 지점 좌표 기록
 def start_move(event):
@@ -767,22 +752,22 @@ def setup_paint_app(window):
     
 
     button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
-    button_frame.pack(fill=X)
+    button_frame.pack(fill=BOTH)
 
     labelframe_brush = LabelFrame(button_frame, text="brush mode") #브러시 설정을 정리한 프레임
-    labelframe_brush.pack(side = LEFT,fill=Y)
+    labelframe_brush.pack(side = LEFT,fill=BOTH)
 
     labelframe_flip = LabelFrame(button_frame, text="flip") #브러시 설정을 정리한 프레임
-    labelframe_flip.pack(side = LEFT,fill=Y)
+    labelframe_flip.pack(side = LEFT,fill=BOTH)
 
     labelframe_timer = LabelFrame(button_frame, text="timer") #타이머 설정을 정리한 프레임
-    labelframe_timer.pack(side = LEFT,fill=Y)
+    labelframe_timer.pack(side = LEFT,fill=BOTH)
 
     labelframe_additional = LabelFrame(button_frame,text="additionals") # 추가 기능 설정을 정리한 프레임
-    labelframe_additional.pack(side = LEFT,fill=Y)
+    labelframe_additional.pack(side = LEFT,fill=BOTH)
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
-    labelframe_additional2.pack(side = LEFT,fill=Y)
+    labelframe_additional2.pack(side = LEFT,fill=BOTH)
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
@@ -814,10 +799,6 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    # 밝기 슬라이더
-    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
-    brightness_slider.set(100)  # 초기 밝기를 100%로 설정
-    brightness_slider.pack(pady=20)
 
     #timer 카테고리
     # 타이머 멈춤 버튼
@@ -887,14 +868,20 @@ def setup_paint_app(window):
     button_flip_vertical.pack(side=TOP)
     button_flip_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_flip_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
     
     #브러시  모드를 선택하는 콤보박스
     brush_combobox = ttk.Combobox(labelframe_brush, values=brush_modes, state="readonly")
     brush_combobox.current(0)
     brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
     brush_combobox.pack(side=LEFT)
-    
+
+
+    #additional2 카테고리
+    # 밝기 슬라이더
+    Label(labelframe_additional2, text="Brightness").grid(row=0,column=0)
+    brightness_slider = tk.Scale(labelframe_additional2, from_=0, to=100, orient='horizontal', command=set_brightness)
+    brightness_slider.set(100)  # 초기 밝기를 100%로 설정
+    brightness_slider.grid(row=1,column=0)
 
     # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
@@ -909,18 +896,25 @@ def setup_paint_app(window):
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
 
+    # 눈금자 간격 입력 레이블
+    interval_label = Label(labelframe_additional2, text="Ruler Interval:")
+    interval_label.grid(row=2,column=0)
 
+    interval_entry = Entry(labelframe_additional2)
+    interval_entry.grid(row=3,column=0)
+    interval_entry.insert(0, "10")  # 기본값 설정
 
     # 에어브러쉬 속성 조절 버튼 추가
-    Button(labelframe_additional2, text="+", command=increase_dot_distance).pack(side=RIGHT)
-    Label(labelframe_additional2, text="Distance").pack(side=RIGHT)
-    Label(labelframe_additional2, textvariable=dot_distance).pack(side=RIGHT)  # 거리 표시
-    Button(labelframe_additional2, text="-", command=decrease_dot_distance).pack(side=RIGHT)
+    Label(labelframe_additional2, text="air brush").grid(row=0,column=2)
+    Button(labelframe_additional2, text="+", command=increase_dot_distance).grid(row=1,column=3)
+    Label(labelframe_additional2, text="Distance").grid(row=1,column=2)
+    Label(labelframe_additional2, textvariable=dot_distance).grid(row=1,column=4)  # 거리 표시
+    Button(labelframe_additional2, text="-", command=decrease_dot_distance).grid(row=1,column=5)
 
-    Button(labelframe_additional2, text="+", command=increase_dot_count).pack(side=RIGHT)
-    Label(labelframe_additional2, text="Count").pack(side=RIGHT)
-    Label(labelframe_additional2, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
-    Button(labelframe_additional2, text="-", command=decrease_dot_count).pack(side=RIGHT)
+    Button(labelframe_additional2, text="+", command=increase_dot_count).grid(row=2,column=3)
+    Label(labelframe_additional2, text="Count").grid(row=2,column=2)
+    Label(labelframe_additional2, textvariable=dot_count).grid(row=2,column=4)  # 개수 표시
+    Button(labelframe_additional2, text="-", command=decrease_dot_count).grid(row=2,column=5)
 
     # button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
     # button_paint.pack(side=RIGHT)
@@ -1849,14 +1843,6 @@ ruler_texts = []
 canvas.bind("<ButtonPress-3>", start_move)
 canvas.bind("<B3-Motion>", move)
 canvas.bind("<ButtonRelease-3>", end_move)
-
-# 눈금자 간격 입력 레이블
-interval_label = Label(labelframe_additional2, text="Ruler Interval:")
-interval_label.pack()
-
-interval_entry = Entry(labelframe_additional2)
-interval_entry.pack()
-interval_entry.insert(0, "10")  # 기본값 설정
 
 canvas.bind("<Configure>", on_resize)
 
