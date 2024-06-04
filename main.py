@@ -16,6 +16,7 @@ from tkinter import filedialog
 from tkinter import PhotoImage
 from tkinter import messagebox
 from tkinter import simpledialog
+import webbrowser
 import tkinter as tk
 import math  # 수학 모듈을 가져옴
 import random
@@ -500,6 +501,11 @@ def flip_vertical(canvas):
                 coords[i] = canvas_height - coords[i]
         canvas.coords(obj, *coords)
 
+def set_eraser_mode(canvas):
+    global eraser_mode
+    eraser_mode = True
+    canvas.bind("<B1-Motion>", lambda event: erase(event, canvas))
+
 def erase(event, canvas):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
@@ -765,6 +771,15 @@ def show_shortcuts():
     """
     messagebox.showinfo("단축키", shortcuts_info)
 
+def open_google_search():
+    # 사용자로부터 검색어를 입력받음
+    search_query = simpledialog.askstring("Google Search", "검색어를 입력하세요:")
+    if search_query:
+        # 구글 검색 URL 생성
+        search_url = f"https://www.google.com/search?q={search_query}"
+        # 기본 웹 브라우저에서 URL 열기
+        webbrowser.open(search_url)
+
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
 
@@ -803,7 +818,17 @@ def setup_paint_app(window):
     button_shortcuts.pack(side=LEFT)
     button_shortcuts.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_shortcuts.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-    
+
+    # 구글 검색 버튼 추가
+    google_search_button = Button(labelframe_additional, text="Google Search", command=open_google_search)
+    google_search_button.grid(row=3, column=1)
+    google_search_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    google_search_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_eraser = Button(labelframe_brush, text="Eraser", command=lambda: set_eraser_mode(canvas))
+    button_eraser.pack(side=LEFT)
+    button_eraser.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_eraser.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
