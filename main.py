@@ -256,7 +256,8 @@ def open_text_input_window():
 
 def add_text_to_canvas(text):
     if text.strip():  # 입력된 텍스트가 공백이 아닌 경우에만 캔버스에 추가
-        text_item = canvas.create_text(100, 100, text=text, fill="black", font=('Arial', 12))
+        text_color=askcolor()[1] # 텍스트 색 추가
+        text_item = canvas.create_text(100, 100, text=text, fill=text_color, font=('Arial', 12))
         canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
         canvas.tag_bind(text_item, "<B1-Motion>", drag)
         canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
