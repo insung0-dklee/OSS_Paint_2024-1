@@ -17,6 +17,7 @@ import math  # 수학 모듈을 가져옴
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
+from brush_settings import highlighter_paint
 
 
 # 초기 설정 값들
@@ -148,6 +149,14 @@ def dotted_paint(event, canvas):
         last_x, last_y = event.x, event.y
         canvas.create_oval(last_x - 1, last_y - 1, last_x + 1, last_y + 1, fill=brush_color, outline=brush_color)
 
+#형광펜 브러쉬 함수
+def highlighter_paint(event, canvas):
+    global x1, y1, brush_size, brush_color
+    x2, y2 = event.x, event.y
+    # 반투명 효과를 위해 stipple 속성 사용
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size, stipple='gray25')
+    x1, y1 = x2, y2
+
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -160,6 +169,8 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))  # 실선(기본) 브러쉬로 변경
     elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
+    elif brush_mode == "hightlighter": #브러쉬 모드가 hightlighter면
+        canvas.bind("<B1-Motion>", lambda event: highlighter_paint(event, canvas)) #형광펜 브러쉬로 변경
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -292,6 +303,12 @@ def setup_paint_app(window):
 
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
 
+    # 형광펜 모드 버튼
+
+    button_highlighter = Button(button_frame, text="Highlighter", command=lambda: set_brush_mode(canvas, "hightlighter"))
+    button_highlighter.pack()
+    button_highlighter.bind("<Enter>", on_enter)
+    button_highlighter.bind("<Leave>", on_leave)
 
 
     button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
@@ -360,7 +377,6 @@ def setup_paint_app(window):
 
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
-
 
 
     # 에어브러쉬 속성 조절 버튼 추가
@@ -545,3 +561,5 @@ timer.start()
 update_timer()
 
 window.mainloop()
+
+

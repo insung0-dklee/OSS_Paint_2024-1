@@ -29,8 +29,8 @@ def change_brush_color():
 
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
-실선 브러쉬와 점선 브러쉬로 전환한다.
-매개변수: mode - 브러쉬 모드를 나타내는 문자열 ("solid" 또는 "dotted")
+실선 브러쉬, 점선 브러쉬, 형광펜 브러쉬로 전환한다.
+매개변수: mode - 브러쉬 모드를 나타내는 문자열 ("solid", "dotted", "highlighter")
 """
 def set_brush_mode(canvas, mode):
     global brush_mode
@@ -39,6 +39,8 @@ def set_brush_mode(canvas, mode):
         canvas.bind("<B1-Motion>", lambda event: paint(event, canvas))
     elif brush_mode == "dotted":
         canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))
+    elif brush_mode == "highlighter":  # 형광펜 모드 추가
+        canvas.bind("<B1-Motion>", lambda event: highlighter_paint(event, canvas))
 
 # 마우스 움직임에 따라 도형을 그리는 함수
 def set_paint_mode_normal(canvas):
@@ -87,3 +89,16 @@ def dotted_paint(event, canvas):
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
+
+"""
+highlighter_paint: 형광펜 브러쉬 함수
+마우스가 이동하는 경로를 따라 반투명한 색상을 적용하여 직선을 그린다.
+매개변수: event - 마우스 이벤트 객체로, 마우스의 현재 좌표를 포함
+canvas - 그림이 그려질 캔버스 객체
+"""
+def highlighter_paint(event, canvas):
+    global x1, y1, brush_size, brush_color
+    x2, y2 = event.x, event.y
+    # 반투명 효과를 위해 stipple 속성 사용
+    canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size, stipple='gray25')
+    x1, y1 = x2, y2
