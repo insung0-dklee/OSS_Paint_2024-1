@@ -43,15 +43,18 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
-
 # 벌집 색상 선택 함수
 def choose_hex_color():
+    global honeycomb_pattern_on
+    honeycomb_pattern_on = True
     color = askcolor()[1]
     if color:
         draw_honeycomb_pattern(canvas, hex_color=color)
 
+
 # 벌집 모양 패턴 함수
-def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
+def draw_honeycomb_pattern(canvas, hex_color="black"):
+    hex_size = 30
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
     hex_height = math.sqrt(3) * hex_size  # 헥사곤의 높이 계산
@@ -66,7 +69,30 @@ def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
             for dx in [0, hex_size * 3 // 2]:
                 for dy in [0, hex_height // 2]:
                     hexagon = [hex_corner(x + dx, y + dy, hex_size, i) for i in range(6)]
-                    canvas.create_polygon(hexagon, outline=hex_color, fill='')
+                    canvas.create_polygon(hexagon, outline=hex_color, fill='', tags="honeycomb")
+
+"""
+벌집 패턴 토글 기능 추가
+honeycomb_pattern_on : 현재 벌집 패턴이 활성화되어 있는지 확인하는 변수
+
+toggle_honeycomb_pattern() : 현재 벌집 패턴의 상태에 따라 함수 호출
+활성화 되어 있다면 : clear_honeycomb_pattern(canvas) 실행
+아니라면 : draw_honeycomb_pattern(canvas, hex_color="black") 실행
+
+clear_honeycomb_pattern(canvas) : tags = honeycomb 를 모두 삭제
+"""
+
+honeycomb_pattern_on = False
+# 벌집 패턴 토글 스위치
+def toggle_honeycomb_pattern():
+    global honeycomb_pattern_on
+    if honeycomb_pattern_on:
+        clear_honeycomb_pattern(canvas)
+    else:
+        draw_honeycomb_pattern(canvas, hex_color="black")
+    honeycomb_pattern_on = not honeycomb_pattern_on
+def clear_honeycomb_pattern(canvas):
+    canvas.delete("honeycomb")
 
 # 연필 브러시 함수
 def pencil_brush(event, canvas):
@@ -785,7 +811,7 @@ def setup_paint_app(window):
     labelframe_additional2.pack(side = LEFT,fill=Y)
 
     # 벌집 모양 패턴 버튼
-    button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
+    button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: toggle_honeycomb_pattern())
     button_honeycomb.pack(side=LEFT)
     button_honeycomb.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
