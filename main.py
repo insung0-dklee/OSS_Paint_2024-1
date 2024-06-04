@@ -330,10 +330,14 @@ button_paint_mode.pack(side=LEFT)
 
 window.mainloop()
 
-def add_text(event):
-    text = text_box.get()
-    canvas.create_text(event.x, event.y, text=text, fill=current_color, font=('Arial', 12))
+# 확대/축소 기능을 위한 함수
+def zoom(event):
+    scale = 1.0
+    if event.delta > 0:  # 마우스 휠을 위로 굴리면 확대
+        scale *= 1.1
+    elif event.delta < 0:  # 마우스 휠을 아래로 굴리면 축소
+        scale /= 1.1
+    canvas.scale("all", event.x, event.y, scale, scale)  # 캔버스의 모든 객체를 스케일
 
-text_box = Entry(window)  # 텍스트 입력 상자
-text_box.pack(side=LEFT)
-canvas.bind("<Button-3>", add_text)  # 오른쪽 클릭으로 텍스트 추가
+# 확대/축소 기능을 마우스 휠에 바인딩
+canvas.bind("<MouseWheel>", zoom)
