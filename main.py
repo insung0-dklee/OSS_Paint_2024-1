@@ -859,6 +859,146 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+def draw_entity(event, entity_name):
+    """
+    draw_entity: 엔터티를 그리는 함수
+    캔버스의 특정 위치에 엔터티를 그린다.
+    """
+    x, y = event.x, event.y
+    canvas.create_rectangle(x - 50, y - 20, x + 50, y + 20, fill="white", outline="black")  # 엔터티 사각형
+    canvas.create_text(x, y, text=entity_name, anchor="center")  # 엔터티 이름
+    # 바인딩 해제
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def draw_attribute(event, attribute_name):
+    """
+    draw_attribute: 속성을 그리는 함수
+    캔버스의 특정 위치에 속성을 그린다.
+    """
+    x, y = event.x, event.y
+    canvas.create_oval(x - 40, y - 20, x + 40, y + 20, fill="white", outline="black")  # 속성 타원
+    canvas.create_text(x, y, text=attribute_name, anchor="center")  # 속성 이름
+    # 바인딩 해제
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def draw_line(event):
+    """
+    draw_line: 선을 그리는 함수
+    캔버스의 특정 위치에서 다른 위치로 선을 그린다.
+    """
+    x, y = event.x, event.y
+    global x1, y1  # 시작 지점
+    if x1 is not None and y1 is not None:  # 시작 지점이 세팅되어 있을 때만 선을 그림
+        canvas.create_line(x1, y1, x, y)  # 실제 선 그리기
+        x1, y1 = None, None  # 시작 지점 초기화
+    # 바인딩 해제
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def draw_relationship(event, relationship_name):
+    """
+    draw_relationship: 관계를 그리는 함수
+    캔버스의 특정 위치에 관계(마름모)를 그린다.
+    """
+    x, y = event.x, event.y
+    canvas.create_polygon(x - 40, y, x, y - 40, x + 40, y, x, y + 40, fill="white", outline="black")  # 관계 마름모
+    canvas.create_text(x, y, text=relationship_name, anchor="center")  # 관계 이름
+    # 바인딩 해제
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def draw_erd_relationship_start(event):
+    """
+    draw_erd_relationship_start: ERD 관계 그리기를 시작하는 함수
+    관계의 시작 지점을 기록하고, 드래그 중에 미리보기 선을 그린다.
+    """
+    global x1, y1, preview_line
+    x1, y1 = event.x, event.y  # 시작 지점 기록
+    preview_line = None  # 미리보기 선 초기화
+    canvas.bind("<B1-Motion>", draw_erd_relationship_preview)  # 드래그할 때 미리보기 선 그리기
+
+def draw_erd_relationship_preview(event):
+    """
+    draw_erd_relationship_preview: ERD 관계 그리기 미리보기 함수
+    관계를 그리기 위해 드래그할 때 현재 위치까지의 미리보기 선을 그린다.
+    """
+    global x1, y1, preview_line
+    x2, y2 = event.x, event.y  # 현재 지점
+    if preview_line:
+        canvas.delete(preview_line)  # 이전 미리보기 선 삭제
+    preview_line = canvas.create_line(x1, y1, x2, y2, dash=(4, 2))  # 새로운 미리보기 선 그리기
+
+def draw_erd_relationship_end(event):
+    """
+    draw_erd_relationship_end: ERD 관계 그리기를 종료하는 함수
+    드래그 종료 지점에서 실제 선을 그린다.
+    """
+    global x1, y1, preview_line
+    x2, y2 = event.x, event.y  # 종료 지점
+    if preview_line:
+        canvas.delete(preview_line)  # 미리보기 선 삭제
+    canvas.create_line(x1, y1, x2, y2)  # 실제 선 그리기
+
+    # 바인딩 해제
+    canvas.unbind("<Button-1>")
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def add_entity():
+    """
+    add_entity: 엔터티 추가 함수
+    엔터티의 이름을 입력받고, 캔버스에 엔터티를 그리는 이벤트를 바인딩한다.
+    """
+    entity_name = simpledialog.askstring("Input", "엔터티의 이름을 입력하세요:")  # 엔터티 이름 입력받기
+    if entity_name:
+        canvas.bind("<Button-1>", lambda event: draw_entity(event, entity_name))  # 클릭 시 엔터티 그리기
+
+def add_attribute():
+    """
+    add_attribute: 속성 추가 함수
+    속성의 이름을 입력받고, 캔버스에 속성을 그리는 이벤트를 바인딩한다.
+    """
+    attribute_name = simpledialog.askstring("Input", "속성의 이름을 입력하세요:")  # 속성 이름 입력받기
+    if attribute_name:
+        canvas.bind("<Button-1>", lambda event: draw_attribute(event, attribute_name))  # 클릭 시 속성 그리기
+
+def add_line_erd():
+    """
+    add_line_erd: 선 추가 함수
+    선을 그리는 이벤트를 바인딩한다.
+    """
+    canvas.bind("<Button-1>", draw_erd_relationship_start)  # 클릭 시 선 그리기 시작
+    canvas.bind("<ButtonRelease-1>", draw_erd_relationship_end)  # 마우스 버튼 놓으면 선 그리기 종료
+
+def add_relationship_erd():
+    """
+    add_relationship_erd: 관계 추가 함수
+    관계의 이름을 입력받고, 캔버스에 관계를 그리는 이벤트를 바인딩한다.    
+    """
+    relationship_name = simpledialog.askstring("Input", "관계의 이름을 입력하세요:")  # 관계 이름 입력받기
+    if relationship_name:
+        canvas.bind("<Button-1>", lambda event: draw_relationship(event, relationship_name))  # 클릭 시 관계 그리기
+
+def choose_erd_element(event=None):
+    """
+    choose_erd_element: ERD 요소 선택 함수
+    엔터티, 속성, 관계, 선을 선택할 수 있는 팝업 메뉴를 생성한다.
+    """
+    popup = Menu(labelframe_additional, tearoff=0)
+    popup.add_command(label="Entity", command=add_entity)  # 엔터티 추가
+    popup.add_command(label="Attribute", command=add_attribute)  # 속성 추가
+    popup.add_command(label="Relationship", command=add_relationship_erd)  # 관계 추가
+    popup.add_command(label="Line", command=add_line_erd)  # 선 추가
+    if event:
+        popup.post(event.x_root, event.y_root)  # 마우스 위치에 팝업 메뉴 표시
+    else:
+        popup.post(window.winfo_pointerx(), window.winfo_pointery())  # 마우스 포인터 위치에 팝업 메뉴 표시
 
 
 def setup_paint_app(window):
@@ -962,6 +1102,8 @@ def setup_paint_app(window):
     button_use_case.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_use_case.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     
+    button_erd = Button(labelframe_additional, text="Add ERD Element", command=choose_erd_element)
+    button_erd.grid(row=1, column=3)
     
     #이전 획 설정
     button_erase_last_stroke = Button(labelframe_additional, text="Undo", command=erase_last_stroke)
@@ -976,7 +1118,7 @@ def setup_paint_app(window):
 
     #all clear
     button_clear = Button(labelframe_additional, text="All Clear", command=lambda: clear_paint(canvas))
-    button_clear.grid(row=1, column=3)
+    button_clear.grid(row=2, column=4)
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
