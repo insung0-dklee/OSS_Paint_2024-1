@@ -37,6 +37,7 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+trail_effects = []
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -82,6 +83,21 @@ def pencil_brush(event, canvas):
             jitter_y = y + random.randint(-brush_size, brush_size)
             canvas.create_line(jitter_x, jitter_y, jitter_x + 1, jitter_y + 1, fill=brush_color, width=brush_size/2)
     last_x, last_y = event.x, event.y
+
+
+def convert_to_pointillism():
+    objects = canvas.find_all()  # 캔버스에 있는 모든 객체를 가져옴
+    for obj in objects:
+        if canvas.type(obj) == "line":  # 선이면
+            coords = canvas.coords(obj)  # 선의 좌표를 가져옴
+            color = canvas.itemcget(obj, "fill")  # 선의 색상을 가져옴
+            canvas.delete(obj)  # 기존 선을 삭제
+            for i in range(0, len(coords), 2):  # 좌표 쌍을 반복
+                x = coords[i]
+                y = coords[i + 1]
+                canvas.create_oval(x - 1, y - 1, x + 1, y + 1, fill=color, outline=color)  # 원을 그려서 점묘화 효과를 추가함
+
+
 
 # 벽돌 색상 선택 함수
 def choose_brick_line_color():
@@ -801,6 +817,9 @@ def setup_paint_app(window):
     button_pencil_brush.pack(side=LEFT)
     button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_pointillism = Button(window, text="Convert to Pointillism", command=convert_to_pointillism)
+    button_pointillism.pack(side=LEFT)
 
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))

@@ -64,10 +64,11 @@ def paint_start(event, canvas):
     global x1, y1, brush_size
     x1, y1 = (event.x, event.y)
 
-def paint(event, canvas):
+def paint(event, canvas, add_trail_effect):
     global x1, y1, brush_size, brush_color
     x2, y2 = event.x, event.y
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size)
+    add_trail_effect(x1, y1, x2, y2)
     x1, y1 = x2, y2
 
 """
