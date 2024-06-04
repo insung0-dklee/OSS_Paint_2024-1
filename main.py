@@ -178,6 +178,17 @@ def sharpen_image():
         canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
         canvas.image = tk_image
 
+def distort_image():
+    global image, tk_image
+    if image:
+        width, height = image.size
+        m = -0.5
+        x_shift = abs(m) * width
+        new_width = width + int(round(x_shift))
+        image = image.transform((new_width, height), Image.AFFINE, (1, m, -x_shift if m > 0 else 0, 0, 1, 0), Image.BICUBIC)
+        tk_image = ImageTk.PhotoImage(image)
+        canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+        canvas.image = tk_image
 
 
 root = tk.Tk()
@@ -260,6 +271,9 @@ text_button.pack(side=tk.LEFT)
 
 sharpen_button = tk.Button(root, text="날카로움 필터링", command=sharpen_image)
 sharpen_button.pack(side=tk.LEFT)
+
+distort_button = tk.Button(root, text="왜곡 필터링", command=distort_image)
+distort_button.pack(side=tk.LEFT)
 
 root.mainloop()
 
