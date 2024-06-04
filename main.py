@@ -101,6 +101,78 @@ def draw_person(event):
 def person_mode():
     canvas.bind("<Button-1>", draw_person)
 
+# 강조 효과 그리는 함수
+def create_emphasis_effect(event=None):
+    # 마우스 왼쪽 버튼 클릭 시 start_emphasis 함수를 호출하도록 설정
+    canvas.bind("<Button-1>", start_emphasis)
+
+def start_emphasis(event):
+    global start_x, start_y, current_shape
+    # 마우스 클릭 지점을 시작점으로 설정
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    # 마우스 움직임에 따라 draw_emphasis 함수를 호출하고, 버튼이 놓여지면 finish_emphasis 함수 호출
+    canvas.bind("<B1-Motion>", draw_emphasis)
+    canvas.bind("<ButtonRelease-1>", finish_emphasis)
+
+def draw_emphasis(event):
+    global start_x, start_y, current_shape
+    # 이전에 그려진 임시 도형 삭제
+    canvas.delete("temp_shape")
+    # 마우스 위치를 끝점으로 설정
+    end_x, end_y = event.x, event.y
+
+    # 시작점과 끝점을 이용해 사각형 영역 그리기
+    canvas.create_rectangle(start_x, start_y, end_x, end_y, outline="white", tags="temp_shape", fill="white")
+
+    # 사각형 영역의 중심 좌표 계산
+    center_x = (start_x + end_x) / 2
+    center_y = (start_y + end_y) / 2
+
+    # 사각형 중심에서 방사형으로 선을 그림
+    rect_width = abs(end_x - start_x) / 2
+    rect_height = abs(end_y - start_y) / 2
+    angle = 0
+    while angle < 360:
+        angle_step = random.randint(1, 5)  # 각도의 증가량을 랜덤으로 설정
+        radian_angle = math.radians(angle)  # 각도를 라디안으로 변환
+        # 삼각함수를 이용해 선의 끝점 계산
+        if abs(math.cos(radian_angle)) > abs(math.sin(radian_angle)):
+            x = center_x + rect_width * (1 if math.cos(radian_angle) > 0 else -1)
+            y = center_y + rect_width * math.tan(radian_angle) * (1 if math.cos(radian_angle) > 0 else -1)
+        else:
+            y = center_y + rect_height * (1 if math.sin(radian_angle) > 0 else -1)
+            x = center_x + rect_height / math.tan(radian_angle) * (1 if math.sin(radian_angle) > 0 else -1)
+        
+        # 선의 끝점이 사각형 영역을 벗어나지 않도록 조정
+        if start_x < end_x:
+            x = max(min(x, end_x), start_x)
+        else:
+            x = max(min(x, start_x), end_x)
+        
+        if start_y < end_y:
+            y = max(min(y, end_y), start_y)
+        else:
+            y = max(min(y, start_y), end_y)
+
+        # 선의 굵기를 랜덤으로 설정
+        line_width = random.randint(1, 3)
+        
+        # 계산된 위치와 굵기로 선 그리기
+        canvas.create_line(center_x, center_y, x, y, fill="black", width=line_width, tags="temp_shape")
+        angle += angle_step
+
+    # 중심에 흰색 타원 그리기 (사각형 영역에 대한 비율로 크기 조정)
+    x_radius = rect_width * 0.8
+    y_radius = rect_height * 0.8
+    canvas.create_oval(center_x - x_radius, center_y - y_radius, center_x + x_radius, center_y + y_radius, fill="white", outline="white", tags="temp_shape")
+
+def finish_emphasis(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    canvas.dtag("temp_shape", "temp_shape")
+
 # 벌집 색상 선택 함수
 def choose_hex_color():
     color = askcolor()[1]
@@ -1073,6 +1145,9 @@ def setup_paint_app(window):
 
     # 사람 그리기 서브 메뉴 생성
     cartoon_menu.add_command(label="Draw Person", command=person_mode)
+
+    # 컷 강조 효과 서브메뉴 생성
+    cartoon_menu.add_command(label="Emphasis Effect", command=create_emphasis_effect)
 
     file_menu.add_command(label="Open New Window", command=create_new_window) # File 메뉴에 Open New Window 기능 버튼 추가
     file_menu.add_command(label="Add Image", command=upload_image) # File 메뉴에 Add Image 기능 버튼 추가
