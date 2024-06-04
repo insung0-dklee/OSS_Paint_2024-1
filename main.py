@@ -43,6 +43,47 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+# 삼각형 패턴을 그리는 색상을 선택하는 함수
+def choose_triangle_color():
+    color = askcolor()[1]
+    if color:
+        draw_triangle_pattern(canvas, tri_color=color)
+
+# 캔버스에 삼각형 패턴을 그리는 함수
+def draw_triangle_pattern(canvas, tri_size=30, tri_color="black"):
+    # 캔버스의 너비와 높이를 가져옴
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    
+    # 삼각형의 높이를 계산
+    tri_height = tri_size * math.sqrt(3) / 2
+
+    # 삼각형의 꼭짓점 좌표를 계산하는 함수
+    def triangle_points(x, y, size, up):
+        if up:
+            # 위쪽을 향한 삼각형
+            return [
+                (x, y - size * math.sqrt(3) / 3),
+                (x - size / 2, y + size * math.sqrt(3) / 6),
+                (x + size / 2, y + size * math.sqrt(3) / 6)
+            ]
+        else:
+            # 아래쪽을 향한 삼각형
+            return [
+                (x, y + size * math.sqrt(3) / 3),
+                (x - size / 2, y - size * math.sqrt(3) / 6),
+                (x + size / 2, y - size * math.sqrt(3) / 6)
+            ]
+
+    # 캔버스 높이와 너비를 따라 반복하며 삼각형을 그림
+    for y in range(0, canvas_height, int(tri_height)):
+        for x in range(0, canvas_width, tri_size):
+            # 번갈아가며 위쪽과 아래쪽을 향한 삼각형을 그림
+            up = (x // tri_size + y // int(tri_height)) % 2 == 0
+            points = triangle_points(x + tri_size / 2, y + tri_height / 2, tri_size, up)
+            canvas.create_polygon(points, outline=tri_color, fill='')
+
+
 
 # 벌집 색상 선택 함수
 def choose_hex_color():
@@ -783,6 +824,20 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    
+    # 삼각형 모양 패턴 버튼
+    button_triangle = Button(window, text="Triangle Pattern", command=lambda: draw_triangle_pattern(canvas))
+    button_triangle.pack(side=LEFT)
+    button_triangle.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_triangle.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 삼각형 모양 패턴 색상 선택 버튼
+    button_triangle_color = Button(window, text="Choose Triangle Color", command=choose_triangle_color)
+    button_triangle_color.pack(side=LEFT)
+    button_triangle_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_triangle_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
