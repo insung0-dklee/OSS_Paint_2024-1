@@ -301,6 +301,13 @@ def start_stop():
         timer.start()
 
 
+def all_clear(canvas): #메세지 박스를 띄워서 다시 한번 확인 
+    result = messagebox.askyesno("확인", "정말 지우시겠습니까?")
+    if result:
+        clear_paint(canvas)
+    else:
+        print("Action cancelled.")
+
 def paint_airbrush(event, canvas):
     for _ in range(dot_count.get()):  # 에어브러쉬 효과를 위해 여러 개의 작은 점을 그림
         radius = random.randint(1, brush_size)  # 점의 크기를 무작위로 선택
@@ -868,7 +875,7 @@ def setup_paint_app(window):
     button_redo_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     #all clear
-    button_clear = Button(labelframe_additional, text="All Clear", command=lambda: clear_paint(canvas))
+    button_clear = Button(labelframe_additional, text="All Clear", command=lambda: all_clear(canvas)) #all_clear로 교체
     button_clear.grid(row=1, column=3)
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
