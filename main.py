@@ -43,6 +43,50 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+#+=================================================================================
+class _tool_tip(object): # 툴팁을 생성하고 관리하는 클래스
+    def __init__(self, widget):
+        self.widget = widget  # 툴팁이 연결된 위젯
+        self.tipwindow = None  # 툴팁 창
+        self.id = None
+        self.x = self.y = 0
+
+    def showtip(self, text):
+        self.text = text  # 표시할 텍스트
+        if self.tipwindow or not self.text:
+            return
+        x, y, _, _ = self.widget.bbox("insert")
+        x = x + self.widget.winfo_rootx() + 25
+        y = y + self.widget.winfo_rooty() + 20
+        # 툴팁 창 생성
+        self.tipwindow = tw = Toplevel(self.widget)
+        tw.wm_overrideredirect(1)  # 창 테두리와 타이틀 바 제거
+        tw.wm_geometry("+%d+%d" % (x, y))  # 창 위치 설정
+
+        # 레이블 생성
+        label = Label(tw, text=self.text, justify=LEFT,
+                          background="#ffffe0", relief=SOLID, borderwidth=1,
+                          font=("tahoma", "8", "normal"))
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()  # 툴팁 창 제거
+
+def create_tool_tip(widget, text, enter, leave): # 툴팁을 생성하는 기능
+    toolTip = _tool_tip(widget)  # 툴팁 객체 생성
+    def enter_event(event):
+        toolTip.showtip(text)  # 마우스가 위젯 위에 올라갔을 때 툴팁 표시
+        enter(event)
+    def leave_event(event):
+        toolTip.hidetip()  # 마우스가 위젯을 벗어났을 때 툴팁 제거
+        leave(event)
+    widget.bind('<Enter>', enter_event)
+    widget.bind('<Leave>', leave_event)
+    # 마우스가 올라갔을때를 판별하여 함수 실행
+#+=================================================================================
 
 # 벌집 색상 선택 함수
 def choose_hex_color():
@@ -787,114 +831,99 @@ def setup_paint_app(window):
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
     button_honeycomb.pack(side=LEFT)
-    button_honeycomb.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_honeycomb.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_honeycomb, "Add honeycomb pattern", on_enter, on_leave)
 
     # 벌집 모양 패턴 색상 선택 버튼
     button_honeycomb_color = Button(window, text="Choose Honeycomb Color", command=choose_hex_color)
     button_honeycomb_color.pack(side=LEFT)
-    button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_honeycomb_color, "Adjust honeycomb pattern color", on_enter, on_leave)
 
     # 연필 브러시 버튼 추가
     button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
     button_pencil_brush.pack(side=LEFT)
-    button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_pencil_brush, "Select pencil brush", on_enter, on_leave)
 
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
     button_brick_pattern.pack(side=LEFT)
-    button_brick_pattern.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_brick_pattern.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_brick_pattern, "Add brick pattern", on_enter, on_leave)
 
     # 벽돌 패턴 색상 선택 버튼
     button_brick_line_color = Button(window, text="Choose Brick Line Color", command=choose_brick_line_color)
     button_brick_line_color.pack(side=LEFT)
-    button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_brick_line_color, "Adjust brick pattern color", on_enter, on_leave)
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
+    create_tool_tip(brightness_slider, "Adjust canvers bright", on_enter, on_leave)
 
     #timer 카테고리
     # 타이머 멈춤 버튼
     button_stop_timer = Button(labelframe_timer, text="Stop", command=stop_timer)
     button_stop_timer.pack(side=LEFT)
-    button_stop_timer.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_stop_timer.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_stop_timer, "Stop timer", on_enter, on_leave)
 
     #타이머 리셋 버튼
     button_reset_timer = Button(labelframe_timer, text="Reset", command=reset_timer)
     button_reset_timer.pack(side=LEFT)
-    button_reset_timer.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_reset_timer.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_reset_timer, "Reset timer", on_enter, on_leave)
+
 
     #타이머 시작
     start_button = Button(labelframe_timer, text="Start", command=start_stop)
     start_button.pack(side = LEFT)
-    start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(start_button, "Start timer", on_enter, on_leave)
 
     
     #additionals 카테고리
     # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
     text_box_button = Button(labelframe_additional, text="TEXTBOX", command=open_text_input_window)
     text_box_button.grid(row=1, column=1)
-    text_box_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    text_box_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(text_box_button, "Add textbox", on_enter, on_leave)
 
     #다이어그램
     button_use_case = Button(labelframe_additional, text="Case Diagram", command=choose_use_case_element) #추가 기능에 포함됨.
     button_use_case.grid(row=1, column=2) 
-    button_use_case.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_use_case.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-    
+    create_tool_tip(button_use_case, "Draw the components of a use case diagram", on_enter, on_leave)
+
     
     #이전 획 설정
     button_erase_last_stroke = Button(labelframe_additional, text="Undo", command=erase_last_stroke)
     button_erase_last_stroke.grid(row=2, column=1)
-    button_erase_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_erase_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_erase_last_stroke, "Undo stroke", on_enter, on_leave)
 
     button_redo_last_stroke = Button(labelframe_additional, text="Redo", command=rewrite_last_stroke)
     button_redo_last_stroke.grid(row=2, column=2)
-    button_redo_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_redo_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_redo_last_stroke, "Redo stroke", on_enter, on_leave)
 
     #all clear
     button_clear = Button(labelframe_additional, text="All Clear", command=lambda: clear_paint(canvas))
     button_clear.grid(row=1, column=3)
-    button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_clear, "Clear canvas's screen.", on_enter, on_leave)
 
     #도형 모양 선택하는 버튼 생성
     button_choose_shape = Button(labelframe_additional, text="shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
     button_choose_shape.grid(row=2,column=3)
-    button_choose_shape.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_choose_shape.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_choose_shape, "Choose shape", on_enter, on_leave)
 
     #filp 카테고리
     button_flip = Button(labelframe_flip, text="Horizontal", command=lambda: flip_horizontal(canvas))
     button_flip.pack(side=TOP)
-    button_flip.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_flip.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_flip, "Flip the canvas horizontally", on_enter, on_leave)
 
     button_flip_vertical = Button(labelframe_flip, text="Vertical", command=lambda: flip_vertical(canvas))
     button_flip_vertical.pack(side=TOP)
-    button_flip_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_flip_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    create_tool_tip(button_flip_vertical, "Flip the canvas vertically", on_enter, on_leave)
 
     
     #브러시  모드를 선택하는 콤보박스
     brush_combobox = ttk.Combobox(labelframe_brush, values=brush_modes, state="readonly")
     brush_combobox.current(0)
     brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
-    brush_combobox.pack(side=LEFT)
-    
+    brush_combobox.pack(side=LEFT)    
 
     # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
@@ -912,15 +941,23 @@ def setup_paint_app(window):
 
 
     # 에어브러쉬 속성 조절 버튼 추가
-    Button(labelframe_additional2, text="+", command=increase_dot_distance).pack(side=RIGHT)
+    airbrush_dot_distance_plus = Button(labelframe_additional2, text="+", command=increase_dot_distance)
+    airbrush_dot_distance_plus.pack(side=RIGHT)
     Label(labelframe_additional2, text="Distance").pack(side=RIGHT)
     Label(labelframe_additional2, textvariable=dot_distance).pack(side=RIGHT)  # 거리 표시
-    Button(labelframe_additional2, text="-", command=decrease_dot_distance).pack(side=RIGHT)
+    airbrush_dot_distance_minus = Button(labelframe_additional2, text="-", command=decrease_dot_distance)
+    airbrush_dot_distance_minus.pack(side=RIGHT)
+    create_tool_tip(airbrush_dot_distance_plus, "Increase the distance between dots from the airbrush", on_enter, on_leave)
+    create_tool_tip(airbrush_dot_distance_minus, "Decrease the distance between dots from the airbrush", on_enter, on_leave)
 
-    Button(labelframe_additional2, text="+", command=increase_dot_count).pack(side=RIGHT)
+    airbrush_size_button_plus = Button(labelframe_additional2, text="+", command=increase_dot_count)
+    airbrush_size_button_plus.pack(side=RIGHT)
     Label(labelframe_additional2, text="Count").pack(side=RIGHT)
     Label(labelframe_additional2, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
-    Button(labelframe_additional2, text="-", command=decrease_dot_count).pack(side=RIGHT)
+    airbrush_size_button_minus = Button(labelframe_additional2, text="-", command=decrease_dot_count)
+    airbrush_size_button_minus.pack(side=RIGHT)
+    create_tool_tip(airbrush_size_button_plus, "Increase the amount of dots from the airbrush", on_enter, on_leave)
+    create_tool_tip(airbrush_size_button_minus, "Decrease the amount of dots from the airbrush", on_enter, on_leave)
 
     # button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
     # button_paint.pack(side=RIGHT)
@@ -939,12 +976,12 @@ def setup_paint_app(window):
     brush_size_slider = Scale(labelframe_brush, from_=1, to=20, orient=HORIZONTAL, label="Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
+    create_tool_tip(brush_size_slider, "Adjust brush size", on_enter, on_leave)
 
     #브러시 line 모드(콤보 박스 통합X)
     button_line = Button(labelframe_brush, text="Line", command=lambda: set_brush_mode_line(canvas)) # 해당 기능은 브러시 모드 콤보 박스에 통합 시 기능이 작동안하는 문제가 발생함. 해결 전까지 RESET과 남겨두며, 위치만 이동 시킴.
     button_line.pack(side=RIGHT)
-    button_line.bind("<Enter>", on_enter)  
-    button_line.bind("<Leave>", on_leave)
+    create_tool_tip(brush_size_slider, "Brush line mode", on_enter, on_leave)
 
 
     window.bind("<F11>", toggle_fullscreen)
@@ -1857,6 +1894,7 @@ interval_label.pack()
 interval_entry = Entry(labelframe_additional2)
 interval_entry.pack()
 interval_entry.insert(0, "10")  # 기본값 설정
+create_tool_tip(interval_entry, "Adjust ruler interval size", on_enter, on_leave)
 
 canvas.bind("<Configure>", on_resize)
 
