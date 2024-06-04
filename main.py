@@ -606,6 +606,7 @@ def reset_brush(canvas):
     global brush_size, brush_color
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
+    spray_brush.set_brush_color("black")  #스프레이 브러시 색상 초기화
     change_brush_size(brush_size)  # 브러시 크기 조정
     canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
 
