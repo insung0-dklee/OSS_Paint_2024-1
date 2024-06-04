@@ -518,6 +518,7 @@ def change_brush_color(event=None):
     if selected_color:
         brush_color = selected_color
         set_brush_color(brush_color)
+        canvas.create_rectangle(10, 10, 100, 50, fill=brush_color, outline=brush_color, width=3) # 무슨 색을 사용하고 있는지 시각적으로 보여주는 기능 추가
 """
 TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
@@ -1858,6 +1859,8 @@ interval_label.pack()
 interval_entry = Entry(labelframe_additional2)
 interval_entry.pack()
 interval_entry.insert(0, "10")  # 기본값 설정
+
+canvas.create_rectangle(10, 10, 100, 50, fill=brush_color, outline=brush_color, width=3) # 무슨 색을 사용하고 있는지 시각적으로 보여주는 기능 추가(기본값 설정)
 
 canvas.bind("<Configure>", on_resize)
 
