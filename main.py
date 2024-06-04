@@ -8,6 +8,7 @@ button_delete : clear_paint의 버튼
 from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk 
+import itertools
 from tkinter import filedialog
 from tkinter import messagebox
 import time #시간 계산을 위한 모듈
@@ -45,6 +46,35 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+class AnimatedGIF:
+    def __init__(self, canvas, path, x=0, y=0):
+        self.canvas = canvas
+        self.x = x
+        self.y = y
+        self.frames = []
+        self.delay = 100
+
+        # GIF 이미지 파일 열기
+        self.image = Image.open(path)
+        if self.image.format != "GIF":
+            raise ValueError("Not a GIF file")
+
+        # GIF의 모든 프레임을 읽어들임
+        try:
+            for frame in itertools.count(1):
+                self.frames.append(ImageTk.PhotoImage(self.image.copy()))
+                self.image.seek(frame)
+        except EOFError:
+            pass
+
+        self.frame_count = len(self.frames)
+        self.current_frame = 0
+
+    def update_frame(self):
+        self.canvas.delete("gif")
+        self.canvas.create_image(self.x, self.y, anchor=NW, image=self.frames[self.current_frame], tags="gif")
+        self.current_frame = (self.current_frame + 1) % self.frame_count
+        self.canvas.after(self.delay, self.update_frame)
 
 # 벌집 색상 선택 함수
 def choose_hex_color():
@@ -204,20 +234,27 @@ def on_leave(event):
 def upload_image():
     path = filedialog.askopenfilename()
     if path:
-        # 업로드 파일이 JPG나 PNG 파일인지 확인
-        if not (path.lower().endswith('.png') or path.lower().endswith('.jpg')):
-            messagebox.showerror("잘못된 파일", "JPG나 PNG 파일만 업로드할 수 있습니다.")
+        # 업로드 파일이 JPG, PNG 또는 GIF 파일인지 확인
+        if not (path.lower().endswith('.png') or path.lower().endswith('.jpg') or path.lower().endswith('.gif')):
+            messagebox.showerror("잘못된 파일", "JPG, PNG 또는 GIF 파일만 업로드할 수 있습니다.")
             return
 
-        # 업로드 파일이 JPG나 PNG일 때 업로드 성공
+        # 업로드 파일이 JPG, PNG 또는 GIF일 때 업로드 성공
         try:
-            image = Image.open(path)
-            image = ImageTk.PhotoImage(image)
-            canvas.create_image(0, 0, anchor=NW, image=image)
-            canvas.image = image
+            if path.lower().endswith('.gif'):
+                # GIF 파일인 경우 애니메이션 클래스 사용
+                global animated_gif
+                animated_gif = AnimatedGIF(canvas, path)
+                animated_gif.update_frame()
+            else:
+                # PNG 또는 JPG 파일인 경우 정적 이미지로 표시
+                image = Image.open(path)
+                image = ImageTk.PhotoImage(image)
+                canvas.create_image(0, 0, anchor=NW, image=image)
+                canvas.image = image
         except Exception as e:
             messagebox.showerror("오류", f"이미지를 열 수 없습니다: {e}")
-            
+
 # 문자열 드래그 시작
 def start_drag(event):
     drag_data["item"] = canvas.find_closest(event.x, event.y)[0]
@@ -265,6 +302,8 @@ def add_text_to_canvas(text):
         canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
         canvas.tag_bind(text_item, "<B1-Motion>", drag)
         canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
+
+
 
 
 
@@ -608,20 +647,23 @@ def save_canvas(canvas):
     if file_path:
         canvas.postscript(file=file_path)
 
-def reset_brush(canvas):
-    global brush_size, brush_color
-    brush_size = 1  # 초기 브러시 크기
-    brush_color = "black"  # 초기 브러시 색상
-    change_brush_size(brush_size)  # 브러시 크기 조정
-    canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
+
 
 
 def setup_reset_brush_button(window, canvas):
-    global button_reset
+    global button_reset, brush_size_slider  # 브러시 크기 조정 슬라이더에 접근하기 위해 전역 변수로 선언
     button_reset = Button(labelframe_brush, text="Reset", command=lambda: reset_brush(canvas))
     button_reset.pack(side=BOTTOM)
     button_reset.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_reset.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+def reset_brush(canvas):
+    global brush_size, brush_color, brush_size_slider
+    brush_size = 1  # 초기 브러시 크기
+    brush_color = "black"  # 초기 브러시 색상
+    change_brush_size(brush_size)  # 브러시 크기 조정
+    canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
+    
 
 # 색 채우기 기능 추가
 def flood_fill(event):
@@ -821,9 +863,10 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
-    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
+    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness,label="brightness", length=200)
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
+
 
     #timer 카테고리
     # 타이머 멈춤 버튼
@@ -1571,6 +1614,9 @@ def rewrite_last_stroke(event=None): #마지막으로 지운 획을 다시 그�
         strokes.append(last_redo_stroke)
         for line in last_redo_stroke:
             canvas.create_line(*line, fill=brush_color, width=brush_size)
+            
+
+
 
 def start_new_line(event):
     global last_x, last_y
