@@ -31,7 +31,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush","spray"]
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush", "spray", "pencil"]
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -795,12 +795,6 @@ def setup_paint_app(window):
     button_honeycomb_color.pack(side=LEFT)
     button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    # 연필 브러시 버튼 추가
-    button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
-    button_pencil_brush.pack(side=LEFT)
-    button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
