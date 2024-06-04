@@ -1871,3 +1871,88 @@ update_timer()
 window.mainloop()
 
 
+# 누끼 따는 기능
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk, ImageDraw
+
+class NukiApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("누끼 따기 앱")
+
+        self.canvas = tk.Canvas(root, bg="white", width=800, height=600)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.image = None
+        self.image_on_canvas = None
+        self.mask = None
+        self.drawing = False
+        self.start_x = None
+        self.start_y = None
+
+        self.canvas.bind("<Button-1>", self.start_drawing)
+        self.canvas.bind("<B1-Motion>", self.draw)
+        self.canvas.bind("<ButtonRelease-1>", self.stop_drawing)
+
+        menu = tk.Menu(root)
+        root.config(menu=menu)
+        file_menu = tk.Menu(menu)
+        menu.add_cascade(label="파일", menu=file_menu)
+        file_menu.add_command(label="이미지 열기", command=self.open_image)
+        file_menu.add_command(label="저장", command=self.save_image)
+
+    def open_image(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")])
+        if file_path:
+            try:
+                self.image = Image.open(file_path).convert("RGBA")
+                self.mask = Image.new("L", self.image.size, 0)
+                self.display_image()
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to open image: {e}")
+
+    def display_image(self):
+        self.tk_image = ImageTk.PhotoImage(self.image)
+        if self.image_on_canvas:
+            self.canvas.delete(self.image_on_canvas)
+        self.image_on_canvas = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
+
+    def start_drawing(self, event):
+        if self.image:
+            self.drawing = True
+            self.start_x = event.x
+            self.start_y = event.y
+
+    def draw(self, event):
+        if self.drawing and self.image:
+            draw = ImageDraw.Draw(self.mask)
+            draw.line([self.start_x, self.start_y, event.x, event.y], fill=255, width=10)
+            self.start_x = event.x
+            self.start_y = event.y
+
+            temp_image = self.image.copy()
+            temp_image.putalpha(self.mask)
+            self.tk_image = ImageTk.PhotoImage(temp_image)
+            self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
+
+    def stop_drawing(self, event):
+        if self.drawing:
+            self.drawing = False
+
+    def save_image(self):
+        if self.image and self.mask:
+            result_image = self.image.copy()
+            result_image.putalpha(self.mask)
+            file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
+            if file_path:
+                try:
+                    result_image.save(file_path)
+                    print(f"이미지를 저장했습니다: {file_path}")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to save image: {e}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = NukiApp(root)
+    root.mainloop()
