@@ -815,7 +815,7 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
-    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
+    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', label = "brightness", command=set_brightness)
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
 
