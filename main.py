@@ -26,3 +26,33 @@ button_delete = Button(window, text="all clear", command=clear_paint)
 button_delete.pack()
 
 window.mainloop()
+
+import tkinter as tk
+from tkinter import font
+
+class TextEditor:
+    def __init__(self, master):
+        self.master = master
+        master.title("Text Editor")
+
+        # 텍스트 입력 영역 생성
+        self.text_area = tk.Text(master, font=("Arial", 16))
+        self.text_area.pack(fill=tk.BOTH, expand=True)
+
+        # 실행 취소 기능 구현
+        self.undo_stack = []
+        self.text_area.bind("<KeyRelease>", self.save_state)
+        self.undo_button = tk.Button(master, text="Undo", command=self.undo)
+        self.undo_button.pack(side=tk.BOTTOM)
+
+    def save_state(self, event):
+        self.undo_stack.append(self.text_area.get("1.0", tk.END))
+
+    def undo(self):
+        if self.undo_stack:
+            self.text_area.delete("1.0", tk.END)
+            self.text_area.insert("1.0", self.undo_stack.pop())
+
+root = tk.Tk()
+text_editor = TextEditor(root)
+root.mainloop()
