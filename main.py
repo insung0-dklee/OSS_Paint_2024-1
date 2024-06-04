@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import webbrowser
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -749,7 +750,12 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
-
+"""
+open_bgm_url : 백색소음이 검색되어 있는 youtube 웹사이트를 엽니다.
+import webbrowser를 미리 선언해야 합니다.
+"""
+def open_bgm_url():
+    webbrowser.open("https://www.youtube.com/results?search_query=%EB%B0%B1%EC%83%89%EC%86%8C%EC%9D%8C")
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
@@ -783,6 +789,10 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    # BGM 웹사이트 방문 기능 버튼
+    button = Button(window, text="BGM", command=open_bgm_url)
+    button.pack(side=RIGHT)
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
