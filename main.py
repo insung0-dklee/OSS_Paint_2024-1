@@ -307,3 +307,24 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PaintApp(root)
     root.mainloop()
+
+import subprocess
+import time
+
+def run_ms_paint():
+    try:
+        subprocess.Popen(['mspaint'])
+    except FileNotFoundError:
+        print("그림판이 설치되어 있지 않습니다.")
+
+if __name__ == "__main__":
+    start_time = time.time()
+    
+    # 그림판 실행
+    run_ms_paint()
+    
+    input("그림판을 종료하고 Enter를 누르세요.")
+    
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print("그림판 사용 시간:", elapsed_time, "초")
