@@ -43,6 +43,25 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+# 만화 컷 테두리 그리기 함수
+def draw_comic_cut(cut_number):
+    canvas.delete("all")  # 기존에 그려진 것을 지움
+    margin = 20  # 컷 사이의 간격
+    if cut_number == 1: # 1컷
+        canvas.create_rectangle(50, 50, 750, 550, outline="black", width=2)
+    elif cut_number == 2: # 2컷
+        canvas.create_rectangle(50, 50, 375 - margin//2, 550, outline="black", width=2)
+        canvas.create_rectangle(375 + margin//2, 50, 750, 550, outline="black", width=2)
+    elif cut_number == 3: # 3컷
+        canvas.create_rectangle(50, 50, 275 - margin//2, 550, outline="black", width=2)
+        canvas.create_rectangle(275 + margin//2, 50, 525 - margin//2, 550, outline="black", width=2)
+        canvas.create_rectangle(525 + margin//2, 50, 750, 550, outline="black", width=2)
+    elif cut_number == 4: # 4컷
+        canvas.create_rectangle(50, 50, 375 - margin//2, 300 - margin//2, outline="black", width=2)
+        canvas.create_rectangle(375 + margin//2, 50, 750, 300 - margin//2, outline="black", width=2)
+        canvas.create_rectangle(50, 300 + margin//2, 375 - margin//2, 550, outline="black", width=2)
+        canvas.create_rectangle(375 + margin//2, 300 + margin//2, 750, 550, outline="black", width=2)
+
 
 # 벌집 색상 선택 함수
 def choose_hex_color():
@@ -212,6 +231,7 @@ def upload_image():
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
 
+
 # 문자열 드래그 시작
 def start_drag(event):
     drag_data["item"] = canvas.find_closest(event.x, event.y)[0]
@@ -240,6 +260,7 @@ def end_drag(event):
 drag_data = {"item": None, "x": 0, "y": 0}
 drag_data = {"item": None, "x": 0, "y": 0}
 
+# 문자열 입력 후 클릭한 위치에 텍스트가 생성되도록 수정
 def open_text_input_window():
     # 문자열을 입력할 새로운 창 생성
     text_input_window = Toplevel(window)
@@ -250,31 +271,47 @@ def open_text_input_window():
     text_input.pack()
 
     # 확인 버튼 생성 및 클릭 이벤트 핸들러 설정
-    confirm_button = Button(text_input_window, text="확인", command=lambda: add_text_to_canvas(text_input.get("1.0", "end-1c")))
+    confirm_button = Button(text_input_window, text="확인", command=lambda: add_text_to_canvas(text_input, canvas, text_input_window))
     confirm_button.pack()
 
-def add_text_to_canvas(text):
-    if text.strip():  # 입력된 텍스트가 공백이 아닌 경우에만 캔버스에 추가
-        text_item = canvas.create_text(100, 100, text=text, fill="black", font=('Arial', 12))
-        canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
-        canvas.tag_bind(text_item, "<B1-Motion>", drag)
-        canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
+def add_text_to_canvas(text_input, canvas, text_input_window):
+    text = text_input.get("1.0", "end-1c")
+    if text.strip():  # 입력된 텍스트가 공백이 아닌 경우에만
+        # 캔버스 클릭 시 텍스트를 그리는 이벤트 바인딩
+        canvas.bind("<Button-1>", lambda event: create_text_at_click(event, canvas, text))
+        text_input.delete("1.0", END)  # 텍스트 입력 창 초기화
+        text_input_window.destroy() # 텍스트 입력 창 닫기
+
+def create_text_at_click(event, canvas, text):
+    x, y = event.x, event.y
+    text_item = canvas.create_text(x, y, text=text, fill="black", font=('Arial', 12))
+    # 드래그를 위한 바인딩
+    canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
+    canvas.tag_bind(text_item, "<B1-Motion>", drag)
+    canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
+    # 추가 후 다시 바인딩하지 않도록 바인딩 해제
+    canvas.unbind("<Button-1>")
 
 
 
-# 라인 브러쉬 기능 추가 
+# 라인 브러쉬 기능 수정 
 def set_brush_mode_line(canvas):
     canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
 
 def line_start(event, canvas):
     global x1, y1
     x1, y1 = event.x, event.y
-    canvas.bind("<Button-1>", lambda event: draw_line(event, canvas))
+    canvas.bind("<B1-Motion>", lambda event: draw_line(event, canvas))
+    # 마우스 버튼을 놓을 때 reset_line 함수를 호출하여 드래그 이벤트를 해제
+    canvas.bind("<ButtonRelease-1>", lambda event: reset_line(canvas))
 
 def draw_line(event, canvas):
     global x1, y1
-    canvas.create_line(x1, y1, x1, y1, event.x, event.y, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, event.x, event.y, fill=brush_color, width=2)
     x1, y1 = event.x, event.y
+
+def reset_line(canvas): # 마우스 드래그 이벤트를 해제하여 선 그리기를 멈춤
+    canvas.unbind("<B1-Motion>")
 
 #타이머 기능 추가
 timer = Timer()
@@ -970,11 +1007,23 @@ def setup_paint_app(window):
     color_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 색 관련 메뉴를 추가
     tool_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도구 관련 메뉴를 추가
     help_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도움 관련 메뉴를 추가
+    cartoon_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 만화 관련 메뉴를 추가
 
     menu_bar.add_cascade(label="File", menu=file_menu) # 'File' 메뉴를 매뉴바에 생성
     menu_bar.add_cascade(label="Color", menu=color_menu) # 'Color' 메뉴를 매뉴바에 생성
     menu_bar.add_cascade(label="Tools", menu=tool_menu) # 'Tools' 메뉴를 매뉴바에 생성
+    menu_bar.add_cascade(label="Cartoon", menu=cartoon_menu) # 'Cartoon' 메뉴를 메뉴바에 생성
     menu_bar.add_cascade(label="Help", menu=help_menu) # 'Help' 메뉴를 매뉴바에 생성
+    
+    # 컷 그리기 서브메뉴 생성
+    cut_menu = Menu(cartoon_menu, tearoff=0)
+    cartoon_menu.add_cascade(label="Draw Cut Borders", menu=cut_menu)
+
+    # 서브메뉴에 1, 2, 3, 4컷 옵션 추가
+    cut_menu.add_command(label="1 cut", command=lambda: draw_comic_cut(1))
+    cut_menu.add_command(label="2 cut", command=lambda: draw_comic_cut(2))
+    cut_menu.add_command(label="3 cut", command=lambda: draw_comic_cut(3))
+    cut_menu.add_command(label="4 cut", command=lambda: draw_comic_cut(4))
 
     file_menu.add_command(label="Open New Window", command=create_new_window) # File 메뉴에 Open New Window 기능 버튼 추가
     file_menu.add_command(label="Add Image", command=upload_image) # File 메뉴에 Add Image 기능 버튼 추가
