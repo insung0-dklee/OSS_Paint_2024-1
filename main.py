@@ -31,7 +31,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush","spray"]
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush","spray","pencil","line"]
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -281,8 +281,11 @@ timer = Timer()
 #타이머의 경과시간 업데이트 
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
-    timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
-    window.after(1000, update_timer)  # 1초마다 updatae_time 함수를 호출
+    hours = int(elapsed_time // 3600)
+    minutes = int((elapsed_time % 3600) // 60)
+    seconds = int(elapsed_time % 60)
+    timer_label.config(text=f"Time: {hours:02d}:{minutes:02d}:{seconds:02d}")  # 라벨에 표시
+    window.after(1000, update_timer)  # 1초마다 update_timer 함수를 호출
 #타이머 STOP
 def stop_timer():
     timer.stop()
@@ -420,6 +423,10 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<Button-1>", start_pencil)
         canvas.bind("<B1-Motion>", lambda event: pencil_brush(event, canvas))
         canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event))
+    elif brush_mode == "line":
+        canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
+
+
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -796,11 +803,7 @@ def setup_paint_app(window):
     button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    # 연필 브러시 버튼 추가
-    button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
-    button_pencil_brush.pack(side=LEFT)
-    button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    
 
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
@@ -815,7 +818,7 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
-    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
+    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', label="brightness",command=set_brightness) #라벨 작성 
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
 
@@ -940,12 +943,7 @@ def setup_paint_app(window):
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
 
-    #브러시 line 모드(콤보 박스 통합X)
-    button_line = Button(labelframe_brush, text="Line", command=lambda: set_brush_mode_line(canvas)) # 해당 기능은 브러시 모드 콤보 박스에 통합 시 기능이 작동안하는 문제가 발생함. 해결 전까지 RESET과 남겨두며, 위치만 이동 시킴.
-    button_line.pack(side=RIGHT)
-    button_line.bind("<Enter>", on_enter)  
-    button_line.bind("<Leave>", on_leave)
-
+   
 
     window.bind("<F11>", toggle_fullscreen)
 
