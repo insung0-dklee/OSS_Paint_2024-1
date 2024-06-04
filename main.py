@@ -103,6 +103,9 @@ def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="blac
                 canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
                                         outline=line_color, fill="")
 
+
+
+
 def start_pencil(event):
     global last_x, last_y
     last_x, last_y = None, None
@@ -960,6 +963,18 @@ def setup_paint_app(window):
     canvas.bind("<MouseWheel>", zoom_scroll)
     bind_shortcuts()
 
+
+    # 마우스 좌표를 표시하는 라벨 추가
+    position_label = Label(window, text="X: 0, Y: 0")
+    position_label.pack(side=BOTTOM)
+
+    # 마우스 좌표를 표시하는 함수 추가
+    def show_mouse_position(event):
+        x, y = event.x, event.y
+        position_label.config(text=f"X: {x}, Y: {y}")
+
+    # 마우스 이동 이벤트 바인딩
+    canvas.bind("<Motion>", show_mouse_position)
     
 
 #+=================================================================================
