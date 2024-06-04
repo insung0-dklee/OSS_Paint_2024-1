@@ -31,7 +31,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush","spray"]
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush","spray","pencil","line"] #연필 기능 통합
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -103,31 +103,11 @@ def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="blac
                 canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
                                         outline=line_color, fill="")
 
-def start_pencil(event):
-    global last_x, last_y
-    last_x, last_y = None, None
-    pencil_brush(event, canvas)
-
 def set_brightness(value):
     brightness = int(value) / 100  # 슬라이더 값(0-100)을 0-1 범위로 변환
     rgb = (int(255 * brightness), int(255 * brightness), int(255 * brightness))  # RGB 값 계산
     color = f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'  # RGB 값을 16진수 색상 코드로 변환
     canvas.configure(bg=color)
-
-def increase_brightness(event=None):
-    current_value = brightness_slider.get()
-    if current_value < 100:
-        brightness_slider.set(current_value + 5)  # 밝기를 5% 올리기
-        set_brightness(current_value + 5)
-
-def decrease_brightness(event=None):
-    current_value = brightness_slider.get()
-    if current_value > 0:
-        brightness_slider.set(current_value - 5)  # 밝기를 5% 낮추기
-        set_brightness(current_value - 5)
-
-
-
 
 #드래그로 그림 움직이기
 #오른쪽 마우스 눌렀을 때 드래그 시작하는 지점 좌표 기록
@@ -417,9 +397,8 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<B1-Motion>",  spray_brush.spray_paint)
         canvas.bind("<Button-1>",  spray_brush.spray_paint)
     elif brush_mode == "pencil":
-        canvas.bind("<Button-1>", start_pencil)
+        canvas.bind("<Button-1>", lambda event: pencil_brush(event, canvas))
         canvas.bind("<B1-Motion>", lambda event: pencil_brush(event, canvas))
-        canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event))
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -796,11 +775,6 @@ def setup_paint_app(window):
     button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    # 연필 브러시 버튼 추가
-    button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
-    button_pencil_brush.pack(side=LEFT)
-    button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
