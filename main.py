@@ -126,7 +126,24 @@ def decrease_brightness(event=None):
         brightness_slider.set(current_value - 5)  # 밝기를 5% 낮추기
         set_brightness(current_value - 5)
 
+def on_enter_clock(event):
+    event.widget.config(background='light blue')
 
+def on_leave_clock(event):
+    event.widget.config(background='gray')
+
+#실시간 시계 기능 
+def update_clock(button):
+    if is_24_hour_format:
+        current_time = time.strftime("%H:%M:%S")
+    else:
+        current_time = time.strftime("%I:%M:%S %p")
+    button.config(text=current_time)
+    button.after(1000, update_clock, button)
+
+def toggle_time_format():
+    global is_24_hour_format
+    is_24_hour_format = not is_24_hour_format
 
 
 #드래그로 그림 움직이기
@@ -766,7 +783,8 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
+    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2,is_24_hour_format
+    is_24_hour_format = True
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
@@ -847,6 +865,17 @@ def setup_paint_app(window):
     start_button.pack(side = LEFT)
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+     #시계 기능 추가(오른쪽 하단)
+    clock_button = Button(labelframe_timer, font=('calibri', 10, 'bold'), background='gray', foreground='white', command=toggle_time_format)
+    clock_button.pack(side=RIGHT)
+    update_clock(clock_button)
+    clock_button.bind("<Enter>", on_enter_clock)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    clock_button.bind("<Leave>", on_leave_clock)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+
+    frame_count = Frame(button_frame)
+    frame_count.pack(side=RIGHT)
 
     
     #additionals 카테고리
