@@ -31,7 +31,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker"]
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush","spray"]
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -78,17 +78,123 @@ class _tool_tip(object): # 툴팁을 생성하고 관리하는 클래스
 def create_tool_tip(widget, text, enter, leave): # 툴팁을 생성하는 기능
     toolTip = _tool_tip(widget)  # 툴팁 객체 생성
     def enter_event(event):
-        print("a")
         toolTip.showtip(text)  # 마우스가 위젯 위에 올라갔을 때 툴팁 표시
         enter(event)
     def leave_event(event):
-        print("b")
         toolTip.hidetip()  # 마우스가 위젯을 벗어났을 때 툴팁 제거
         leave(event)
     widget.bind('<Enter>', enter_event)
     widget.bind('<Leave>', leave_event)
     # 마우스가 올라갔을때를 판별하여 함수 실행
 #+=================================================================================
+
+# 벌집 색상 선택 함수
+def choose_hex_color():
+    color = askcolor()[1]
+    if color:
+        draw_honeycomb_pattern(canvas, hex_color=color)
+
+# 벌집 모양 패턴 함수
+def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    hex_height = math.sqrt(3) * hex_size  # 헥사곤의 높이 계산
+
+    def hex_corner(x, y, size, i):
+        angle_deg = 60 * i
+        angle_rad = math.pi / 180 * angle_deg
+        return x + size * math.cos(angle_rad), y + size * math.sin(angle_rad)
+
+    for y in range(0, canvas_height, int(hex_height)):
+        for x in range(0, canvas_width, int(3 * hex_size // 2)):
+            for dx in [0, hex_size * 3 // 2]:
+                for dy in [0, hex_height // 2]:
+                    hexagon = [hex_corner(x + dx, y + dy, hex_size, i) for i in range(6)]
+                    canvas.create_polygon(hexagon, outline=hex_color, fill='')
+
+# 연필 브러시 함수
+def pencil_brush(event, canvas):
+    global last_x, last_y, brush_size
+    if last_x is not None and last_y is not None:
+        dx = event.x - last_x
+        dy = event.y - last_y
+        distance = max(abs(dx), abs(dy))
+        for i in range(0, distance, 2):  # 이동 거리의 절반마다 포인트 추가
+            x = last_x + dx * i / distance
+            y = last_y + dy * i / distance
+            jitter_x = x + random.randint(-brush_size, brush_size)  # 브러시 크기에 따른 진동 효과
+            jitter_y = y + random.randint(-brush_size, brush_size)
+            canvas.create_line(jitter_x, jitter_y, jitter_x + 1, jitter_y + 1, fill=brush_color, width=brush_size/2)
+    last_x, last_y = event.x, event.y
+
+# 벽돌 색상 선택 함수
+def choose_brick_line_color():
+    color = askcolor()[1]
+    if color:
+        draw_brick_pattern(canvas, line_color=color)
+
+
+# 벽돌 모양 패턴 함수
+def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="black"):
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+
+    for y in range(0, canvas_height, brick_height):
+        for x in range(0, canvas_width, brick_width):
+            if (y // brick_height) % 2 == 0:
+                canvas.create_rectangle(x, y, x + brick_width, y + brick_height, outline=line_color, fill="")
+            else:
+                canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
+                                        outline=line_color, fill="")
+
+def start_pencil(event):
+    global last_x, last_y
+    last_x, last_y = None, None
+    pencil_brush(event, canvas)
+
+def set_brightness(value):
+    brightness = int(value) / 100  # 슬라이더 값(0-100)을 0-1 범위로 변환
+    rgb = (int(255 * brightness), int(255 * brightness), int(255 * brightness))  # RGB 값 계산
+    color = f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'  # RGB 값을 16진수 색상 코드로 변환
+    canvas.configure(bg=color)
+
+def increase_brightness(event=None):
+    current_value = brightness_slider.get()
+    if current_value < 100:
+        brightness_slider.set(current_value + 5)  # 밝기를 5% 올리기
+        set_brightness(current_value + 5)
+
+def decrease_brightness(event=None):
+    current_value = brightness_slider.get()
+    if current_value > 0:
+        brightness_slider.set(current_value - 5)  # 밝기를 5% 낮추기
+        set_brightness(current_value - 5)
+
+
+
+
+#드래그로 그림 움직이기
+#오른쪽 마우스 눌렀을 때 드래그 시작하는 지점 좌표 기록
+def start_move(event):
+    global last_x, last_y, is_moving
+    if event.num == 3:  # 오른쪽 버튼 클릭 여부 확인
+        last_x, last_y = event.x, event.y
+        is_moving = True
+#오른쪽 마우스 누르면 그려진 모든 요소들 이동
+def move(event):
+    global last_x, last_y, is_moving
+    if is_moving:
+        x_delta = event.x - last_x
+        y_delta = event.y - last_y
+        canvas.move("all", x_delta, y_delta)  # 그려진 모든 요소를 이동시킴
+        last_x, last_y = event.x, event.y
+#오른쪽 마우스 떼면 움직임 종료
+def end_move(event):
+    global is_moving
+    is_moving = False
+
+
+
 
 #+=================================================================================
 def close_program(): #프로그램을 종료하는 기능
@@ -103,11 +209,11 @@ is_dark_mode = False  # 기본 모드는 라이트 모드
 
 def toggle_dark_mode(): # 다크 모드를 토글하는 함수
     global is_dark_mode
-    if is_dark_mode: # 지금 다크 모드라면
-        apply_light_mode() # 라이트 모드 적용
-    else: # 지금 라이트 모드라면
-        apply_dark_mode() # 다크 모드 적용
-    is_dark_mode = not is_dark_mode # 다크 모드 상태 변경
+    is_dark_mode = not is_dark_mode  # 토글 동작을 상태 변경 전에 수행
+    if is_dark_mode:  # 지금 라이트 모드라면 [수정된 조건 검사]
+        apply_dark_mode()  # 다크 모드 적용
+    else: # 지금 다크 모드라면
+        apply_light_mode()  # 라이트 모드 적용
 
 def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
@@ -149,6 +255,56 @@ def upload_image():
         image = PhotoImage(file=path)
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
+
+# 문자열 드래그 시작
+def start_drag(event):
+    drag_data["item"] = canvas.find_closest(event.x, event.y)[0]
+    drag_data["x"] = event.x
+    drag_data["y"] = event.y
+    canvas.unbind("<B1-Motion>")
+
+# 문자열 드래그 중
+def drag(event):
+    if drag_data["item"]:
+        dx = event.x - drag_data["x"]
+        dy = event.y - drag_data["y"]
+        canvas.move(drag_data["item"], dx, dy)
+        drag_data["x"] = event.x
+        drag_data["y"] = event.y
+
+# 문자열 드래그 종료
+def end_drag(event):
+    drag_data["item"] = None
+    drag_data["x"] = 0
+    drag_data["y"] = 0
+    canvas.bind("<B1-Motion>", paint_stroke)
+
+#텍스트 박스 추가 기능
+# 문자열을 드래그하기 위한 변수
+drag_data = {"item": None, "x": 0, "y": 0}
+drag_data = {"item": None, "x": 0, "y": 0}
+
+def open_text_input_window():
+    # 문자열을 입력할 새로운 창 생성
+    text_input_window = Toplevel(window)
+    text_input_window.title("Text Input")
+
+    # 텍스트 입력 창 생성
+    text_input = Text(text_input_window, width=30, height=5)
+    text_input.pack()
+
+    # 확인 버튼 생성 및 클릭 이벤트 핸들러 설정
+    confirm_button = Button(text_input_window, text="확인", command=lambda: add_text_to_canvas(text_input.get("1.0", "end-1c")))
+    confirm_button.pack()
+
+def add_text_to_canvas(text):
+    if text.strip():  # 입력된 텍스트가 공백이 아닌 경우에만 캔버스에 추가
+        text_item = canvas.create_text(100, 100, text=text, fill="black", font=('Arial', 12))
+        canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
+        canvas.tag_bind(text_item, "<B1-Motion>", drag)
+        canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
+
+
 
 # 라인 브러쉬 기능 추가 
 def set_brush_mode_line(canvas):
@@ -226,6 +382,8 @@ def bind_shortcuts():
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
+    window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
+
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
@@ -296,6 +454,16 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     elif brush_mode == "marker":
         canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
         canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
+    elif brush_mode == "airbrush":
+        canvas.bind("<B1-Motion>", lambda event: paint_airbrush(event, canvas))
+        canvas.bind("<Button-1>", lambda event: paint_airbrush(event, canvas))
+    elif brush_mode == "spray":
+        canvas.bind("<B1-Motion>",  spray_brush.spray_paint)
+        canvas.bind("<Button-1>",  spray_brush.spray_paint)
+    elif brush_mode == "pencil":
+        canvas.bind("<Button-1>", start_pencil)
+        canvas.bind("<B1-Motion>", lambda event: pencil_brush(event, canvas))
+        canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event))
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -304,14 +472,34 @@ def change_brush_size(new_size):
     # spray의 크기를 변경하는 기능
     spray_brush.set_brush_size(brush_size)
 
-# 화면 확대 및 축소 기능 추가
-def zoom(event):
-    scale = 1.0
-    if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
-        scale = 1.1
-    elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
-        scale = 0.9
-    canvas.scale("all", event.x, event.y, scale, scale)
+def zoom_scroll(event):
+    # Ctrl 키가 눌려있는지 확인
+    if event.state & 0x0004:
+        scale = 1.0
+        if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
+            scale = 1.1
+        elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
+            scale = 0.9
+        canvas.scale("all", event.x, event.y, scale, scale)
+        canvas.configure(scrollregion=canvas.bbox("all"))
+    else:
+        # Ctrl 키가 눌려있지 않으면 스크롤
+        if event.delta > 0:
+            canvas.yview_scroll(-1, "units")  # 위로 스크롤
+        elif event.delta < 0:
+            canvas.yview_scroll(1, "units")  # 아래로 스크롤
+
+def horizontal_scroll(event):
+    if event.delta > 0:
+        canvas.xview_scroll(-1, "units")  # 왼쪽으로 스크롤
+    elif event.delta < 0:
+        canvas.xview_scroll(1, "units")  # 오른쪽으로 스크롤
+
+def on_button_press(event):
+    canvas.scan_mark(event.x, event.y)
+
+def on_mouse_drag(event):
+    canvas.scan_dragto(event.x, event.y, gain=1)
 
 #all clear 기능 추가
 def clear_paint(canvas):
@@ -454,7 +642,7 @@ def setup_palette(window):
 
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
-    file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PostScript files", "*.png"), ("All files", "*.*")])
     if file_path:
         canvas.postscript(file=file_path)
 
@@ -467,8 +655,9 @@ def reset_brush(canvas):
 
 
 def setup_reset_brush_button(window, canvas):
-    button_reset = Button(window, text="Reset Brush", command=lambda: reset_brush(canvas))
-    button_reset.pack(side=LEFT)
+    global button_reset
+    button_reset = Button(labelframe_brush, text="Reset", command=lambda: reset_brush(canvas))
+    button_reset.pack(side=BOTTOM)
     button_reset.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_reset.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
@@ -595,7 +784,7 @@ def choose_use_case_element(event=None):
     choose_use_case_element: 유스케이스 다이어그램 요소 선택 함수
     액터, 유스케이스, 관계를 선택할 수 있는 팝업 메뉴를 생성한다.
     """
-    popup = Menu(window, tearoff=0)
+    popup = Menu(labelframe_additional, tearoff=0)
     popup.add_command(label="Actor", command=add_actor) # 액터 추가
     popup.add_command(label="Use Case", command=add_use_case) # 유스케이스 추가
     popup.add_command(label="Relationship", command=add_relationship) # 관계 추가
@@ -607,127 +796,134 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame
+    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
 
     global canvas
     canvas = Canvas(window, bg="white")
-    canvas.pack(fill="both", expand=True)
+    canvas.pack(fill=BOTH, expand=True,side= BOTTOM)
 
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
-    button_frame = Frame(window,bg="sky blue")#구별하기 위한 버튼 영역 색 변경
+    
+
+    button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
 
-    button_toggle_mode = Button(window, text="Toggle Dark Mode", command=toggle_dark_mode)
-    button_toggle_mode.pack(side=LEFT) # 다크 모드 토글 버튼을 윈도우에 배치
-    create_tool_tip(button_toggle_mode, "turn the dark mode of the UI On/Off.", on_enter, on_leave)
+    labelframe_brush = LabelFrame(button_frame, text="brush mode") #브러시 설정을 정리한 프레임
+    labelframe_brush.pack(side = LEFT,fill=Y)
 
-    button_use_case = Button(button_frame, text="Use Case Diagram", command=choose_use_case_element)
-    button_use_case.pack(side=LEFT) # 유스케이스 다이어그램을 그릴 수 있는 버튼을 윈도우에 배치
-    create_tool_tip(button_use_case, "Draw the components of a use case diagram", on_enter, on_leave)
+    labelframe_flip = LabelFrame(button_frame, text="flip") #브러시 설정을 정리한 프레임
+    labelframe_flip.pack(side = LEFT,fill=Y)
 
-    button_clear = Button(window, text="All Clear", command=lambda: clear_paint(canvas))
-    button_clear.pack(side=LEFT)
-    create_tool_tip(button_clear, "All clear canvas's screen.", on_enter, on_leave)
+    labelframe_timer = LabelFrame(button_frame, text="timer") #타이머 설정을 정리한 프레임
+    labelframe_timer.pack(side = LEFT,fill=Y)
 
+    labelframe_additional = LabelFrame(button_frame,text="additionals") # 추가 기능 설정을 정리한 프레임
+    labelframe_additional.pack(side = LEFT,fill=Y)
+
+    labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
+    labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    # 벌집 모양 패턴 버튼
+    button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
+    button_honeycomb.pack(side=LEFT)
+    create_tool_tip(button_honeycomb, "Add honeycomb pattern", on_enter, on_leave)
+
+    # 벌집 모양 패턴 색상 선택 버튼
+    button_honeycomb_color = Button(window, text="Choose Honeycomb Color", command=choose_hex_color)
+    button_honeycomb_color.pack(side=LEFT)
+    create_tool_tip(button_honeycomb_color, "Adjust honeycomb pattern color", on_enter, on_leave)
+
+    # 연필 브러시 버튼 추가
+    button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
+    button_pencil_brush.pack(side=LEFT)
+    create_tool_tip(button_pencil_brush, "Select pencil brush", on_enter, on_leave)
+
+    # 벽돌 패턴 버튼
+    button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
+    button_brick_pattern.pack(side=LEFT)
+    create_tool_tip(button_brick_pattern, "Add brick pattern", on_enter, on_leave)
+
+    # 벽돌 패턴 색상 선택 버튼
+    button_brick_line_color = Button(window, text="Choose Brick Line Color", command=choose_brick_line_color)
+    button_brick_line_color.pack(side=LEFT)
+    create_tool_tip(button_brick_line_color, "Adjust brick pattern color", on_enter, on_leave)
+
+    # 밝기 슬라이더
+    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
+    brightness_slider.set(100)  # 초기 밝기를 100%로 설정
+    brightness_slider.pack(pady=20)
+    create_tool_tip(brightness_slider, "Adjust canvers bright", on_enter, on_leave)
+
+    #timer 카테고리
     # 타이머 멈춤 버튼
-    button_stop_timer = Button(button_frame, text="Stop Timer", command=stop_timer)
-    button_stop_timer.pack(side=RIGHT)
-    create_tool_tip(button_stop_timer, "Stop the timer", on_enter, on_leave)
+    button_stop_timer = Button(labelframe_timer, text="Stop", command=stop_timer)
+    button_stop_timer.pack(side=LEFT)
+    create_tool_tip(button_stop_timer, "Stop timer", on_enter, on_leave)
 
     #타이머 리셋 버튼
-    button_reset_timer = Button(button_frame, text="Reset Timer", command=reset_timer)
-    button_reset_timer.pack(side=RIGHT)
-    create_tool_tip(button_reset_timer, "Reset the timer", on_enter, on_leave)
-
-    start_button = Button(button_frame, text="Start", command=start_stop)
-    start_button.pack(side = RIGHT)
-    create_tool_tip(start_button, "Start the timer", on_enter, on_leave)
-
-    
-
-    #spray 인스턴스 생성 
-    global spray_brush
-    spray_brush = SprayBrush(canvas, brush_color)
-    
-
-    button_erase_last_stroke = Button(button_frame, text="Erase Last Stroke", command=erase_last_stroke)
-    button_erase_last_stroke.pack(side=LEFT)
-    create_tool_tip(button_erase_last_stroke, "Erase last stroke", on_enter, on_leave)
-
-    button_redo_last_stroke = Button(button_frame, text="Rewrite Last Stroke", command=rewrite_last_stroke)
-    button_redo_last_stroke.pack(side=LEFT)
-    create_tool_tip(button_redo_last_stroke, "Rewrite last stroke", on_enter, on_leave)
+    button_reset_timer = Button(labelframe_timer, text="Reset", command=reset_timer)
+    button_reset_timer.pack(side=LEFT)
+    create_tool_tip(button_reset_timer, "Reset timer", on_enter, on_leave)
 
 
-    brush_size_slider = Scale(button_frame, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
-    brush_size_slider.set(brush_size)
-    brush_size_slider.pack(side=LEFT)
-    create_tool_tip(brush_size_slider, "Adjust the brush size", on_enter, on_leave)
-    
+    #타이머 시작
+    start_button = Button(labelframe_timer, text="Start", command=start_stop)
+    start_button.pack(side = LEFT)
+    create_tool_tip(start_button, "Start timer", on_enter, on_leave)
 
     
+    #additionals 카테고리
+    # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
+    text_box_button = Button(labelframe_additional, text="TEXTBOX", command=open_text_input_window)
+    text_box_button.grid(row=1, column=1)
+    create_tool_tip(text_box_button, "Add textbox", on_enter, on_leave)
 
-    setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
+    #다이어그램
+    button_use_case = Button(labelframe_additional, text="Case Diagram", command=choose_use_case_element) #추가 기능에 포함됨.
+    button_use_case.grid(row=1, column=2) 
+    create_tool_tip(button_use_case, "Draw the components of a use case diagram", on_enter, on_leave)
 
-    button_line = Button(window, text="Line Brush", command=lambda: set_brush_mode_line(canvas))
-    button_line.pack(side=LEFT)
-    create_tool_tip(button_line, "Select Line brush", on_enter, on_leave)
-
-    # 스프레이 버튼
-    button_spray = Button(window, text="spray", command=lambda: canvas.bind("<B1-Motion>", spray_brush.spray_paint))
-    button_spray.pack(side=LEFT)
-    create_tool_tip(button_spray, "Select spray brush", on_enter, on_leave)
-
-    button_paint = Button(window, text="normal", command=lambda: set_paint_mode_normal(canvas))
-    button_paint.pack(side=RIGHT)
-    create_tool_tip(button_paint, "Select normal brush", on_enter, on_leave)
-
-    button_paint = Button(window, text="pressure", command=lambda: set_paint_mode_pressure(canvas))
-    button_paint.pack(side=RIGHT)
-    create_tool_tip(button_paint, "Select pressure brush", on_enter, on_leave)
-
-    text_box = Entry(window)
-    text_box.pack(side=LEFT)
-
-    canvas.bind("<Button-3>", lambda event: add_text(event, canvas, text_box))
-    window.bind("<F11>", toggle_fullscreen)
-
-    button_flip = Button(window, text="Flip Horizontal", command=lambda: flip_horizontal(canvas))
-    button_flip.pack(side=LEFT)
-    create_tool_tip(button_flip, "Flip the canvas horizontally", on_enter, on_leave)
-
-    button_flip_vertical = Button(window, text="Flip Vertical", command=lambda: flip_vertical(canvas))
-    button_flip_vertical.pack(side=LEFT)
-    create_tool_tip(button_flip_vertical, "Flip the canvas vertically", on_enter, on_leave)
-
-    canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
-
-    brush_combobox = ttk.Combobox(button_frame, values=brush_modes, state="readonly")
-    brush_combobox.current(0)
-    brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
-    brush_combobox.pack(side=LEFT)
     
+    #이전 획 설정
+    button_erase_last_stroke = Button(labelframe_additional, text="Undo", command=erase_last_stroke)
+    button_erase_last_stroke.grid(row=2, column=1)
+    create_tool_tip(button_erase_last_stroke, "Undo stroke", on_enter, on_leave)
+
+    button_redo_last_stroke = Button(labelframe_additional, text="Redo", command=rewrite_last_stroke)
+    button_redo_last_stroke.grid(row=2, column=2)
+    create_tool_tip(button_redo_last_stroke, "Redo stroke", on_enter, on_leave)
+
+    #all clear
+    button_clear = Button(labelframe_additional, text="All Clear", command=lambda: clear_paint(canvas))
+    button_clear.grid(row=1, column=3)
+    create_tool_tip(button_clear, "Clear canvas's screen.", on_enter, on_leave)
 
     #도형 모양 선택하는 버튼 생성
-    button_choose_shape = Button(window, text="shape", command=choose_shape)
+    button_choose_shape = Button(labelframe_additional, text="shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
-    button_choose_shape.pack(side=LEFT)
-    create_tool_tip(button_choose_shape, "Select the shape", on_enter, on_leave)
+    button_choose_shape.grid(row=2,column=3)
+    create_tool_tip(button_choose_shape, "Choose shape", on_enter, on_leave)
 
-    canvas.bind("<Enter>", change_cursor)
-    canvas.bind("<Leave>", default_cursor)
+    #filp 카테고리
+    button_flip = Button(labelframe_flip, text="Horizontal", command=lambda: flip_horizontal(canvas))
+    button_flip.pack(side=TOP)
+    create_tool_tip(button_flip, "Flip the canvas horizontally", on_enter, on_leave)
 
-    canvas.bind("<Button-3>", show_coordinates)
-    canvas.bind("<ButtonRelease-3>", hide_coordinates)
+    button_flip_vertical = Button(labelframe_flip, text="Vertical", command=lambda: flip_vertical(canvas))
+    button_flip_vertical.pack(side=TOP)
+    create_tool_tip(button_flip_vertical, "Flip the canvas vertically", on_enter, on_leave)
 
-    canvas.bind("<MouseWheel>", zoom)
-
-    bind_shortcuts()
+    
+    #브러시  모드를 선택하는 콤보박스
+    brush_combobox = ttk.Combobox(labelframe_brush, values=brush_modes, state="readonly")
+    brush_combobox.current(0)
+    brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
+    brush_combobox.pack(side=LEFT)    
 
     # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
@@ -745,25 +941,61 @@ def setup_paint_app(window):
 
 
     # 에어브러쉬 속성 조절 버튼 추가
-    Button(frame_distance, text="+", command=increase_dot_distance).pack(side=RIGHT)
-    Label(frame_distance, text="Distance").pack(side=RIGHT)
-    Label(frame_distance, textvariable=dot_distance).pack(side=RIGHT)  # 거리 표시
-    Button(frame_distance, text="-", command=decrease_dot_distance).pack(side=RIGHT)
+    airbrush_dot_distance_plus = Button(labelframe_additional2, text="+", command=increase_dot_distance)
+    airbrush_dot_distance_plus.pack(side=RIGHT)
+    Label(labelframe_additional2, text="Distance").pack(side=RIGHT)
+    Label(labelframe_additional2, textvariable=dot_distance).pack(side=RIGHT)  # 거리 표시
+    airbrush_dot_distance_minus = Button(labelframe_additional2, text="-", command=decrease_dot_distance)
+    airbrush_dot_distance_minus.pack(side=RIGHT)
+    create_tool_tip(airbrush_dot_distance_plus, "Increase the distance between dots from the airbrush", on_enter, on_leave)
+    create_tool_tip(airbrush_dot_distance_minus, "Decrease the distance between dots from the airbrush", on_enter, on_leave)
 
-    Button(frame_count, text="+", command=increase_dot_count).pack(side=RIGHT)
-    Label(frame_count, text="Count").pack(side=RIGHT)
-    Label(frame_count, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
-    Button(frame_count, text="-", command=decrease_dot_count).pack(side=RIGHT)
+    airbrush_size_button_plus = Button(labelframe_additional2, text="+", command=increase_dot_count)
+    airbrush_size_button_plus.pack(side=RIGHT)
+    Label(labelframe_additional2, text="Count").pack(side=RIGHT)
+    Label(labelframe_additional2, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
+    airbrush_size_button_minus = Button(labelframe_additional2, text="-", command=decrease_dot_count)
+    airbrush_size_button_minus.pack(side=RIGHT)
+    create_tool_tip(airbrush_size_button_plus, "Increase the amount of dots from the airbrush", on_enter, on_leave)
+    create_tool_tip(airbrush_size_button_minus, "Decrease the amount of dots from the airbrush", on_enter, on_leave)
 
-    button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
-    button_paint.pack(side=RIGHT)
-    create_tool_tip(button_paint, "Select air brush", on_enter, on_leave)
+    # button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
+    # button_paint.pack(side=RIGHT)
+    # button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    # button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
+    #spray 인스턴스 생성 
+    global spray_brush
+    spray_brush = SprayBrush(canvas, brush_color)
+
+    #브러시 크기 조정 슬라이더
+    brush_size_slider = Scale(labelframe_brush, from_=1, to=20, orient=HORIZONTAL, label="Size", command=change_brush_size)
+    brush_size_slider.set(brush_size)
+    brush_size_slider.pack(side=LEFT)
+    create_tool_tip(brush_size_slider, "Adjust brush size", on_enter, on_leave)
+
+    #브러시 line 모드(콤보 박스 통합X)
+    button_line = Button(labelframe_brush, text="Line", command=lambda: set_brush_mode_line(canvas)) # 해당 기능은 브러시 모드 콤보 박스에 통합 시 기능이 작동안하는 문제가 발생함. 해결 전까지 RESET과 남겨두며, 위치만 이동 시킴.
+    button_line.pack(side=RIGHT)
+    create_tool_tip(brush_size_slider, "Brush line mode", on_enter, on_leave)
+
+
+    window.bind("<F11>", toggle_fullscreen)
+
+    canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
+
     set_paint_mode_normal(canvas)
+    setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
+    canvas.bind("<Enter>", change_cursor)
+    canvas.bind("<Leave>", default_cursor)
+    canvas.bind("<Button-3>", show_coordinates)
+    canvas.bind("<ButtonRelease-3>", hide_coordinates)
+    canvas.bind("<MouseWheel>", zoom_scroll)
+    bind_shortcuts()
 
     
 
@@ -794,46 +1026,12 @@ def setup_paint_app(window):
     tool_menu.add_command(label="Toggle Ruler", command=toggle_ruler) # Tools 메뉴에 Toggle Ruler 기능 버튼 추가
     tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas)) # Tools 메뉴에 Toggle Grid 기능 버튼 추가
     tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
+    tool_menu.add_command(label="dark mode", command=toggle_dark_mode) # 다크 모드를 Tools 메뉴로 이동
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
     
-    # button_new_window = Button(window, text="새 창 열기", command=create_new_window)
-    # button_new_window.pack(side=LEFT)
-
-    # toggle_button = Button(window, text="Ruler", command=toggle_ruler)
-    # toggle_button.pack()
-
-    # 팔레트 설정 버튼 생성 및 버튼 프레임에 추가
-    # button_palette = Button(button_frame, text="Set Palette", command=lambda: setup_palette(window))
-    # button_palette.pack(side=LEFT)
-
-    # # 보조선을 토글하는 버튼
-    # button_toggle_grid = Button(window, text="Grid on/off", command=lambda: toggle_grid(canvas))
-    # button_toggle_grid.pack(side=LEFT)
-
-    # # 보조선 크기 설정
-    # button_grid_settings = Button(window, text="Grid setting", command=open_grid_dialog)
-    # button_grid_settings.pack()
-
-    # button_bg_color = Button(window, text="Change Background Color", command=lambda: change_bg_color(canvas))
-    # button_bg_color.pack(side=LEFT)
-    # button_bg_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    # button_bg_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    # button_brush_color = Button(window, text="Change Brush Color", command=lambda: change_brush_color())
-    # button_brush_color.pack(side=LEFT)
-    # button_brush_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    # button_brush_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    # # 버튼 프레임에 저장 버튼 추가
-    # button_save = Button(window, text="Save", command=lambda: save_canvas(canvas))
-    # button_save.pack(side=LEFT)
-
-    # button_upload_image = Button(window, text="Upload Image", command=upload_image)
-    # button_upload_image.pack(side=LEFT)
-
-
+    
 # 새 창 열기 생성
 def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
@@ -1186,9 +1384,156 @@ def finish_diamond(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+# 화살표 그리기
+def create_arrow(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_arrow)
+# 화살표 그릴 위치 정하고 생성하는 함수 호출
+def start_arrow(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", draw_arrow)
+    canvas.bind("<ButtonRelease-1>", finish_arrow)
+#화살표 생성하기
+def draw_arrow(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    end_x, end_y = event.x, event.y
+    # 화살표의 선 부분
+    current_shape = canvas.create_line(start_x, start_y, end_x, end_y, fill=shape_outline_color, tags="temp_shape")
+    # 화살표 머리 부분 계산
+    arrow_size = 10
+    angle = math.atan2(end_y - start_y, end_x - start_x)
+    left_x = end_x - arrow_size * math.cos(angle - math.pi / 6)
+    left_y = end_y - arrow_size * math.sin(angle - math.pi / 6)
+    right_x = end_x - arrow_size * math.cos(angle + math.pi / 6)
+    right_y = end_y - arrow_size * math.sin(angle + math.pi / 6)
+    canvas.create_polygon(end_x, end_y, left_x, left_y, right_x, right_y, fill=shape_outline_color, outline=shape_outline_color, tags="temp_shape")
+#화살표 그리기 종료
+def finish_arrow(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+# 정오각형 그리기
+def create_pentagon(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_pentagon)
+
+# 정오각형 시작 지점 설정 및 함수 호출
+def start_pentagon(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_pentagon(event))
+    canvas.bind("<ButtonRelease-1>", finish_pentagon)
+
+"""
+radius : 오각형의 중심으로 부터 꼭짓점까지의 거리
+angle : 오각형의 각 꼭짓점을 찾기 위해 사용하는 각도의 값
+"""
+# 정오각형 그리기 함수
+def draw_pentagon(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    radius = math.sqrt((event.x - start_x)**2 + (event.y - start_y)**2)
+    points = []
+    for i in range(5):
+        angle = 2 * math.pi / 5 * i + 60
+        x = start_x + radius * math.cos(angle)
+        y = start_y + radius * math.sin(angle)
+        points.extend([x, y])
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 정오각형 그리기 종료
+def finish_pentagon(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+def create_V(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_V)
+
+# 체크 도형 그릴 위치 정하고 생성하는 함수 호출
+def start_V(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_V(event))
+    canvas.bind("<ButtonRelease-1>", finish_cross)
+
+# 체크 도형 생성하기
+def draw_V(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    width = abs(start_x - event.x)  # 가로 길이
+    height = abs(start_y - event.y)  # 세로 길이
+    cross_width = min(width, height) / 3
+
+
+    points = [
+        start_x,start_y,
+        start_x + width/3, start_y,  
+        start_x + width/2, start_y + height-width/3, 
+        start_x + width*2/3, start_y, 
+        event.x, start_y,  
+        start_x + width/2, event.y,  
+        ]
+
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+    # 육각형 도형 그리기
+def create_hexagon(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_hexagon)
+
+# 육각형 도형 시작점 지정 및 그리기 함수 호출
+def start_hexagon(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", lambda event: draw_hexagon(event))
+    canvas.bind("<ButtonRelease-1>", finish_hexagon)
+
+"""
+육각형 그리기 함수
+mid_x : 각 변의 중점의 x 좌표
+mid_y : 각 변의 중점의 y 좌표
+x : 각 꼭짓점의 x 좌표
+y : 각 꼭짓점의 y 좌표
+"""
+def draw_hexagon(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    mid_x = (start_x + event.x) / 2
+    mid_y = (start_y + event.y) / 2
+
+    # 육각형 꼭짓점 계산
+    points = []
+    for i in range(6):
+        angle = (2 * math.pi / 6) * i
+        x = mid_x + math.cos(angle) * (event.x - start_x) / 2
+        y = mid_y + math.sin(angle) * (event.y - start_y) / 2
+        points.extend([x, y])
+    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+# 육각형 그리기 종료
+def finish_hexagon(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
-    popup = Menu(window, tearoff=0)
+    popup = Menu(labelframe_additional, tearoff=0)
     popup.add_command(label="Rectangle", command=lambda: create_rectangle(event))
     popup.add_command(label="Triangle", command=lambda: create_triangle(event))
     popup.add_command(label="Circle", command=lambda: create_circle(event))
@@ -1197,8 +1542,23 @@ def choose_shape(event):
     popup.add_command(label="Heart", command=lambda: create_heart(event))
     popup.add_command(label="Cross", command=lambda: create_cross(event))
     popup.add_command(label="Diamond", command=lambda: create_diamond(event))
+    popup.add_command(label="Arrow", command=lambda: create_arrow(event))
+    popup.add_command(label="V", command=lambda: create_V(event))
+    popup.add_command(label="Hexagon", command=lambda: create_hexagon(event))
+    popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
+
+def get_canvas_resolution(canvas):
+    # 캔버스의 해상도(너비와 높이)를 반환하는 함수
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+    return width, height
+
+def print_canvas_resolution(canvas):
+    # 캔버스의 해상도(너비와 높이)를 출력하는 함수
+    width, height = get_canvas_resolution(canvas)
+    print("Canvas resolution:", width, "x", height)
 
 """
 그림그리는 것을 획 단위로 그리도록 개선, 획 단위로 지우는 지우개 기능 추가, 지웠던 획을 다시 되돌리는 기능 추가
@@ -1212,12 +1572,12 @@ redo_strokes = []
 
 def paint_start(event): #획 시작
     global x1, y1, current_stroke
-    x1, y1 = event.x, event.y
+    x1, y1 = canvas.canvasx(event.x), canvas.canvasy(event.y)
     current_stroke = []
 
 def paint_stroke(event): #획 그림
     global x1, y1, current_stroke
-    x2, y2 = event.x, event.y
+    x2, y2 = canvas.canvasx(event.x), canvas.canvasy(event.y)
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size, capstyle=ROUND)
     current_stroke.append((x1, y1, x2, y2))
     x1, y1 = x2, y2
@@ -1236,7 +1596,7 @@ def erase_last_stroke(event=None): #마지막으로 그린 획을 지움
         for line in last_stroke:
             canvas.create_line(*line, fill="white", width=brush_size)
 
-def rewrite_last_stroke(): #마지막으로 지운 획을 다시 그림
+def rewrite_last_stroke(event=None): #마지막으로 지운 획을 다시 그림
     if redo_strokes:
         last_redo_stroke = redo_strokes.pop()
         strokes.append(last_redo_stroke)
@@ -1261,7 +1621,7 @@ def double_line_paint(event, canvas):
         # 첫 번째 선 그리기
         canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color, capstyle=ROUND)
         # 두 번째 선 그리기
-        canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color, capstyle=ROUND)
+        canvas.create_line(last_x + dx, last_y + dy, event.x + dx, event.y + dy, width=brush_size, fill=brush_color, capstyle=ROUND)
 
         last_x, last_y = event.x, event.y
     else:
@@ -1488,58 +1848,9 @@ setup_paint_app(window)
 editor = ImageEditor(canvas)
 
 # 타이머 라벨
-timer_label = Label(window, text="Time: 0 s")
+timer_label = Label(labelframe_timer, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
 
-#텍스트 박스 추가 기능
-# 문자열을 드래그하기 위한 변수
-drag_data = {"item": None, "x": 0, "y": 0}
-drag_data = {"item": None, "x": 0, "y": 0}
-
-def open_text_input_window():
-    # 문자열을 입력할 새로운 창 생성
-    text_input_window = Toplevel(window)
-    text_input_window.title("Text Input")
-
-    # 텍스트 입력 창 생성
-    text_input = Text(text_input_window, width=30, height=5)
-    text_input.pack()
-
-    # 확인 버튼 생성 및 클릭 이벤트 핸들러 설정
-    confirm_button = Button(text_input_window, text="확인", command=lambda: add_text_to_canvas(text_input.get("1.0", "end-1c")))
-    confirm_button.pack()
-
-def add_text_to_canvas(text):
-    if text.strip():  # 입력된 텍스트가 공백이 아닌 경우에만 캔버스에 추가
-        text_item = canvas.create_text(100, 100, text=text, fill="black", font=('Arial', 12))
-        canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
-        canvas.tag_bind(text_item, "<B1-Motion>", drag)
-        canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
-
-
-
-# 문자열 드래그 시작
-def start_drag(event):
-    drag_data["item"] = canvas.find_closest(event.x, event.y)[0]
-    drag_data["x"] = event.x
-    drag_data["y"] = event.y
-    canvas.unbind("<B1-Motion>")
-
-# 문자열 드래그 중
-def drag(event):
-    if drag_data["item"]:
-        dx = event.x - drag_data["x"]
-        dy = event.y - drag_data["y"]
-        canvas.move(drag_data["item"], dx, dy)
-        drag_data["x"] = event.x
-        drag_data["y"] = event.y
-
-# 문자열 드래그 종료
-def end_drag(event):
-    drag_data["item"] = None
-    drag_data["x"] = 0
-    drag_data["y"] = 0
-    canvas.bind("<B1-Motion>", paint_stroke)
 
 #작업 시작 시간 기능
 def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
@@ -1550,13 +1861,8 @@ current_time = time.localtime()
 initial_hours = current_time.tm_hour
 initial_minutes = current_time.tm_min 
 
-time_label = Label(window, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
+time_label = Label(labelframe_timer, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
 time_label.pack()
-
-# "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
-text_box_button = Button(window, text="TEXTBOX", command=open_text_input_window)
-text_box_button.pack()
-create_tool_tip(text_box_button, "Add textbox", on_enter, on_leave)
 
 # 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
@@ -1576,15 +1882,19 @@ ruler_on = False
 ruler_lines = []
 ruler_texts = []
 
-
+# 오른쪽 버튼 드래그 이벤트 바인딩
+canvas.bind("<ButtonPress-3>", start_move)
+canvas.bind("<B3-Motion>", move)
+canvas.bind("<ButtonRelease-3>", end_move)
 
 # 눈금자 간격 입력 레이블
-interval_label = Label(window, text="Ruler Interval:")
+interval_label = Label(labelframe_additional2, text="Ruler Interval:")
 interval_label.pack()
 
-interval_entry = Entry(window)
+interval_entry = Entry(labelframe_additional2)
 interval_entry.pack()
 interval_entry.insert(0, "10")  # 기본값 설정
+create_tool_tip(interval_entry, "Adjust ruler interval size", on_enter, on_leave)
 
 canvas.bind("<Configure>", on_resize)
 
