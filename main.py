@@ -170,6 +170,14 @@ def add_text():
             canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
             canvas.image = tk_image
 
+def sharpen_image():
+    global image, tk_image
+    if image:
+        image = image.filter(ImageFilter.SHARPEN)
+        tk_image = ImageTk.PhotoImage(image)
+        canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+        canvas.image = tk_image
+
 
 
 root = tk.Tk()
@@ -249,6 +257,9 @@ entry_block_size.pack(side=tk.LEFT)
 
 text_button = tk.Button(root, text="텍스트 추가", command=add_text)
 text_button.pack(side=tk.LEFT)
+
+sharpen_button = tk.Button(root, text="날카로움 필터링", command=sharpen_image)
+sharpen_button.pack(side=tk.LEFT)
 
 root.mainloop()
 
