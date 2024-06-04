@@ -256,3 +256,84 @@ button_save.pack(side=LEFT)
 
 window.mainloop()
 
+from tkinter import *
+from tkinter.colorchooser import askcolor
+from tkinter import filedialog
+from PIL import Image
+
+# 초기 설정 값들
+current_color = "black"
+x1, y1 = None, None  # 직선 시작 좌표 초기화
+
+def change_brush_color():
+    global current_color
+    color = askcolor()[1]
+    if color:
+        current_color = color
+
+def paint(event):
+    x1, y1 = (event.x - 1), (event.y - 1)
+    x2, y2 = (event.x + 1), (event.y + 1)
+    canvas.create_oval(x1, y1, x2, y2, fill=current_color, outline=current_color)
+
+def start_line(event):
+    global x1, y1
+    x1, y1 = event.x, event.y
+
+def draw_line(event):
+    global x1, y1
+    x2, y2 = event.x, event.y
+    canvas.create_line(x1, y1, x2, y2, fill=current_color, width=2)
+    x1, y1 = x2, y2
+
+def set_draw_mode(mode):
+    if mode == "line":
+        canvas.bind("<Button-1>", start_line)
+        canvas.bind("<B1-Motion>", draw_line)
+    else:
+        canvas.bind("<B1-Motion>", paint)
+
+def save_image():
+    file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
+    if file_path:
+        canvas.update()
+        canvas.postscript(file="tmp_canvas.ps", colormode='color')
+        img = Image.open("tmp_canvas.ps")
+        img.save(file_path, "png")
+
+window = Tk()
+window.title("그림판")
+
+canvas = Canvas(window, bg="white")
+canvas.pack(fill="both", expand=True)
+
+# 기본 그리기 기능 설정
+canvas.bind("<B1-Motion>", paint)
+
+button_frame = Frame(window)
+button_frame.pack(fill=X)
+
+button_clear = Button(button_frame, text="All Clear", command=lambda: canvas.delete("all"))
+button_clear.pack(side=LEFT)
+
+button_brush_color = Button(button_frame, text="Change Brush Color", command=change_brush_color)
+button_brush_color.pack(side=LEFT)
+
+button_save = Button(button_frame, text="Save", command=save_image)
+button_save.pack(side=LEFT)
+
+button_line_mode = Button(button_frame, text="Line Mode", command=lambda: set_draw_mode("line"))
+button_line_mode.pack(side=LEFT)
+
+button_paint_mode = Button(button_frame, text="Paint Mode", command=lambda: set_draw_mode("paint"))
+button_paint_mode.pack(side=LEFT)
+
+window.mainloop()
+
+def add_text(event):
+    text = text_box.get()
+    canvas.create_text(event.x, event.y, text=text, fill=current_color, font=('Arial', 12))
+
+text_box = Entry(window)  # 텍스트 입력 상자
+text_box.pack(side=LEFT)
+canvas.bind("<Button-3>", add_text)  # 오른쪽 클릭으로 텍스트 추가
