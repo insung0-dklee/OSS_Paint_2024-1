@@ -21,6 +21,7 @@ from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
+from tkinter import colorchooser
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -312,11 +313,63 @@ def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
     except ValueError:
         print("유효한 RGB 값을 입력하세요.")
 
+# 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
+def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
+    try:
+        # R, G, B 값을 입력받아 정수로 변환
+        r = int(r_entry.get())
+        g = int(g_entry.get())
+        b = int(b_entry.get())
+
+        # R, G, B 값이 0에서 255 사이인지 확인
+        if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
+            # R, G, B 값을 16진수로 변환하여 색상 코드 생성
+            color = f'#{r:02x}{g:02x}{b:02x}'
+            set_brush_color(color)  # 브러시 색상 설정 함수 호출
+
+            # 사용자 정의 색상을 팔레트에 동적으로 추가
+            button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
+            button.pack(side=LEFT, padx=2, pady=2)
+        else:
+            print("RGB 값은 0에서 255 사이여야 합니다.")
+    except ValueError:
+        print("유효한 RGB 값을 입력하세요.")
+
+# 색상 스펙트럼을 설정하는 함수
+def setup_color_spectrum(palette_frame):
+    def on_canvas_click(event):
+        x = event.x
+        y = event.y
+        color = spectrum_canvas.winfo_rgb(spectrum_canvas.gettags("current")[0])
+        color = f'#{color[0]>>8:02x}{color[1]>>8:02x}{color[2]>>8:02x}'
+        set_brush_color(color)
+        
+        # 사용자 정의 색상을 팔레트에 동적으로 추가
+        button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
+        button.pack(side=LEFT, padx=2, pady=2)
+
+    # 색상 스펙트럼을 Canvas 위젯으로 생성
+    spectrum_canvas = Canvas(palette_window, width=256, height=150)
+    spectrum_canvas.pack(pady=10)
+    
+    for i in range(256):
+        red_to_green = f'#{i:02x}{255-i:02x}00'
+        green_to_blue = f'#{255-i:02x}{i:02x}ff'
+        blue_to_red = f'#{255-i:02x}00{i:02x}'
+        spectrum_canvas.create_line(i, 0, i, 50, fill=red_to_green, tags=(red_to_green,))
+        spectrum_canvas.create_line(i, 50, i, 100, fill=green_to_blue, tags=(green_to_blue,))
+        spectrum_canvas.create_line(i, 100, i, 150, fill=blue_to_red, tags=(blue_to_red,))
+    
+    spectrum_canvas.bind("<Button-1>", on_canvas_click)
+
+
 # 팔레트 설정 함수
 def setup_palette(window):
     # 새로운 창 생성
+    global palette_window
     palette_window = Toplevel(window)
     palette_window.title("팔레트 설정")
+    
 
     # 팔레트 프레임 생성 및 추가
     palette_frame = Frame(palette_window)
@@ -353,8 +406,10 @@ def setup_palette(window):
 
     # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
     Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
-
-
+    
+    # 색상 스펙트럼 설정
+    setup_color_spectrum(palette_frame)
+    
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".ps", filetypes=[("PostScript files", "*.ps"), ("All files", "*.*")])
