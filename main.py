@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from datetime import datetime
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -749,7 +750,18 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+ #저작권 발생 함수
+def show_current_datetime(canvas):
+    now = datetime.now()
+    current_date_time = now.strftime("%Y년 %m월 %d일 %H시 %M분 생성 저작권자: 영남대")
+    canvas.delete("datetime")  # 이전에 표시된 날짜 및 시간 삭제
+    canvas.create_text(10, 10, anchor="nw", text=current_date_time, tags="datetime")
 
+#현재 화면 크기 출력함수
+def update_screen_size_label(label, window):
+    screen_width = window.winfo_width()
+    screen_height = window.winfo_height()
+    label.config(text=f"현재 화면 크기: {screen_width} x {screen_height}")
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
@@ -764,7 +776,18 @@ def setup_paint_app(window):
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
-    
+
+    #저작권 생성 버튼
+    button = tk.Button(window, text="저작권 생성", command=lambda: show_current_datetime(canvas))
+    button.pack(side = LEFT)
+
+    # 현재 화면크기 라벨 생성
+    screen_size_label = tk.Label(window, text="현재 화면 크기: 0 x 0")
+    screen_size_label.pack()
+
+    # 윈도우 크기 변경 시 화면 크기 라벨 업데이트 하기 위함
+    window.bind("<Configure>", lambda e: update_screen_size_label(screen_size_label, window))
+
 
     button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
