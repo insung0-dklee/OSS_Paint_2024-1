@@ -1798,6 +1798,21 @@ def set_modified():
     global is_modified
     is_modified = True
 
+# 멀티 선택 및 이동 기능
+selected_items = []
+
+def select_item(event):
+    item = canvas.find_closest(event.x, event.y)
+    if item not in selected_items:
+        selected_items.append(item)
+
+def move_selected_items(event):
+    for item in selected_items:
+        canvas.move(item, event.x - x1, event.y - y1)
+
+canvas.bind("<Button-1>", select_item)
+canvas.bind("<B1-Motion>", move_selected_items)
+
 
 
 window = Tk()
