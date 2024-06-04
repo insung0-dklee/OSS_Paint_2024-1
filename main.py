@@ -393,16 +393,16 @@ def update_timer():
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
     window.after(1000, update_timer)  # 1초마다 updatae_time 함수를 호출
 #타이머 STOP
-def stop_timer():
+def stop_timer(event=None):
     timer.stop()
 #타이머 리셋
-def reset_timer():
+def reset_timer(event=None):
     timer.reset()
     if not timer.running:
         timer.start()
 
 #타이머 재시작
-def start_stop():
+def start_stop(event=None):
     if not timer.running:
         timer.start()
 
@@ -448,6 +448,10 @@ def bind_shortcuts():
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
     window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
+    window.bind_all("<Control-x>", start_stop)  # 타이머 시작/정지 단축키 설정
+    window.bind_all("<Control-r>", reset_timer)  # 타이머 재시작 단축키 설정
+    window.bind_all("<Control-p>", stop_timer)  # 타이머 멈춤 단축키 설정
+
 
 # brush_settings.initialize_globals(globals())
 
