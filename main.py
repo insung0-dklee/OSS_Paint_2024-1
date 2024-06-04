@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from PIL import Image, ImageTk
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -42,6 +43,7 @@ x1, y1 = None, None
 dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
+patterns = {}  # 사용자 정의 패턴을 저장할 딕셔너리
 
 
 # 벌집 색상 선택 함수
@@ -103,6 +105,86 @@ def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="blac
                 canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
                                         outline=line_color, fill="")
 
+def setup_pattern_menu(window):
+    """
+    setup_pattern_menu: 패턴을 선택할 수 있는 메뉴를 생성하는 함수
+    @Param
+        window: 메뉴가 추가될 Tk 윈도우 객체
+    @Return
+        pattern_menu: 생성된 패턴 메뉴 객체
+    """
+    pattern_menu = Menu(window, tearoff=0)
+    pattern_menu.add_command(label="Custom Pattern", command=add_custom_pattern)
+    return pattern_menu
+
+def add_custom_pattern():
+    """
+    add_custom_pattern: 패턴의 이름과 이미지를 입력받아 사용자 정의 패턴으로 추가하는 함수
+    @Return
+        None
+    """
+    pattern_name = simpledialog.askstring("Input", "패턴의 이름을 입력하세요:")
+    if pattern_name:
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
+        if file_path:
+            try:
+                img = Image.open(file_path)
+                img = img.resize((50, 50), Image.ANTIALIAS)  # 원하는 크기로 이미지 크기 조정
+                patterns[pattern_name] = ImageTk.PhotoImage(img)
+                messagebox.showinfo("Success", f"패턴 '{pattern_name}'이(가) 추가되었습니다.")
+            except Exception as e:
+                messagebox.showerror("Error", f"이미지를 불러오는 중 오류 발생: {e}")
+
+def tile_pattern_on_canvas(pattern_name):
+    """
+    tile_pattern_on_canvas: 선택된 패턴을 캔버스에 타일 형식으로 그리는 함수
+    @Param
+        pattern_name: 그릴 패턴의 이름
+    @Return
+        None
+    """
+    if pattern_name in patterns:
+        canvas.delete("all")  # 기존의 모든 그림을 삭제
+        pattern_img = patterns[pattern_name]
+        pattern_width = pattern_img.width()
+        pattern_height = pattern_img.height()
+        canvas_width = canvas.winfo_width()
+        canvas_height = canvas.winfo_height()
+
+        for x in range(0, canvas_width, pattern_width):
+            for y in range(0, canvas_height, pattern_height):
+                canvas.create_image(x, y, image=pattern_img, anchor=NW)
+
+def choose_pattern(event):
+    """
+    choose_pattern: 패턴 선택 팝업 메뉴를 표시하는 함수
+    @Param
+        event: 마우스 이벤트
+    @Return
+        None
+    """
+    popup = Menu(window, tearoff=0)
+    for pattern_name in patterns.keys():
+        popup.add_command(label=pattern_name, command=lambda name=pattern_name: set_pattern_mode(name))
+    if patterns:
+        popup.add_separator()
+    popup.add_command(label="Add Custom Pattern", command=add_custom_pattern)
+    
+    if event:
+        popup.post(event.x_root, event.y_root)
+    else:
+        popup.post(window.winfo_pointerx(), window.winfo_pointery())
+
+def set_pattern_mode(pattern_name):
+    """
+    set_pattern_mode: 패턴 그리기 모드를 설정하는 함수
+    @Param
+        pattern_name: 설정할 패턴의 이름
+    @Return
+        None
+    """
+    tile_pattern_on_canvas(pattern_name)
+                                                        
 def start_pencil(event):
     global last_x, last_y
     last_x, last_y = None, None
@@ -813,6 +895,9 @@ def setup_paint_app(window):
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_pattern = Button(window, text="Pattern", command=lambda event=None: choose_pattern(event))
+    button_pattern.pack(side=LEFT) # 패턴 버튼을 추가
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
