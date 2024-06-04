@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from datetime import datetime
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -102,7 +103,7 @@ def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="blac
             else:
                 canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
                                         outline=line_color, fill="")
-
+                
 def start_pencil(event):
     global last_x, last_y
     last_x, last_y = None, None
@@ -750,6 +751,13 @@ def choose_use_case_element(event=None):
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
 
+ #현재 날짜 출력
+def display_date():
+    global date_label
+    now = datetime.now()
+    current_date = now.strftime("%Y-%m-%d")  # 시간 부분 제거
+    date_label.config(text="현재 날짜: " + current_date)
+
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
@@ -790,6 +798,7 @@ def setup_paint_app(window):
     button_honeycomb.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
+
     # 벌집 모양 패턴 색상 선택 버튼
     button_honeycomb_color = Button(window, text="Choose Honeycomb Color", command=choose_hex_color)
     button_honeycomb_color.pack(side=LEFT)
@@ -802,6 +811,15 @@ def setup_paint_app(window):
     button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
+     #현재 날짜 출력
+    global date_label
+    date_label = tk.Label(window, text="")
+    date_label.pack(side = LEFT)
+
+    #날짜함수 실행
+    display_date()
+
+
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
     button_brick_pattern.pack(side=LEFT)
@@ -813,6 +831,8 @@ def setup_paint_app(window):
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+   
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
@@ -895,6 +915,10 @@ def setup_paint_app(window):
     brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
     brush_combobox.pack(side=LEFT)
     
+
+
+
+
 
     # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
@@ -994,7 +1018,8 @@ def setup_paint_app(window):
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
     
-    
+
+
 # 새 창 열기 생성
 def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
@@ -1691,6 +1716,7 @@ interval : 격자의 간격 변수
 5번째로 생성된 눈금에 숫자 표기 및 크기 증가
 눈금자을 생성할 시 각 리스트에 눈금 선과 숫자값을 저장
 """
+
 
 
 def draw_ruler():
