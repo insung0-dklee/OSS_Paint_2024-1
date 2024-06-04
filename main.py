@@ -931,6 +931,10 @@ def setup_paint_app(window):
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
+    # 물결 패턴 버튼 추가
+    button_wave = Button(window, text="Wave Pattern", command=draw_wave_pattern)  # 변경된 부분
+    button_wave.pack() 
+    
     #spray 인스턴스 생성 
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
@@ -1798,6 +1802,15 @@ def set_modified():
     global is_modified
     is_modified = True
 
+# 물결 패턴을 그리는 함수 추가
+def draw_wave_pattern():
+    clear_paint(canvas)  
+    colors = ["skyblue", "skyblue", "white", "white", "skyblue", "skyblue", "white", "white"]
+    size = 20  
+    for i in range(0, canvas.winfo_width(), size):
+        for j in range(0, canvas.winfo_height(), size):
+            color = colors[(i + j) // size % len(colors)]
+            canvas.create_rectangle(i, j, i + size, j + size, fill=color, outline="")
 
 
 window = Tk()
@@ -1869,5 +1882,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
