@@ -37,6 +37,9 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+typing_mode = False
+current_text_x = 10
+current_text_y = 10
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -45,6 +48,79 @@ previous_x, previous_y = None, None
 
 
 
+def toggle_typing_mode():
+    """
+    toggle_typing_mode: 타이핑 모드를 전환하는 함수
+    @Param
+        None
+    @Return
+        None
+    타이핑 모드가 활성화되면 캔버스에 텍스트를 입력할 수 있다.
+    타이핑 시 흔히 누를 수 있는 c, d, Enter에 대한 단축키는 타이핑 모드 활성화 시에 동작하지 않도록 하였다. 
+    타이핑 모드가 비활성화되면 단축키 기능이 다시 활성화된다.
+    """
+    global typing_mode
+    typing_mode = not typing_mode
+    if typing_mode:
+        typing_button.config(relief=tk.SUNKEN, text="Typing Mode: ON")
+        canvas.focus_set()
+        canvas.bind("<Key>", type_on_canvas)
+        canvas.bind("<BackSpace>", delete_char)
+        
+        # 타이핑 모드 활성화 시 단축키 비활성화
+        window.unbind("<c>")
+        window.unbind("d")
+        window.unbind("<Command-Return>")
+        
+    else:
+        typing_button.config(relief=tk.RAISED, text="Typing Mode: OFF")
+        canvas.unbind("<Key>")
+        canvas.unbind("<BackSpace>")
+        bind_shortcuts() # 타이핑 모드 비활성화 시 단축키 재활성화
+
+def type_on_canvas(event):
+    """
+    type_on_canvas: 캔버스에 키보드 입력을 표시하는 함수
+    @Param
+        event : 이벤트 객체 (키보드 입력 이벤트에 반응)
+    @Return
+        None
+    Enter 키를 누르면 커서 위치를 다음 줄로 내린다.
+    그 외의 키 입력은 캔버스에 텍스트 객체를 생성하며 커서 위치를 이동시킨다.
+    """
+    global current_text_x, current_text_y
+    if typing_mode:
+        if event.keysym == "Return":
+            current_text_x = 10
+            current_text_y += 20
+        else:
+            canvas.create_text(current_text_x, current_text_y, text=event.char, font=("Arial", 16), tags="typing_text")
+            current_text_x += 15
+
+def delete_char(event):
+    """
+    delete_char: 캔버스에서 마지막으로 입력된 문자를 삭제하는 함수
+    @Param
+        event: 이벤트 객체 (키보드 입력 이벤트에 반응)
+    @Return
+        None
+    Backspace 키를 누르면 마지막 문자를 삭제하고, 커서 위치를 이동시킨다.
+    """
+    global current_text_x, current_text_y
+    if typing_mode:
+        # 마지막으로 생성된 텍스트 객체 가져오기
+        last_text_items = canvas.find_withtag("typing_text")
+        if last_text_items:
+            last_text = last_text_items[-1]
+            bbox = canvas.bbox(last_text)
+            canvas.delete(last_text)
+
+            # 현재 텍스트 커서 위치 이동
+            if event.keysym == "BackSpace" and bbox[0] > 10:
+                current_text_x -= 15
+            elif event.keysym == "BackSpace" and bbox[0] == 10:
+                current_text_y -= 20
+                current_text_x = canvas.winfo_width() - 10
 
 # 만화 컷 테두리 그리기 함수
 def draw_comic_cut(cut_number):
@@ -570,8 +646,9 @@ def on_mouse_drag(event):
 #all clear 기능 추가
 def clear_paint(canvas):
     canvas.delete("all")
-    global last_x, last_y
+    global last_x, last_y, current_text_x, current_text_y
     last_x, last_y = None, None # 마지막 좌표 초기화
+    current_text_x, current_text_y = 10, 10 # 타이핑 커서 위치 초기화
 
 def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
@@ -862,7 +939,7 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
+    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2, typing_button
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
@@ -923,6 +1000,11 @@ def setup_paint_app(window):
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    typing_button = tk.Button(window, text="Typing Mode: OFF", command=toggle_typing_mode)
+    typing_button.pack(side=LEFT)
+    typing_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    typing_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
