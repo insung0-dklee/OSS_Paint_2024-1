@@ -448,6 +448,7 @@ def bind_shortcuts():
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
     window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
+    window.bind_all("<Control-h>", lambda event: show_info_window())
 
 # brush_settings.initialize_globals(globals())
 
