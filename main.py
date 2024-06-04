@@ -925,3 +925,34 @@ def draw_table(canvas, rows, cols, start_x=50, start_y=50, cell_width=80, cell_h
 
     for j in range(cols + 1):
         canvas.create_line(start_x + j * cell_width, start_y, start_x + j * cell_width, start_y + rows * cell_height)
+
+
+import calendar
+from datetime import datetime
+
+# 지정된 연도(year)와 월(month)의 달력을 캔버스에 그리는 함수
+def draw_calendar(canvas, year, month):
+    # 캔버스를 초기화하여 이전 그리기를 지웁니다.
+    canvas.delete("all")
+
+    # 첫 요일을 월요일로 설정
+    calendar.setfirstweekday(calendar.MONDAY)  # 여기를 수정
+    
+    # 요일 헤더 그리기
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    for i, day in enumerate(days):
+        canvas.create_text(50 + i * 50, 50, text=day, fill="black")
+
+    # 달의 날짜 그리기
+    cal = calendar.Calendar()
+    month_days = cal.monthdayscalendar(year, month)
+    for week_num, week in enumerate(month_days):
+        for day_num, day in enumerate(week):
+            if day != 0: # 0은 이전/다음 달의 날짜를 의미하므로 그리지 않음
+                canvas.create_text(50 + day_num * 50, 100 + week_num * 50, text=str(day), fill="black")
+    """
+    # 현재 연도와 월 가져오기
+    now = datetime.now()
+    current_year = now.year
+    current_month = now.month
+    """
