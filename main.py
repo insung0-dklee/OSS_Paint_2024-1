@@ -1868,19 +1868,23 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 timer.start()
 update_timer()
 
-#사용하고 있는 펜의 종류를 알려주는 버튼
+def draw_check_pattern(canvas, color):
+    clear_paint(canvas)
+    colors = [color, "white"]
+    size = 20  
+    for i in range(0, canvas.winfo_width(), size):
+        for j in range(0, canvas.winfo_height(), size):
+            color = colors[(i // size + j // size) % len(colors)]
+            canvas.create_rectangle(i, j, i + size, j + size, fill=color, outline="")
 
-def display_brush_mode():
-    mode_test = f"pen mode: {get_brush_mode()}"
-    mode_label.config(text = mode_test)
+def choose_check_color():
+    color = askcolor()[1]
+    if color:
+        draw_check_pattern(canvas, color)
 
-def get_brush_mode():
-    return brush_mode
-
-mode_button = tk.Button(window, text="Pen Mode", command=display_brush_mode)
-mode_button.pack(pady=10)
-
-mode_label = tk.Label(window, text="")
-mode_label.pack()
+button_checkerboard_color = Button(window, text="Choose Checkerboard Color", command=choose_check_color)
+button_checkerboard_color.pack(side=LEFT)
+button_checkerboard_color.bind("<Enter>", on_enter)  
+button_checkerboard_color.bind("<Leave>", on_leave)
 
 window.mainloop()
