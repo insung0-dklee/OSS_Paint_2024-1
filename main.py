@@ -261,6 +261,17 @@ def add_text_to_canvas(text):
         canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
 
 
+def set_alarm():
+    delay_str = simpledialog.askstring("알람 설정", "알람이 울릴 시간(분)을 입력하세요:")
+    if delay_str:
+        delay_minutes = int(delay_str)
+        delay_seconds = delay_minutes * 60
+
+        window.after(1000 * delay_seconds, ring_alarm, delay_minutes)
+
+def ring_alarm(delay_minutes):
+    message = f"{delay_minutes}분 경과!"
+    messagebox.showinfo("알람", message)
 
 # 라인 브러쉬 기능 추가 
 def set_brush_mode_line(canvas):
@@ -838,6 +849,9 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
+    #알람 설정 버튼
+    button_alarm = Button(window, text="알람 설정", command=set_alarm)
+    button_alarm.pack(side=RIGHT)
     
     #additionals 카테고리
     # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
