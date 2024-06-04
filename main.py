@@ -1850,18 +1850,41 @@ editor = ImageEditor(canvas)
 timer_label = Label(labelframe_timer, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
 
-
-#작업 시작 시간 기능
-def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
-    return f"{hours:02}:{minutes:02}"
-
+# 작업 시작 시간 기능
+def format_time(hours, minutes, seconds, weekday): #시간, 분, 초, 요일을 매개변수로 받아 시간:분:초 형태로 보여줌
+    return f"{weekday} {hours:02}:{minutes:02}:{seconds:02}"
 
 current_time = time.localtime() 
 initial_hours = current_time.tm_hour
 initial_minutes = current_time.tm_min 
+initial_seconds = current_time.tm_sec
+initial_weekday = time.strftime('(%a)', current_time)  # 요일을 축약형 문자열로 얻음
 
-time_label = Label(labelframe_timer, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
+time_label = Label(labelframe_timer, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes, initial_seconds, initial_weekday)}")
 time_label.pack()
+
+# 현재 시간 라벨 추가
+current_time_label = Label(labelframe_timer, text=f"현재 시간: {format_time(initial_hours, initial_minutes, initial_seconds, initial_weekday)}")
+current_time_label.pack()
+
+# 타이머의 경과시간 업데이트 
+def update_timer():
+    elapsed_time = timer.get_elapsed_time()
+    timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
+    
+    # 현재 시간 업데이트
+    current_time = time.localtime()
+    current_hours = current_time.tm_hour
+    current_minutes = current_time.tm_min
+    current_seconds = current_time.tm_sec
+    current_weekday = time.strftime('(%a)', current_time)  # 요일을 축약형 문자열로 얻음
+    current_time_label.config(text=f"현재 시간: {format_time(current_hours, current_minutes, current_seconds, current_weekday)}")
+    
+    window.after(1000, update_timer)  # 1초마다 update_timer 함수를 호출
+
+# 프로그램 시작 시 타이머 시작
+timer.start()
+update_timer()
 
 # 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
