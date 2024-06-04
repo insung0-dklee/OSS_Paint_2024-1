@@ -31,7 +31,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush","spray"]
+brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush", "spray", "pencil"]
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -68,21 +68,6 @@ def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
                     hexagon = [hex_corner(x + dx, y + dy, hex_size, i) for i in range(6)]
                     canvas.create_polygon(hexagon, outline=hex_color, fill='')
 
-# 연필 브러시 함수
-def pencil_brush(event, canvas):
-    global last_x, last_y, brush_size
-    if last_x is not None and last_y is not None:
-        dx = event.x - last_x
-        dy = event.y - last_y
-        distance = max(abs(dx), abs(dy))
-        for i in range(0, distance, 2):  # 이동 거리의 절반마다 포인트 추가
-            x = last_x + dx * i / distance
-            y = last_y + dy * i / distance
-            jitter_x = x + random.randint(-brush_size, brush_size)  # 브러시 크기에 따른 진동 효과
-            jitter_y = y + random.randint(-brush_size, brush_size)
-            canvas.create_line(jitter_x, jitter_y, jitter_x + 1, jitter_y + 1, fill=brush_color, width=brush_size/2)
-    last_x, last_y = event.x, event.y
-
 # 벽돌 색상 선택 함수
 def choose_brick_line_color():
     color = askcolor()[1]
@@ -102,6 +87,21 @@ def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="blac
             else:
                 canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
                                         outline=line_color, fill="")
+
+# 연필 브러시 함수
+def pencil_brush(event, canvas):
+    global last_x, last_y, brush_size
+    if last_x is not None and last_y is not None:
+        dx = event.x - last_x
+        dy = event.y - last_y
+        distance = max(abs(dx), abs(dy))
+        for i in range(0, distance, 2):  # 이동 거리의 절반마다 포인트 추가
+            x = last_x + dx * i / distance
+            y = last_y + dy * i / distance
+            jitter_x = x + random.randint(-brush_size, brush_size)  # 브러시 크기에 따른 진동 효과
+            jitter_y = y + random.randint(-brush_size, brush_size)
+            canvas.create_line(jitter_x, jitter_y, jitter_x + 1, jitter_y + 1, fill=brush_color, width=brush_size/2)
+    last_x, last_y = event.x, event.y
 
 def start_pencil(event):
     global last_x, last_y
@@ -419,7 +419,6 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     elif brush_mode == "pencil":
         canvas.bind("<Button-1>", start_pencil)
         canvas.bind("<B1-Motion>", lambda event: pencil_brush(event, canvas))
-        canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event))
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -839,12 +838,6 @@ def setup_paint_app(window):
     button_honeycomb_color.pack(side=LEFT)
     button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    # 연필 브러시 버튼 추가
-    button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
-    button_pencil_brush.pack(side=LEFT)
-    button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
