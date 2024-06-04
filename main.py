@@ -43,6 +43,38 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+#캔버스 배율의 측정을 위한 변수 초기화
+initial_width = None
+initial_height = None
+
+def get_initial_canvas_size(canvas):
+    # 초기 캔버스의 너비와 높이를 가져오는 함수
+    global initial_width, initial_height
+    initial_width = canvas.winfo_width()
+    initial_height = canvas.winfo_height()
+
+def get_canvas_scale(canvas):
+    # 초기 캔버스 크기와 현재 캔버스 크기를 비교하여 배율을 계산하는 함수
+    current_width = canvas.winfo_width()
+    current_height = canvas.winfo_height()
+    
+    width_scale = current_width / initial_width
+    height_scale = current_height / initial_height
+    
+    return width_scale, height_scale
+
+def print_canvas_scale(canvas):
+    # 캔버스의 배율을 출력하는 함수
+    width_scale, height_scale = get_canvas_scale(canvas)
+    print("Canvas scale:", "Width scale:", width_scale, "Height scale:", height_scale)
+
+def on_resize(event):
+    # 캔버스 크기가 조정될 때 호출되는 이벤트 핸들러
+    if ruler_on:
+        clear_ruler()
+        draw_ruler()
+    print_canvas_scale(canvas)
+
 
 # 벌집 색상 선택 함수
 def choose_hex_color():
