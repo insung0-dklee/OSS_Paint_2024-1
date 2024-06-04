@@ -24,6 +24,12 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import cv2
+import numpy as np
+import pyautogui
+from threading import Thread
+from tkinter import Button
+import pygetwindow as gw
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -37,12 +43,79 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+recording = False # 녹화 상태
+window_title = "그림판"
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+def get_window_rect(title):
+    """
+    get_window_rect: 주어진 제목의 창의 위치와 크기를 반환하는 함수
+    @Param
+        title : 찾고자 하는 창의 제목
+    @Return
+        (left, top, width, height) : 창의 왼쪽, 위쪽 위치와 너비, 높이
+    """
+    win = gw.getWindowsWithTitle(title)
+    if not win:
+        raise Exception(f"'{title}' 창을 찾을 수 없습니다.")
+    win = win[0]  # 첫 번째 창 선택
+    return win.left, win.top, win.width, win.height
+
+def record_screen(output_filename="record.avi", rec_fps=20.0):
+    """
+    record_screen: 주어진 파일 이름과 프레임 속도로 화면을 녹화하는 함수
+    @Param
+        output_filename : 녹화된 비디오를 저장할 파일 이름
+        rec_fps : 초당 프레임 수
+    @Return
+        None
+    """
+    global recording
+    
+    fourcc = cv2.VideoWriter_fourcc(*'XVID') # XVID 코덱 사용
+    
+    left, top, width, height = get_window_rect(window_title)
+    screen_size = (width, height)
+    
+    out = cv2.VideoWriter(output_filename, fourcc, rec_fps, screen_size)
+
+    while recording:
+        img = pyautogui.screenshot(region=(left, top, width, height)) # 스크린샷 캡처
+        frame = np.array(img)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) # BGR로 색상 변환
+        out.write(frame)
+
+    out.release()
+
+def start_recording():
+    """
+    start_recording: 화면 녹화를 시작하는 함수
+    @Param
+        None
+    @Return
+        None
+    """
+    global recording
+    recording = True # 녹화 상태를 True로 변경해 녹화중임을 표시
+    canvas.create_oval(5, 5, 15, 15, fill="red", tag="recording_indicator") # 녹화중임을 알리기 위해 빨간색 동그라미 그리기
+    t = Thread(target=record_screen) # 스레드를 사용하여 화면 녹화 시작
+    t.start()
+
+def stop_recording():
+    """
+    stop_recording: 화면 녹화를 중지하는 함수
+    @Param
+        None
+    @Return
+        None
+    """
+    global recording
+    recording = False # 녹화 상태를 False로 변경해 녹화가 끝났음을 표시
+    canvas.delete("recording_indicator") # 녹화중임을 표시하는 빨간색 동그라미 삭제
 
 
 
@@ -928,6 +1001,11 @@ def setup_paint_app(window):
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
+
+    start_btn = Button(window, text="녹화 시작", command=start_recording)
+    start_btn.pack(side=tk.LEFT)
+    stop_btn = Button(window, text="녹화 중지", command=stop_recording)
+    stop_btn.pack(side=tk.LEFT)
 
     #timer 카테고리
     # 타이머 멈춤 버튼
