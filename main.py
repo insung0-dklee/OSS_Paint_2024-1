@@ -541,8 +541,7 @@ def change_brush_color(event=None):
     global brush_color
     selected_color = askcolor()[1]
     if selected_color:
-        brush_color = selected_color
-        set_brush_color(brush_color)
+        set_brush_color(selected_color)
 """
 TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
@@ -554,6 +553,7 @@ TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 def set_brush_color(color):
     global brush_color
     brush_color = color
+    color_display.config(bg=brush_color)  # 현재 색상 표시 업데이트
     # spray_brush의 색상 변경을 위한 코드 추가
     spray_brush.set_brush_color(brush_color)
 
@@ -631,10 +631,9 @@ def save_canvas(canvas):
 def reset_brush(canvas):
     global brush_size, brush_color
     brush_size = 1  # 초기 브러시 크기
-    brush_color = "black"  # 초기 브러시 색상
+    set_brush_color("black")  # 초기 브러시 색상
     change_brush_size(brush_size)  # 브러시 크기 조정
     canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
-
 
 def setup_reset_brush_button(window, canvas):
     global button_reset
@@ -642,7 +641,7 @@ def setup_reset_brush_button(window, canvas):
     button_reset.pack(side=BOTTOM)
     button_reset.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_reset.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
+    
 # 색 채우기 기능 추가
 def flood_fill(event):
     fill_color = askcolor()[1]  # 색상 선택 대화 상자에서 색상을 선택
@@ -778,37 +777,40 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
+    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2, color_display
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
 
     global canvas
     canvas = Canvas(window, bg="white")
-    canvas.pack(fill=BOTH, expand=True,side= BOTTOM)
+    canvas.pack(fill=BOTH, expand=True, side=BOTTOM)
 
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
-    
-
-    button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
+    button_frame = Frame(window, bg="grey")  # 구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
 
-    labelframe_brush = LabelFrame(button_frame, text="brush mode") #브러시 설정을 정리한 프레임
-    labelframe_brush.pack(side = LEFT,fill=Y)
+    labelframe_brush = LabelFrame(button_frame, text="brush mode")  # 브러시 설정을 정리한 프레임
+    labelframe_brush.pack(side=LEFT, fill=Y)
 
-    labelframe_flip = LabelFrame(button_frame, text="flip") #브러시 설정을 정리한 프레임
-    labelframe_flip.pack(side = LEFT,fill=Y)
+    labelframe_flip = LabelFrame(button_frame, text="flip")  # 브러시 설정을 정리한 프레임
+    labelframe_flip.pack(side=LEFT, fill=Y)
 
-    labelframe_timer = LabelFrame(button_frame, text="timer") #타이머 설정을 정리한 프레임
-    labelframe_timer.pack(side = LEFT,fill=Y)
+    labelframe_timer = LabelFrame(button_frame, text="timer")  # 타이머 설정을 정리한 프레임
+    labelframe_timer.pack(side=LEFT, fill=Y)
 
-    labelframe_additional = LabelFrame(button_frame,text="additionals") # 추가 기능 설정을 정리한 프레임
-    labelframe_additional.pack(side = LEFT,fill=Y)
+    labelframe_additional = LabelFrame(button_frame, text="additionals")  # 추가 기능 설정을 정리한 프레임
+    labelframe_additional.pack(side=LEFT, fill=Y)
 
-    labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
-    labelframe_additional2.pack(side = LEFT,fill=Y)
+    labelframe_additional2 = LabelFrame(button_frame)  # 추가 기능 설정을 정리한 프레임2
+    labelframe_additional2.pack(side=LEFT, fill=Y)
+
+    # 현재 색상 레이블과 색상 표시 네모 칸
+    Label(labelframe_brush, text="현재 색상").pack(side=TOP)
+    color_display = Label(labelframe_brush, bg=brush_color, width=2, height=1)
+    color_display.pack(side=TOP)
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
