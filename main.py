@@ -103,6 +103,32 @@ def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="blac
                 canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
                                         outline=line_color, fill="")
 
+
+
+
+# 다이아몬드 패턴 색상 선택 함수
+def choose_diamond_color():
+    color = askcolor()[1]
+    if color:
+        draw_diamond_pattern(canvas, diamond_color=color)
+
+# 다이아몬드 패턴 그리기 함수
+def draw_diamond_pattern(canvas, diamond_size=30, diamond_color="black"):
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+
+    for y in range(0, canvas_height, diamond_size * 2):
+        for x in range(0, canvas_width, diamond_size * 2):
+            points = [
+                x, y - diamond_size,
+                x + diamond_size, y,
+                x, y + diamond_size,
+                x - diamond_size, y
+            ]
+            canvas.create_polygon(points, outline=diamond_color, fill='', width=2)
+
+
+
 def start_pencil(event):
     global last_x, last_y
     last_x, last_y = None, None
@@ -813,6 +839,16 @@ def setup_paint_app(window):
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_diamond_pattern = Button(window, text="Diamond Pattern", command=lambda: draw_diamond_pattern(canvas))
+    button_diamond_pattern.pack(side=LEFT)
+    button_diamond_pattern.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_diamond_pattern.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_diamond_pattern_color = Button(window, text="Choose Diamond Pattern Color", command=choose_diamond_color)
+    button_diamond_pattern_color.pack(side=LEFT)
+    button_diamond_pattern_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_diamond_pattern_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
