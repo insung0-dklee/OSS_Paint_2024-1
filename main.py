@@ -10,6 +10,7 @@ from tkinter import *
 from tkinter import ttk
 import time #시간 계산을 위한 모듈
 import brush_settings  # brush_settings 모듈 임포트
+import shortcuts
 from brush_settings import change_brush_size, change_bg_color, change_brush_color, set_brush_mode, set_paint_mode_normal, set_paint_mode_pressure, paint_start, paint, dotted_paint
 from tkinter.colorchooser import askcolor  # 색상 선택 대화 상자를 가져옴
 from tkinter import filedialog
@@ -339,6 +340,7 @@ def bind_shortcuts():
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
     window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
+    window.bind("<F1>", lambda event: shortcuts.open_shortcuts_window())  # 단축키 창 단축키 F1
 
 # brush_settings.initialize_globals(globals())
 
@@ -992,6 +994,7 @@ def setup_paint_app(window):
     tool_menu.add_command(label="dark mode", command=toggle_dark_mode) # 다크 모드를 Tools 메뉴로 이동
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
+    help_menu.add_command(label="shortcut", command=shortcuts.open_shortcuts_window)  # Help 메뉴에 단축키 정리 버튼 추가
 #+=================================================================================
     
     
