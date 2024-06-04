@@ -18,6 +18,7 @@ from tkinter import messagebox
 from tkinter import simpledialog
 import tkinter as tk
 import math  # 수학 모듈을 가져옴
+from math import pi, cos, sin
 import random
 from fun_timer import Timer
 from picture import ImageEditor #이미지 모듈을 가져옴
@@ -43,8 +44,92 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+def draw_pie_chart():
+# 데이터 입력 창 생성
+    input_window = Toplevel(window)
 
+    # x, y값을 저장할 리스트 생성
+    x_values = []
+    y_values = []
 
+    # x, y값을 입력받는 함수
+    def add_point_entry():
+        point_frame = Frame(input_window)
+        point_frame.pack(after=add_point_button)
+        x_entry = Entry(point_frame, width=10)
+        x_entry.pack(side=LEFT)
+        y_entry = Entry(point_frame, width=10)
+        y_entry.pack(side=LEFT)
+        x_values.append(x_entry)
+        y_values.append(y_entry)
+
+    # x, y값 입력 창 추가 버튼 생성
+    add_point_button = Button(input_window, text="Add target input field", command=add_point_entry)
+    add_point_button.pack()
+
+    # 그래프 제목 입력 받기
+    title_label = Label(input_window, text="Enter the title of the graph")
+    title_label.pack()
+    title_entry = Entry(input_window)
+    title_entry.pack()
+
+    # 너비 입력 받기
+    width_label = Label(input_window, text="Enter the width of the graph")
+    width_label.pack()
+    width_entry = Entry(input_window)
+    width_entry.pack()
+
+    # 높이 입력 받기
+    height_label = Label(input_window, text="Enter the height of the graph")
+    height_label.pack()
+    height_entry = Entry(input_window)
+    height_entry.pack()
+
+    # 그래프를 그리는 함수
+    def draw_graph():
+         # 값들을 숫자로 변환
+        x_values_str = [value.get() for value in x_values]
+        y_values_int = [int(value.get()) for value in y_values]
+
+        # 각도 계산
+        total = sum(y_values_int)
+        angles = [value / total * 360 for value in y_values_int]
+
+        # 원 그리기
+        start_angle = 0
+        for i, angle in enumerate(angles):
+            width = int(width_entry.get())
+            height = int(height_entry.get())
+            end_angle = start_angle + angle
+            radius = min(width, height) // 2  # 반지름은 가로, 세로 길이 중 작은 값의 절반으로 설정
+            color = '#{:06x}'.format(random.randint(0, 0xFFFFFF))  # 랜덤 색상 생성
+            canvas.create_arc(width // 2 - radius, height // 2 - radius, width // 2 + radius, height // 2 + radius, start=start_angle, extent=angle, fill=color)
+
+            # 각 슬라이스의 중심 각도 계산
+            center_angle = start_angle - angle / 2
+
+            # 레이블 위치 계산
+            label_radius = radius + 20  # 레이블은 원의 바깥에 위치
+            label_x = width // 2 + label_radius * cos(center_angle * pi / 180)
+            label_y = height // 2 - label_radius * sin(center_angle * pi / 180)
+
+            # 레이블 그리기
+            canvas.create_text(label_x, label_y, text=x_values_str[i])
+
+            # 비율 계산
+            percentage = y_values_int[i] / total * 100
+
+            # 비율 레이블 그리기
+            percentage_label_x = width // 2 + radius * cos(center_angle * pi / 180) / 2
+            percentage_label_y = height // 2 - radius * sin(center_angle * pi / 180) / 2
+            canvas.create_text(percentage_label_x, percentage_label_y, text=f'{percentage:.1f}%')
+
+            start_angle = end_angle
+
+    # 그래프 그리기 버튼 생성
+    draw_button = Button(input_window, text="Draw Pie Chart", command=draw_graph)
+    draw_button.pack()
+#+=================================================================================================
 
 # 만화 컷 테두리 그리기 함수
 def draw_comic_cut(cut_number):
@@ -923,6 +1008,12 @@ def setup_paint_app(window):
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 파이 차트 생성 버튼
+    button_line_graph = Button(window, text="Draw pie chart", command= draw_pie_chart)
+    button_line_graph.pack(side=LEFT)
+    button_line_graph.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_line_graph.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
