@@ -500,6 +500,50 @@ def flip_vertical(canvas):
                 coords[i] = canvas_height - coords[i]
         canvas.coords(obj, *coords)
 
+def rotate_right(canvas):
+    objects = canvas.find_all()
+    canvas.update()
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    for obj in objects:
+        coords = canvas.coords(obj)
+        new_coords = []
+        for i in range(0, len(coords), 2):
+            x, y = coords[i], coords[i + 1]
+            new_x = canvas_height - y
+            new_y = x
+            new_coords.extend([new_x, new_y])
+        canvas.coords(obj, *new_coords)
+
+def rotate_left(canvas):
+    objects = canvas.find_all()
+    canvas.update()
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    for obj in objects:
+        coords = canvas.coords(obj)
+        new_coords = []
+        for i in range(0, len(coords), 2):
+            x, y = coords[i], coords[i + 1]
+            new_x = y
+            new_y = canvas_width - x
+            new_coords.extend([new_x, new_y])
+        canvas.coords(obj, *new_coords)
+
+def rotate_180(canvas):
+    objects = canvas.find_all()
+    canvas.update()
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    for obj in objects:
+        coords = canvas.coords(obj)
+        for i in range(len(coords)):
+            if i % 2 == 0:  # x 좌표를 반전시킵니다.
+                coords[i] = canvas_width - coords[i]
+            else:  # y 좌표를 반전시킵니다.
+                coords[i] = canvas_height - coords[i]
+        canvas.coords(obj, *coords)
+
 def erase(event, canvas):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
@@ -878,17 +922,16 @@ def setup_paint_app(window):
     button_choose_shape.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     #filp 카테고리
-    button_flip = Button(labelframe_flip, text="Horizontal", command=lambda: flip_horizontal(canvas))
-    button_flip.pack(side=TOP)
-    button_flip.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_flip.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    menubutton = tk.Menubutton(labelframe_flip, text="회전")
+    menubutton.menu = tk.Menu(menubutton, tearoff=0)
+    menubutton["menu"] = menubutton.menu
+    menubutton.menu.add_command(label="가로 대칭 이동", command=lambda: flip_horizontal(canvas))
+    menubutton.menu.add_command(label="세로 대칭 이동", command=lambda: flip_vertical(canvas))
+    menubutton.menu.add_command(label="오른쪽으로 90 ° 회전", command=lambda: rotate_right(canvas))
+    menubutton.menu.add_command(label="왼쪽으로 90 ° 회전", command=lambda: rotate_left(canvas))
+    menubutton.menu.add_command(label="180 ° 회전", command=lambda: rotate_180(canvas))
+    menubutton.pack(side=TOP)
 
-    button_flip_vertical = Button(labelframe_flip, text="Vertical", command=lambda: flip_vertical(canvas))
-    button_flip_vertical.pack(side=TOP)
-    button_flip_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_flip_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    
     #브러시  모드를 선택하는 콤보박스
     brush_combobox = ttk.Combobox(labelframe_brush, values=brush_modes, state="readonly")
     brush_combobox.current(0)
