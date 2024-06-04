@@ -990,6 +990,7 @@ def setup_paint_app(window):
     tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas)) # Tools 메뉴에 Toggle Grid 기능 버튼 추가
     tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
     tool_menu.add_command(label="dark mode", command=toggle_dark_mode) # 다크 모드를 Tools 메뉴로 이동
+    tool_menu.add_command(label="Dash Line", command=lambda: dash_lines(canvas))
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
@@ -1755,6 +1756,13 @@ def on_resize(event):
         clear_ruler()
         draw_ruler()
 
+#점선 템플릿 
+def dash_lines(canvas):
+    canvas_width = canvas.winfo_width()
+    line_spacing = 40  # 줄 사이의 간격 설정
+    for y in range(0, canvas.winfo_height(), line_spacing):
+        canvas.create_line(0, y, canvas_width, y, fill="lightgray", dash=(2, 4))
+
 def on_closing():
     # 프로그램 종료 시 호출되는 함수
     global is_modified
@@ -1797,6 +1805,8 @@ def set_modified():
     # 사용자의 작업 내역이 발생할 때마다 호출되어 is_modified 변수를 True로 설정한다
     global is_modified
     is_modified = True
+    
+
 
 
 
