@@ -25,6 +25,7 @@ from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
 
+
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
 brush_size = 1  # 초기 브러시 크기
@@ -1868,6 +1869,64 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 timer.start()
 update_timer()
 
+# 이미지를 저장할 리스트
+captured_images = []
+
+import tkinter as tk
+from tkinter import filedialog
+from PIL import ImageGrab
+import imageio
+
+# 타임랩스 녹화를 위한 변수와 함수
+recording = False
+frames = []
+
+def start_timelapse():
+    global recording
+    if not recording:  # 녹화가 아직 시작되지 않았다면 시작
+        recording = True
+        record_frame()
+
+def stop_timelapse():
+    global recording
+    if recording:  # 녹화가 진행중이라면 중지
+        recording = False
+        save_timelapse()
+
+def record_frame():
+    if recording:
+        x = window.winfo_rootx() + canvas.winfo_x()
+        y = window.winfo_rooty() + canvas.winfo_y()
+        x1 = x + canvas.winfo_width()
+        y1 = y + canvas.winfo_height()
+        frame = ImageGrab.grab().crop((x, y, x1, y1))
+        frames.append(frame)
+        window.after(1000, record_frame)  # 1초마다 캡처
+
+def save_timelapse():
+    if frames:
+        filename = filedialog.asksaveasfilename(defaultextension=".gif", filetypes=[("GIF files", "*.gif")])
+        if filename:
+            imageio.mimsave(filename, frames, format='GIF', fps=1)
+            print("Timelapse saved as", filename)
+
+def add_timelapse_buttons():
+    # 버튼 프레임 설정
+    button_frame = tk.Frame(window)
+    button_frame.pack(fill=tk.X)
+
+    # 타임랩스 버튼 추가
+    button_start_timelapse = tk.Button(button_frame, text="Start Timelapse", command=start_timelapse)
+    button_start_timelapse.pack(side=tk.LEFT)
+
+    button_stop_timelapse = tk.Button(button_frame, text="Stop Timelapse", command=stop_timelapse)
+    button_stop_timelapse.pack(side=tk.LEFT)
+
+# 기존 그림판 함수에서 버튼 추가 호출
+add_timelapse_buttons()
+
+# 여기에 기존 window, canvas 설정이 이미 되어있어야 함
+# 예: setup_paint_app(window) 호출 등
+
+
 window.mainloop()
-
-
