@@ -62,6 +62,44 @@ def draw_comic_cut(cut_number):
         canvas.create_rectangle(50, 300 + margin//2, 375 - margin//2, 550, outline="black", width=2)
         canvas.create_rectangle(375 + margin//2, 300 + margin//2, 750, 550, outline="black", width=2)
 
+# 말풍선 그리기 함수
+def draw_balloon(event, balloon_type):
+    x, y = event.x, event.y
+    if balloon_type == "speech": # 대사 말풍선 그리기
+        canvas.create_oval(x-60, y-40, x+60, y+40, outline="black", fill="white")
+        canvas.create_polygon(x, y+40, x-10, y+60, x+10, y+60, outline="black", fill="white")
+    elif balloon_type == "thought": # 생각 말풍선 그리기
+        canvas.create_oval(x-70, y-50, x+70, y+50, outline="black", fill="white")
+        canvas.create_oval(x-10, y+55, x+10, y+75, outline="black", fill="white")
+        canvas.create_oval(x-20, y+70, x, y+90, outline="black", fill="white")
+
+def balloon_mode(balloon_type):
+    canvas.bind("<Button-1>", lambda event: draw_balloon(event, balloon_type))
+
+# 사람 그리기 함수
+def draw_person(event):
+    x, y = event.x, event.y
+    head_radius = 20
+    body_length = 50
+    arm_length = 30
+    leg_length = 40
+
+    # 머리
+    canvas.create_oval(x - head_radius, y - head_radius, x + head_radius, y + head_radius, outline="black", width=2, fill="white")
+    
+    # 몸통
+    canvas.create_line(x, y + head_radius, x, y + head_radius + body_length, fill="black", width=2)
+    
+    # 팔
+    canvas.create_line(x, y + head_radius + 10, x - arm_length, y + head_radius + 20, fill="black", width=2)
+    canvas.create_line(x, y + head_radius + 10, x + arm_length, y + head_radius + 20, fill="black", width=2)
+    
+    # 다리
+    canvas.create_line(x, y + head_radius + body_length, x - leg_length, y + head_radius + body_length + leg_length, fill="black", width=2)
+    canvas.create_line(x, y + head_radius + body_length, x + leg_length, y + head_radius + body_length + leg_length, fill="black", width=2)
+
+def person_mode():
+    canvas.bind("<Button-1>", draw_person)
 
 # 벌집 색상 선택 함수
 def choose_hex_color():
@@ -1024,6 +1062,17 @@ def setup_paint_app(window):
     cut_menu.add_command(label="2 cut", command=lambda: draw_comic_cut(2))
     cut_menu.add_command(label="3 cut", command=lambda: draw_comic_cut(3))
     cut_menu.add_command(label="4 cut", command=lambda: draw_comic_cut(4))
+
+    # 말풍선 그리기 서브메뉴 생성
+    balloon_menu = Menu(cartoon_menu, tearoff=0)
+    cartoon_menu.add_cascade(label="Draw Balloons", menu=balloon_menu)
+
+    # 서브메뉴에 대사, 생각 말풍선 옵션 추가
+    balloon_menu.add_command(label="Speech Balloon", command=lambda: balloon_mode('speech'))
+    balloon_menu.add_command(label="Thought Balloon", command=lambda: balloon_mode('thought'))
+
+    # 사람 그리기 서브 메뉴 생성
+    cartoon_menu.add_command(label="Draw Person", command=person_mode)
 
     file_menu.add_command(label="Open New Window", command=create_new_window) # File 메뉴에 Open New Window 기능 버튼 추가
     file_menu.add_command(label="Add Image", command=upload_image) # File 메뉴에 Add Image 기능 버튼 추가
