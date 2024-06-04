@@ -1868,6 +1868,19 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 timer.start()
 update_timer()
 
+#사용하고 있는 펜의 종류를 알려주는 버튼
+
+def display_brush_mode():
+    mode_test = f"pen mode: {get_brush_mode()}"
+    mode_label.config(text = mode_test)
+
+def get_brush_mode():
+    return brush_mode
+
+mode_button = tk.Button(window, text="Pen Mode", command=display_brush_mode)
+mode_button.pack(pady=10)
+
+mode_label = tk.Label(window, text="")
+mode_label.pack()
+
 window.mainloop()
-
-
