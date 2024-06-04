@@ -930,6 +930,10 @@ def setup_paint_app(window):
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
+    
+    # 아가일 패턴 버튼 추가
+    button_argyle = Button(window, text="Draw Argyle Pattern", command=draw_argyle_pattern)
+    button_argyle.pack()
 
     #spray 인스턴스 생성 
     global spray_brush
@@ -1798,6 +1802,31 @@ def set_modified():
     global is_modified
     is_modified = True
 
+# 아가일 패턴을 그리는 기능 추가
+def draw_argyle_pattern():
+    canvas.delete("all")  
+    color1 = "#aabbcc"  
+    color2 = "#ccbbaa"  
+    diamond_height = 50  
+    diamond_width = 30  
+    width, height = canvas.winfo_width(), canvas.winfo_height()
+    
+    for y in range(0, height, diamond_height):
+        for x in range(0, width, diamond_width):
+           
+            fill_color = color1 if (x // diamond_width + y // diamond_height) % 2 == 0 else color2
+
+            diamond = [(x, y), (x+diamond_width/2, y+diamond_height/2), (x, y+diamond_height), (x-diamond_width/2, y+diamond_height/2)]
+            canvas.create_polygon(diamond, fill=fill_color, outline="black")
+            diamond_shifted = [(x+diamond_width/2, y), (x+diamond_width, y+diamond_height/2), (x+diamond_width/2, y+diamond_height), (x, y+diamond_height/2)]
+            canvas.create_polygon(diamond_shifted, fill="", outline="black")
+            
+    for y in range(0, height, diamond_height):
+        for x in range(0, width, diamond_width):
+            diamond = [(x, y), (x+diamond_width/2, y+diamond_height/2), (x, y+diamond_height), (x-diamond_width/2, y+diamond_height/2)]
+            canvas.create_polygon(diamond, fill="", outline="black")
+            diamond_shifted = [(x+diamond_width/2, y), (x+diamond_width, y+diamond_height/2), (x+diamond_width/2, y+diamond_height), (x, y+diamond_height/2)]
+            canvas.create_polygon(diamond_shifted, fill="", outline="black")
 
 
 window = Tk()
@@ -1869,5 +1898,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
