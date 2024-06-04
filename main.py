@@ -931,6 +931,10 @@ def setup_paint_app(window):
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
+    # 원 패턴을 그리는 버튼 추가
+    button_pattern = Button(window, text="draw pattern", command=draw_complex_pattern)
+    button_pattern.pack()
+
     #spray 인스턴스 생성 
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
@@ -1798,7 +1802,17 @@ def set_modified():
     global is_modified
     is_modified = True
 
-
+# 원 패턴을 그리는 함수 추가
+def draw_complex_pattern():
+    clear_paint(canvas)  
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+    
+    spacing = 40 
+    for i in range(0, width, spacing):
+        for j in range(0, height, spacing):
+            canvas.create_rectangle(i, j, i+spacing, j+spacing, outline="black")
+            canvas.create_oval(i, j, i+spacing, j+spacing, outline="black")
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -1869,5 +1883,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
