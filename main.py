@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import json
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -601,6 +602,34 @@ def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PostScript files", "*.png"), ("All files", "*.*")])
     if file_path:
         canvas.postscript(file=file_path)
+
+# 최근에 저장한 그림의 이름을 파일에 저장
+def save_recent_image_name(image_name):
+    home_dir = os.path.expanduser("~")  # 사용자의 홈 디렉토리 경로
+    file_path = os.path.join(home_dir, ".recent_image.json")  # 파일 경로 생성
+    
+    with open(file_path, "w") as f:
+        json.dump({"recent_image_name": image_name}, f)
+
+# 파일에서 최근에 저장한 그림의 이름을 읽어옴
+def get_recent_image_name():
+    home_dir = os.path.expanduser("~")  # 사용자의 홈 디렉토리 경로
+    file_path = os.path.join(home_dir, ".recent_image.json")  # 파일 경로 생성
+    
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            data = json.load(f)
+            return data.get("recent_image_name", "")
+    else:
+        return ""
+
+ #최근에 저장한 그림의 이름을 출력하는 함수.
+def print_recent_image_name():
+    recent_image_name = get_recent_image_name()
+    if recent_image_name:
+        print("최근에 저장한 그림의 이름:", recent_image_name)
+    else:
+        print("최근에 저장한 그림이 없습니다.")
 
 def reset_brush(canvas):
     global brush_size, brush_color
