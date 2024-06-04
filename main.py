@@ -553,6 +553,11 @@ def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
     except ValueError:
         print("유효한 RGB 값을 입력하세요.")
 
+#+==================================================================
+def select_button_update(button, r, g, b):
+    color='#%02x%02x%02x' % (r.get(), g.get(), b.get())
+    button.config(bg=color)  # 버튼의 색을 변경할 색으로 업데이트
+
 # 팔레트 설정 함수
 def setup_palette(window):
     # 새로운 창 생성
@@ -578,22 +583,36 @@ def setup_palette(window):
     custom_color_frame.pack(pady=10)
 
     # R 값 입력 라벨과 입력창 생성 및 추가
-    Label(custom_color_frame, text="R:").grid(row=0, column=0)
-    r_entry = Entry(custom_color_frame, width=3)
-    r_entry.grid(row=0, column=1)
+    #Label(custom_color_frame, text="R:").grid(row=0, column=0)
+    #r_entry = Entry(custom_color_frame, width=3)
+    #r_entry.grid(row=0, column=1)
 
     # G 값 입력 라벨과 입력창 생성 및 추가
-    Label(custom_color_frame, text="G:").grid(row=0, column=2)
-    g_entry = Entry(custom_color_frame, width=3)
-    g_entry.grid(row=0, column=3)
+    #Label(custom_color_frame, text="G:").grid(row=0, column=2)
+    #g_entry = Entry(custom_color_frame, width=3)
+    #g_entry.grid(row=0, column=3)
 
     # B 값 입력 라벨과 입력창 생성 및 추가
-    Label(custom_color_frame, text="B:").grid(row=0, column=4)
-    b_entry = Entry(custom_color_frame, width=3)
-    b_entry.grid(row=0, column=5)
+    #Label(custom_color_frame, text="B:").grid(row=0, column=4)
+    #b_entry = Entry(custom_color_frame, width=3)
+    #b_entry.grid(row=0, column=5)
 
     # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
-    Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
+    select_button = Button(custom_color_frame, text="Set Color",bg='white', command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame))
+    select_button.grid(row=4, columnspan=6, pady=10)
+
+    r_entry = Scale(custom_color_frame, from_=0, to=255,bg='red', orient='horizontal',
+    length=200, command=lambda  value,button=select_button: select_button_update(button, r_entry, g_entry, b_entry))
+    r_entry.grid(row=1,column=0,padx=5,pady=10) 
+
+    g_entry = Scale(custom_color_frame, from_=0, to=255,bg='green', orient='horizontal',
+    length=200, command=lambda  value,button=select_button: select_button_update(button, r_entry, g_entry, b_entry))
+    g_entry.grid(row=2,column=0,pady=10) 
+
+    b_entry = Scale(custom_color_frame, from_=0, to=255,bg='blue', orient='horizontal',
+    length=200, command=lambda  value,button=select_button: select_button_update(button, r_entry, g_entry, b_entry))
+    b_entry.grid(row=3,column=0,pady=10)
+    #색상 조정을 위한 슬라이더 생성 
 
 
 # 캔버스를 파일로 저장하는 함수
