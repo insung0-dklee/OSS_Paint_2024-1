@@ -6,9 +6,9 @@ button_delete : clear_paint의 버튼
 
 """
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, simpledialog
 from tkinter import *
-from PIL import Image, ImageTk, ImageOps, ImageEnhance
+from PIL import Image, ImageTk, ImageOps, ImageEnhance, ImageFilter, ImageDraw, ImageFont
 
 def paint(event):
     x1, y1 = ( event.x-1 ), ( event.y-1 )
@@ -155,6 +155,21 @@ def mosaic_image(block_size):
         canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
         canvas.image = tk_image
 
+def add_text():
+    global image, tk_image
+    if image:
+        text = simpledialog.askstring("텍스트 추가", "추가할 텍스트를 입력하세요:")
+        if text:
+            draw = ImageDraw.Draw(image)
+            font = ImageFont.load_default()
+            text_size = draw.textsize(text, font=font)
+            width, height = image.size
+            text_position = (width // 2 - text_size[0] // 2, height // 2 - text_size[1] // 2)
+            draw.text(text_position, text, font=font, fill="white")
+            tk_image = ImageTk.PhotoImage(image)
+            canvas.create_image(0, 0, anchor=tk.NW, image=tk_image)
+            canvas.image = tk_image
+
 
 
 root = tk.Tk()
@@ -231,6 +246,9 @@ mosaic_button.pack(side=tk.LEFT)
 tk.Label(root, text="블록 크기:").pack(side=tk.LEFT)
 entry_block_size = tk.Entry(root, width=5)
 entry_block_size.pack(side=tk.LEFT)
+
+text_button = tk.Button(root, text="텍스트 추가", command=add_text)
+text_button.pack(side=tk.LEFT)
 
 root.mainloop()
 
