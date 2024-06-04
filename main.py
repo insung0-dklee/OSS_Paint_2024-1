@@ -760,6 +760,8 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+def show_shortcut_key():
+    messagebox.showinfo("shortcut","Clear : c / Save : ctrl + s / undo : ctrl + z / dark mode : D / solid brush : Q / dotted brush : W , double line brush : E / fullscreen : f11")
 
 
 def setup_paint_app(window):
@@ -924,7 +926,6 @@ def setup_paint_app(window):
     frame_count.pack(side=RIGHT)
 
 
-
     # 에어브러쉬 속성 조절 버튼 추가
     Button(labelframe_additional2, text="+", command=increase_dot_distance).pack(side=RIGHT)
     Label(labelframe_additional2, text="Distance").pack(side=RIGHT)
@@ -1006,6 +1007,7 @@ def setup_paint_app(window):
     tool_menu.add_command(label="dark mode", command=toggle_dark_mode) # 다크 모드를 Tools 메뉴로 이동
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
+    help_menu.add_command(label="shortcut",command=show_shortcut_key)
 #+=================================================================================
     
     
