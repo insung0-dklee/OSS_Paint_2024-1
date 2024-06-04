@@ -5,9 +5,9 @@ class TransformationHandler:
         self.canvas = canvas
 
     def flip_horizontal(self):
-        objects = self.canvas.find_all()
         self.canvas.update()
         canvas_width = self.canvas.winfo_width()
+        objects = self.canvas.find_all()
         for obj in objects:
             coords = self.canvas.coords(obj)
             for i in range(len(coords)):
@@ -16,9 +16,9 @@ class TransformationHandler:
             self.canvas.coords(obj, *coords)
 
     def flip_vertical(self):
-        objects = self.canvas.find_all()
         self.canvas.update()
         canvas_height = self.canvas.winfo_height()
+        objects = self.canvas.find_all()
         for obj in objects:
             coords = self.canvas.coords(obj)
             for i in range(len(coords)):
@@ -27,17 +27,19 @@ class TransformationHandler:
             self.canvas.coords(obj, *coords)
 
     def rotate_90(self):
-        objects = self.canvas.find_all()
         self.canvas.update()
         canvas_width = self.canvas.winfo_width()
         canvas_height = self.canvas.winfo_height()
+        center_x = canvas_width / 2
+        center_y = canvas_height / 2
+        objects = self.canvas.find_all()
         for obj in objects:
             coords = self.canvas.coords(obj)
             new_coords = []
             for i in range(0, len(coords), 2):
-                x = coords[i]
-                y = coords[i + 1]
-                new_x = y
-                new_y = canvas_width - x
+                x = coords[i] - center_x
+                y = coords[i + 1] - center_y
+                new_x = y + center_x
+                new_y = -x + center_y
                 new_coords.extend([new_x, new_y])
             self.canvas.coords(obj, *new_coords)
