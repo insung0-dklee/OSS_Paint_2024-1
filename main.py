@@ -289,17 +289,18 @@ def toggle_fullscreen(event=None):
     window.attributes("-fullscreen", not window.attributes("-fullscreen"))
 
 # 좌우 반전 기능 추가
-def flip_horizontal(canvas):
+def flip_horizontal(canvas): #좌우 반전을할 객체들의 캔버스 
     objects = canvas.find_all()
-    canvas.update()
+    canvas.update() #최신상태를 반영하기 위해서 캔버스를 업데이트
     canvas_width = canvas.winfo_width()
+    #각 객체에 대한 반복 
     for obj in objects:
         coords = canvas.coords(obj)
         for i in range(len(coords)):
-            if i % 2 == 0:  # x 좌표를 반전시킵니다.
+            if i % 2 == 0:  # 짝수인 경우, x 좌표를 반전시킵니다.
                 coords[i] = canvas_width - coords[i]
         canvas.coords(obj, *coords)
-
+#상하 반전 기능 추가 ( 좌우 반전 기능과 유사 )
 def flip_vertical(canvas):
     objects = canvas.find_all()
     canvas.update()
@@ -307,7 +308,7 @@ def flip_vertical(canvas):
     for obj in objects:
         coords = canvas.coords(obj)
         for i in range(len(coords)):
-            if i % 2 != 0:  # y 좌표를 반전시킵니다.
+            if i % 2 != 0:  # 홀수인경우 , y 좌표를 반전시킵니다.
                 coords[i] = canvas_height - coords[i]
         canvas.coords(obj, *coords)
 
@@ -1341,7 +1342,7 @@ interval : 격자의 간격 변수
 눈금자을 생성할 시 각 리스트에 눈금 선과 숫자값을 저장
 """
 
-
+#눈금자를 그리는 draw_ruler()함수
 def draw_ruler():
     global ruler_lines, ruler_texts
     canvas_width = canvas.winfo_width()
@@ -1354,16 +1355,19 @@ def draw_ruler():
 
     # 상단 눈금자 그리기
     for x in range(0, canvas_width, interval):
+        #길이가 5의 배수일때 : 15인 선, 텍스트표시
         if x % (interval * 5) == 0:
             line = canvas.create_line(x, 0, x, 15, fill="black")
             text = canvas.create_text(x, 25, text=str(x), anchor=N)
             ruler_lines.append(line)
             ruler_texts.append(text)
+        #길이가 5의 배수가 아닌경우 : 10인 선, ruler_lines리스트에 추가
         else:
             line = canvas.create_line(x, 0, x, 10, fill="black")
             ruler_lines.append(line)
 
     # 좌측 눈금자 그리기
+    #y를 0부터 canvas_height까지 interval 간격으로 반복
     for y in range(0, canvas_height, interval):
         if y % (interval * 5) == 0:
             line = canvas.create_line(0, y, 15, y, fill="black")
