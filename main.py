@@ -1868,6 +1868,7 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 timer.start()
 update_timer()
 
+# check를 그리는 함수
 def draw_check_pattern(canvas, color):
     clear_paint(canvas)
     colors = [color, "white"]
@@ -1876,12 +1877,13 @@ def draw_check_pattern(canvas, color):
         for j in range(0, canvas.winfo_height(), size):
             color = colors[(i // size + j // size) % len(colors)]
             canvas.create_rectangle(i, j, i + size, j + size, fill=color, outline="")
-
+#체크의 색을 고르는 코드
 def choose_check_color():
     color = askcolor()[1]
     if color:
         draw_check_pattern(canvas, color)
 
+#체크 패턴 배경의 버튼
 button_checkerboard_color = Button(window, text="Choose Checkerboard Color", command=choose_check_color)
 button_checkerboard_color.pack(side=LEFT)
 button_checkerboard_color.bind("<Enter>", on_enter)  
