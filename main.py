@@ -795,7 +795,7 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
+    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2, labelframe_bright
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
@@ -827,34 +827,13 @@ def setup_paint_app(window):
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
 
-    # 벌집 모양 패턴 버튼
-    button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
-    button_honeycomb.pack(side=LEFT)
-    button_honeycomb.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_honeycomb.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    # 벌집 모양 패턴 색상 선택 버튼
-    button_honeycomb_color = Button(window, text="Choose Honeycomb Color", command=choose_hex_color)
-    button_honeycomb_color.pack(side=LEFT)
-    button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    # 벽돌 패턴 버튼
-    button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
-    button_brick_pattern.pack(side=LEFT)
-    button_brick_pattern.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_brick_pattern.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
-    # 벽돌 패턴 색상 선택 버튼
-    button_brick_line_color = Button(window, text="Choose Brick Line Color", command=choose_brick_line_color)
-    button_brick_line_color.pack(side=LEFT)
-    button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    labelframe_bright = LabelFrame(button_frame)
+    labelframe_bright.pack(side=LEFT, fill=Y)
 
     # 밝기 슬라이더
-    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
+    brightness_slider = tk.Scale(labelframe_bright, from_=0, to=100, orient='vertical', command=set_brightness)
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
-    brightness_slider.pack(pady=20)
+    brightness_slider.pack(side=LEFT)
 
     #timer 카테고리
     # 타이머 멈춤 버튼
@@ -1007,6 +986,7 @@ def setup_paint_app(window):
     tool_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도구 관련 메뉴를 추가
     help_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도움 관련 메뉴를 추가
 
+
     menu_bar.add_cascade(label="File", menu=file_menu) # 'File' 메뉴를 매뉴바에 생성
     menu_bar.add_cascade(label="Color", menu=color_menu) # 'Color' 메뉴를 매뉴바에 생성
     menu_bar.add_cascade(label="Tools", menu=tool_menu) # 'Tools' 메뉴를 매뉴바에 생성
@@ -1026,6 +1006,8 @@ def setup_paint_app(window):
     tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas)) # Tools 메뉴에 Toggle Grid 기능 버튼 추가
     tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
     tool_menu.add_command(label="dark mode", command=toggle_dark_mode) # 다크 모드를 Tools 메뉴로 이동
+    tool_menu.add_command(label="Honeycomb pattern", command=lambda: choose_hex_color())
+    tool_menu.add_command(label="Brick pattern", command=lambda: choose_brick_line_color())
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
