@@ -114,21 +114,6 @@ def set_brightness(value):
     color = f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'  # RGB 값을 16진수 색상 코드로 변환
     canvas.configure(bg=color)
 
-def increase_brightness(event=None):
-    current_value = brightness_slider.get()
-    if current_value < 100:
-        brightness_slider.set(current_value + 5)  # 밝기를 5% 올리기
-        set_brightness(current_value + 5)
-
-def decrease_brightness(event=None):
-    current_value = brightness_slider.get()
-    if current_value > 0:
-        brightness_slider.set(current_value - 5)  # 밝기를 5% 낮추기
-        set_brightness(current_value - 5)
-
-
-
-
 #드래그로 그림 움직이기
 #오른쪽 마우스 눌렀을 때 드래그 시작하는 지점 좌표 기록
 def start_move(event):
@@ -148,8 +133,6 @@ def move(event):
 def end_move(event):
     global is_moving
     is_moving = False
-
-
 
 
 #+=================================================================================
@@ -815,9 +798,9 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
-    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
+    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness, label="Brightness" )
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
-    brightness_slider.pack(pady=20)
+    brightness_slider.pack(pady=0)
 
     #timer 카테고리
     # 타이머 멈춤 버튼
@@ -936,7 +919,7 @@ def setup_paint_app(window):
     spray_brush = SprayBrush(canvas, brush_color)
 
     #브러시 크기 조정 슬라이더
-    brush_size_slider = Scale(labelframe_brush, from_=1, to=20, orient=HORIZONTAL, label="Size", command=change_brush_size)
+    brush_size_slider = Scale(labelframe_brush, from_=1, to=20, orient=HORIZONTAL, label="Brush Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
 
