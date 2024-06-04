@@ -43,7 +43,101 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+#+==================================================================
+# 데이터 입력 창 생성
+def draw_line_graph():
+     # 데이터 입력 창 생성
+    input_window = Toplevel(window)
 
+    # x, y값을 저장할 리스트 생성
+    x_values = []
+    y_values = []
+
+    # x, y값을 입력받는 함수
+    def add_point_entry():
+        point_frame = Frame(input_window)
+        point_frame.pack(after=add_point_button)
+        x_entry = Entry(point_frame, width=10)
+        x_entry.pack(side=LEFT)
+        y_entry = Entry(point_frame, width=10)
+        y_entry.pack(side=LEFT)
+        x_values.append(x_entry)
+        y_values.append(y_entry)
+
+    # x, y값 입력 창 추가 버튼 생성
+    add_point_button = Button(input_window, text="Add target input field", command=add_point_entry)
+    add_point_button.pack()
+
+    # 그래프 제목 입력 받기
+    title_label = Label(input_window, text="Enter the title of the graph")
+    title_label.pack()
+    title_entry = Entry(input_window)
+    title_entry.pack()
+
+    # x축 레이블 입력 받기
+    xlabel_label = Label(input_window, text="Enter the x-axis label")
+    xlabel_label.pack()
+    xlabel_entry = Entry(input_window)
+    xlabel_entry.pack()
+
+    # y축 레이블 입력 받기
+    ylabel_label = Label(input_window, text="Enter the y-axis label")
+    ylabel_label.pack()
+    ylabel_entry = Entry(input_window)
+    ylabel_entry.pack()
+
+    # 너비 입력 받기
+    width_label = Label(input_window, text="Enter the width of the graph")
+    width_label.pack()
+    width_entry = Entry(input_window)
+    width_entry.pack()
+
+    # 높이 레이블 입력 받기
+    height_label = Label(input_window, text="Enter the height of the graph")
+    height_label.pack()
+    height_entry = Entry(input_window)
+    height_entry.pack()
+
+    # 그래프 그리기 버튼 생성
+    draw_button = Button(input_window, text="Draw Graph", command=lambda: draw([entry.get() for entry in x_values], [int(entry.get()) for entry in y_values], title_entry.get(), xlabel_entry.get(), ylabel_entry.get(), int(width_entry.get()), int(height_entry.get())))
+    draw_button.pack()
+
+    def draw(x_list, y_list, title, xlabel, ylabel, width, height):
+        # 입력 받은 데이터를 리스트로 변환
+        original_y = y_list  # 원래의 y값을 저장
+        y = original_y.copy()  # 스케일링을 위한 y값 복사
+        x = list(range(1, len(y) + 1))
+        x_list_name = x_list;
+
+        # x, y 데이터를 캔버스의 너비와 높이에 맞게 스케일링
+        x = [i * int(width) / max(x) for i in x]
+        y_min, y_max = min(y), max(y)
+        y = [int(height) - (i - y_min) * int(height) / (y_max - y_min) for i in y]  # y축은 아래에서 위로 그려지므로 높이에서 빼줍니다.
+
+        canvas.create_line(0, int(height), int(width), int(height))
+
+        # y축 그리기
+        canvas.create_line(0, 0, 0, int(height))
+
+        # 꺽은선 그래프 그리기
+        for i in range(len(x) - 1):
+            canvas.create_line(x[i], y[i], x[i+1], y[i+1])
+
+        # 각 y값에 대한 빨간색 점과 대상의 이름 그리고 값을 그리기
+        for i in range(len(x)):
+            canvas.create_oval(x[i]-5, y[i]-5, x[i]+5, y[i]+5, fill='red')
+            canvas.create_text(x[i], y[i]-10, text=str(original_y[i]), fill='black')
+            canvas.create_text(x[i], int(height) + 20, text= x_list_name[i])
+
+        # 그래프 제목 설정
+        canvas.create_text(-20, 20, text=title)
+
+        # x축 레이블 설정
+        canvas.create_text(0, int(height) + 20, text=xlabel , fill='red')
+
+        # y축 레이블 설정
+        canvas.create_text(-20, int(height), text=ylabel, angle=90, fill='red')
+#+==================================================================
 
 
 # 만화 컷 테두리 그리기 함수
@@ -923,6 +1017,12 @@ def setup_paint_app(window):
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 벌집 모양 패턴 버튼
+    button_line_graph = Button(window, text="Draw line graph", command= draw_line_graph)
+    button_line_graph.pack(side=LEFT)
+    button_line_graph.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_line_graph.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
