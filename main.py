@@ -46,7 +46,7 @@ previous_x, previous_y = None, None
 
 # 벌집 색상 선택 함수
 def choose_hex_color():
-    color = askcolor()[1]
+    color = askcolor(title="벌집 색상 선택")[1]
     if color:
         draw_honeycomb_pattern(canvas, hex_color=color)
 
@@ -85,7 +85,7 @@ def pencil_brush(event, canvas):
 
 # 벽돌 색상 선택 함수
 def choose_brick_line_color():
-    color = askcolor()[1]
+    color = askcolor(title="벽돌 색상 선택")[1]
     if color:
         draw_brick_pattern(canvas, line_color=color)
 
@@ -551,12 +551,12 @@ def erase(event, canvas):
     canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color, width=brush_size) # 브러쉬 사이즈 조절
 
 def change_bg_color(canvas):
-    bg_color = askcolor()
+    bg_color = askcolor(title="배경 색상 선택")
     canvas.config(bg=bg_color[1])
 
 def change_brush_color(event=None):
     global brush_color
-    selected_color = askcolor()[1]
+    selected_color = askcolor(title="브러쉬 색상 선택")[1]
     if selected_color:
         brush_color = selected_color
         set_brush_color(brush_color)
@@ -1079,8 +1079,8 @@ shape_fill_color : 도형의 내부 색
 
 def select_shape_color():
     global shape_outline_color, shape_fill_color
-    shape_outline_color = askcolor()[1]  # 윤곽선 색상 선택
-    shape_fill_color = askcolor()[1]  # 내부 색상 선택
+    shape_outline_color = askcolor(title="윤곽선 색상 선택")[1]  # 윤곽선 색상 선택
+    shape_fill_color = askcolor(title="내부 색상 선택")[1]  # 내부 색상 선택
 
 # 사각형 그리기
 def create_rectangle(event=None):
