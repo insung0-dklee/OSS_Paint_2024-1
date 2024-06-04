@@ -1798,6 +1798,20 @@ def set_modified():
     global is_modified
     is_modified = True
 
+# 커스텀 필터
+def apply_custom_filter(filter_function):
+    canvas.postscript(file="canvas.ps", colormode='color')
+    img = Image.open("canvas.ps")
+    img = img.convert("RGB")
+    filtered_img = filter_function(img)
+    filtered_img.show()
+
+def custom_filter(img):
+    return img.convert("L")  # 예시: 흑백 필터
+
+apply_filter_button = Button(window, text="Apply Filter", command=lambda: apply_custom_filter(custom_filter))
+apply_filter_button.pack(side=LEFT)
+
 
 
 window = Tk()
