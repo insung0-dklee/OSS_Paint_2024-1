@@ -339,7 +339,6 @@ def bind_shortcuts():
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
     window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
-
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
@@ -749,8 +748,40 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+def open_memo_window():
+    memo_window = Toplevel(window)
+    memo_window.title("Memo")
 
+    memo_listbox = Listbox(memo_window, width=50, height=20)
+    memo_listbox.pack(pady=10)
 
+    entry_frame = Frame(memo_window)
+    entry_frame.pack(pady=10)
+
+    memo_entry = Entry(entry_frame, width=40)
+    memo_entry.pack(side=LEFT, padx=5)
+
+    def add_memo(event=None):
+        current_time = time.strftime("%H:%M:%S")
+        memo_text = memo_entry.get()
+        if memo_text:
+            memo_listbox.insert(END, f"[{current_time}] {memo_text}")
+            memo_entry.delete(0, END)
+
+    add_button = Button(entry_frame, text="Add", command=add_memo)
+    add_button.pack(side=LEFT)
+
+    memo_entry.bind("<Return>", add_memo)  # Enter 키를 눌렀을 때 add_memo 함수를 호출
+
+    def save_memos():
+        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+        if file_path:
+            with open(file_path, "w") as file:
+                for memo in memo_listbox.get(0, END):
+                    file.write(memo + "\n")
+
+    save_button = Button(memo_window, text="Save", command=save_memos)
+    save_button.pack(pady=10)
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
 
@@ -980,6 +1011,7 @@ def setup_paint_app(window):
     file_menu.add_command(label="Add Image", command=upload_image) # File 메뉴에 Add Image 기능 버튼 추가
     file_menu.add_command(label="Save", command=lambda: save_canvas(canvas)) # File 메뉴에 Save 기능 버튼 추가
     file_menu.add_command(label="Exit", command=close_program) # File 메뉴에 Exit 기능 버튼 추가
+    file_menu.add_command(label="Open Memo", command=open_memo_window) #File 메뉴에 메뉴 기능 버튼 추가
 
     color_menu.add_command(label="Set Palette", command=lambda: setup_palette(window)) # Color 메뉴에 Set Palette 기능 버튼 추가
     color_menu.add_command(label="Change Background Color", command=lambda: change_bg_color(canvas)) # Color 메뉴에 Change Background Color 기능 버튼 추가
