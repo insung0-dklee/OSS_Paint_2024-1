@@ -338,7 +338,7 @@ def bind_shortcuts():
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
-    window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
+    window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+y
 
 # brush_settings.initialize_globals(globals())
 
@@ -749,7 +749,21 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
-
+# 단축키에 대한 설명을 보여주는 함수
+def show_shortcuts():
+    shortcuts_info = """
+    <단축키 목록>
+    • Ctrl + S: 저장
+    • Ctrl + Z: 실행 취소 (Undo)
+    • Ctrl + Y: 다시 실행 (Redo)
+    • D: 다크 모드 토글
+    • Q: 실선 브러시 모드
+    • W: 점선 브러시 모드
+    • E: 이중 선 브러시 모드
+    • C: 그림판 초기화
+    • Alt + Enter: 전체 화면 토글
+    """
+    messagebox.showinfo("단축키", shortcuts_info)
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
@@ -783,6 +797,13 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    # 단축키 버튼 추가
+    button_shortcuts = Button(window, text="단축키", command=show_shortcuts)
+    button_shortcuts.pack(side=LEFT)
+    button_shortcuts.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_shortcuts.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
