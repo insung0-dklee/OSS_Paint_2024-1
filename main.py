@@ -904,3 +904,24 @@ timer.start()
 update_timer()
 
 window.mainloop()
+
+
+import tkinter as tk
+
+def draw_table(canvas, rows, cols, start_x=50, start_y=50, cell_width=80, cell_height=40):
+    """
+    매개변수로 주어진 행과 열의 수에 따라 캔버스에 표를 그리는 함수
+
+    canvas: 표를 그릴 tkinter 캔버스 객체
+    rows: 표의 행 수
+    cols: 표의 열 수
+    start_x: 표가 시작되는 x 좌표
+    start_y: 표가 시작되는 y 좌표
+    cell_width: 각 셀의 너비
+    cell_height: 각 셀의 높이
+    """
+    for i in range(rows + 1):
+        canvas.create_line(start_x, start_y + i * cell_height, start_x + cols * cell_width, start_y + i * cell_height)
+
+    for j in range(cols + 1):
+        canvas.create_line(start_x + j * cell_width, start_y, start_x + j * cell_width, start_y + rows * cell_height)
