@@ -992,6 +992,7 @@ def setup_paint_app(window):
     tool_menu.add_command(label="dark mode", command=toggle_dark_mode) # 다크 모드를 Tools 메뉴로 이동
     tool_menu.add_command(label="Dash Line", command=lambda: dash_lines(canvas))
     tool_menu.add_command(label="CheckList", command=lambda: create_checklist(canvas))
+    tool_menu.add_command(label="Note", command=lambda: create_note(canvas))
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
@@ -1774,7 +1775,18 @@ def create_checklist(canvas):
         canvas.create_rectangle(8, y - square_size // 2, 8 + square_size, y + square_size // 2, fill="lightblue")
         # 수평선 그리기
         canvas.create_line(0, y + square_size // 2, canvas_width, y + square_size // 2, fill="lightgray")
-        
+
+#노트 템플릿
+def create_note(canvas):
+    canvas_width = canvas.winfo_width()
+    line_spacing = 40  # 줄 사이의 간격 설정
+    for y in range(0, canvas.winfo_height(), line_spacing):
+        canvas.create_line(0, y, canvas_width, y, fill="lightgray")
+    # 왼쪽에 빨간 세로선 두 줄 추가
+    canvas.create_line(80, 0, 80, canvas.winfo_height(), fill="red")
+    canvas.create_line(90, 0, 90, canvas.winfo_height(), fill="red")
+
+       
 def on_closing():
     # 프로그램 종료 시 호출되는 함수
     global is_modified
