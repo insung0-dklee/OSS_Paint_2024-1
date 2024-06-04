@@ -528,14 +528,18 @@ TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 def set_brush_color(color):
     global brush_color
     brush_color = color
+    # spray_brush의 색상 변경을 위한 코드 추가
+    spray_brush.set_brush_color(brush_color)
 
 # 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
 def set_custom_color(r_entry, g_entry, b_entry, palette_frame, message_label):
     try:
+        # R, G, B 값을 입력받아 정수로 변환
         r = int(r_entry.get())
         g = int(g_entry.get())
         b = int(b_entry.get())
 
+        # R, G, B 값이 0에서 255 사이인지 확인
         if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
             color = f'#{r:02x}{g:02x}{b:02x}'
             set_brush_color(color)
