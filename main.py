@@ -149,6 +149,10 @@ def end_move(event):
     global is_moving
     is_moving = False
 
+def set_eraser_mode(canvas):
+    canvas.bind("<Button-1>", lambda event: erase(event, canvas))
+    canvas.bind("<B1-Motion>", lambda event: erase(event, canvas))
+    canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event))  # 지우기 종료
 
 
 
@@ -503,9 +507,9 @@ def flip_vertical(canvas):
 def erase(event, canvas):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
-    x1, y1 = ( event.x-1 ), ( event.y-1 )
-    x2, y2 = ( event.x+1 ), ( event.y+1 )
-    canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color, width=brush_size) # 브러쉬 사이즈 조절
+    x1, y1 = ( event.x - brush_size ), ( event.y - brush_size )
+    x2, y2 = ( event.x + brush_size ), ( event.y + brush_size )
+    canvas.create_oval(x1, y1, x2, y2, fill=bg_color, outline=bg_color) # 브러쉬 사이즈 조절
 
 def change_bg_color(canvas):
     bg_color = askcolor()
@@ -810,6 +814,12 @@ def setup_paint_app(window):
 
     # 벽돌 패턴 색상 선택 버튼
     button_brick_line_color = Button(window, text="Choose Brick Line Color", command=choose_brick_line_color)
+    button_brick_line_color.pack(side=LEFT)
+    button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 지우개 버튼
+    button_brick_line_color = Button(window, text="지우개", command=lambda: set_eraser_mode(canvas))
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
