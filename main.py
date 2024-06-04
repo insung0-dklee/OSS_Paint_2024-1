@@ -1837,6 +1837,20 @@ dot_distance.set(10)
 frame_distance = Frame(window)
 frame_distance.pack(side=RIGHT)
 
+
+time_label = Label(labelframe_timer, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
+time_label.pack()
+
+# 에어브러쉬 속성 변수 생성
+dot_count = IntVar()
+dot_count.set(10)
+
+dot_distance = IntVar()
+dot_distance.set(10)
+
+frame_distance = Frame(window)
+frame_distance.pack(side=RIGHT)
+
 frame_count = Frame(window)
 frame_count.pack(side=RIGHT)
 
@@ -1899,4 +1913,5 @@ class TextEditor:
 root = tk.Tk()
 text_editor = TextEditor(root)
 root.mainloop()
+
 
