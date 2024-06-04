@@ -82,26 +82,53 @@ def pencil_brush(event, canvas):
             jitter_y = y + random.randint(-brush_size, brush_size)
             canvas.create_line(jitter_x, jitter_y, jitter_x + 1, jitter_y + 1, fill=brush_color, width=brush_size/2)
     last_x, last_y = event.x, event.y
-
+"""
+수정사항
+line_color : 벽돌의 색을 전역변수로 지정
+기존에는 choose_brick_line_color가 draw_brick_pattern을 호출하여 벽돌의 색을 보내는 방식이었으나
+전역 변수를 보내는 방식으로 바꾸어 함수명에 더 어울리는 기능으로 바꾸면서 활용에 용이한 형태로 바꿈.
+"""
 # 벽돌 색상 선택 함수
 def choose_brick_line_color():
-    color = askcolor()[1]
-    if color:
-        draw_brick_pattern(canvas, line_color=color)
+    global line_color
+    line_color = askcolor()[1]
 
+# line_color 기본값
+line_color = "black"
 
 # 벽돌 모양 패턴 함수
-def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="black"):
+def draw_brick_pattern(canvas, brick_width=60, brick_height=30):
+    global line_color
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
 
     for y in range(0, canvas_height, brick_height):
         for x in range(0, canvas_width, brick_width):
             if (y // brick_height) % 2 == 0:
-                canvas.create_rectangle(x, y, x + brick_width, y + brick_height, outline=line_color, fill="")
+                canvas.create_rectangle(x, y, x + brick_width, y + brick_height, outline=line_color, fill="", tags="brick")
             else:
-                canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
-                                        outline=line_color, fill="")
+                canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height, outline=line_color, fill="", tags="brick")
+"""
+brick_pattern_on : 벽돌 패턴 활성화 여부 확인 변수
+toggle_brick_pattern : 벽돌 패턴 토글 함수
+clear_brick_pattern : tags="brick" 삭제, 벽돌 패턴 삭제 함수
+"""
+
+brick_pattern_on = False
+# 벽돌 패턴 토글 함수
+def toggle_brick_pattern():
+    global brick_pattern_on
+    if brick_pattern_on:
+        clear_brick_pattern(canvas)
+    else:
+        draw_brick_pattern(canvas)
+    brick_pattern_on = not brick_pattern_on
+
+# 벽돌 패턴 삭제 함수
+def clear_brick_pattern(canvas):
+    canvas.delete("brick")
+
+
 
 def start_pencil(event):
     global last_x, last_y
@@ -803,7 +830,7 @@ def setup_paint_app(window):
     button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벽돌 패턴 버튼
-    button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
+    button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: toggle_brick_pattern())
     button_brick_pattern.pack(side=LEFT)
     button_brick_pattern.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_pattern.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
