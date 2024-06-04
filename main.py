@@ -528,70 +528,56 @@ TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 def set_brush_color(color):
     global brush_color
     brush_color = color
-    # spray_brush의 색상 변경을 위한 코드 추가
-    spray_brush.set_brush_color(brush_color)
 
 # 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
-def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
+def set_custom_color(r_entry, g_entry, b_entry, palette_frame, message_label):
     try:
-        # R, G, B 값을 입력받아 정수로 변환
         r = int(r_entry.get())
         g = int(g_entry.get())
         b = int(b_entry.get())
 
-        # R, G, B 값이 0에서 255 사이인지 확인
         if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
-            # R, G, B 값을 16진수로 변환하여 색상 코드 생성
             color = f'#{r:02x}{g:02x}{b:02x}'
-            set_brush_color(color)  # 브러시 색상 설정 함수 호출
+            set_brush_color(color)
 
-            # 사용자 정의 색상을 팔레트에 동적으로 추가
-            button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
-            button.pack(side=LEFT, padx=2, pady=2)
+            # 팔레트에 색상 버튼 추가
+            add_color_button(palette_frame, color, message_label)
         else:
             print("RGB 값은 0에서 255 사이여야 합니다.")
     except ValueError:
         print("유효한 RGB 값을 입력하세요.")
 
-# 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
-def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
-    try:
-        # R, G, B 값을 입력받아 정수로 변환
-        r = int(r_entry.get())
-        g = int(g_entry.get())
-        b = int(b_entry.get())
-
-        # R, G, B 값이 0에서 255 사이인지 확인
-        if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
-            # R, G, B 값을 16진수로 변환하여 색상 코드 생성
-            color = f'#{r:02x}{g:02x}{b:02x}'
-            set_brush_color(color)  # 브러시 색상 설정 함수 호출
-
-            # 사용자 정의 색상을 팔레트에 동적으로 추가
-            button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
-            button.pack(side=LEFT, padx=2, pady=2)
-        else:
-            print("RGB 값은 0에서 255 사이여야 합니다.")
-    except ValueError:
-        print("유효한 RGB 값을 입력하세요.")
+# 팔레트에 색상 버튼을 추가하는 함수
+def add_color_button(palette_frame, color,message_label):
+    button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
+    button.bind("<Button-3>", lambda e: button.destroy())  # 우클릭 시 버튼 삭제
+    # 10열로 정렬
+    button.grid(row=(len(palette_frame.winfo_children()) // 10), column=(len(palette_frame.winfo_children()) % 10), padx=2, pady=2)
+    
+    # 팔레트에 추가된 행 수 계산
+    rows = (len(palette_frame.winfo_children()) + 9) // 10
+    if rows > 8:
+        message_label.config(text="팔레트에 공간이 부족합니다. 우클릭으로 색상을 삭제하세요.")
+    else:
+        message_label.config(text="")
 
 # 색상 스펙트럼을 설정하는 함수
-def setup_color_spectrum(palette_frame):
+def setup_color_spectrum(palette_frame, message_label):
     def on_canvas_click(event):
         x = event.x
         y = event.y
         color = spectrum_canvas.winfo_rgb(spectrum_canvas.gettags("current")[0])
         color = f'#{color[0]>>8:02x}{color[1]>>8:02x}{color[2]>>8:02x}'
         set_brush_color(color)
-        
-        # 사용자 정의 색상을 팔레트에 동적으로 추가
-        button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
-        button.pack(side=LEFT, padx=2, pady=2)
+
+        # 팔레트에 색상 버튼 추가
+        add_color_button(palette_frame, color, message_label)
 
     # 색상 스펙트럼을 Canvas 위젯으로 생성
     spectrum_canvas = Canvas(palette_window, width=256, height=150)
     spectrum_canvas.pack(pady=10)
-    
+
+    # 빨강-녹색, 녹색-파랑, 파랑-빨강 스펙트럼 생성
     for i in range(256):
         red_to_green = f'#{i:02x}{255-i:02x}00'
         green_to_blue = f'#{255-i:02x}{i:02x}ff'
@@ -599,56 +585,48 @@ def setup_color_spectrum(palette_frame):
         spectrum_canvas.create_line(i, 0, i, 50, fill=red_to_green, tags=(red_to_green,))
         spectrum_canvas.create_line(i, 50, i, 100, fill=green_to_blue, tags=(green_to_blue,))
         spectrum_canvas.create_line(i, 100, i, 150, fill=blue_to_red, tags=(blue_to_red,))
-    
-    spectrum_canvas.bind("<Button-1>", on_canvas_click)
 
+    # Canvas 클릭 시 색상 선택 이벤트 바인딩
+    spectrum_canvas.bind("<Button-1>", on_canvas_click)
 
 # 팔레트 설정 함수
 def setup_palette(window):
-    # 새로운 창 생성
     global palette_window
     palette_window = Toplevel(window)
     palette_window.title("팔레트 설정")
-    
 
-    # 팔레트 프레임 생성 및 추가
     palette_frame = Frame(palette_window)
     palette_frame.pack(pady=10)
 
-    # 미리 정의된 색상 목록
     colors = [
         'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'white', 'pink', 'brown', 'grey'
     ]
 
-    # 색상 버튼 생성 및 팔레트 프레임에 추가
-    for color in colors:
-        button = Button(palette_frame, bg=color, width=2, height=1, command=lambda c=color: set_brush_color(c))
-        button.pack(side=LEFT, padx=2, pady=2)
+    message_label = Label(palette_window, text="")
+    message_label.pack(pady=5)
 
-    # 사용자 정의 색상 입력창 생성 및 추가
+    # 미리 정의된 색상 버튼 추가
+    for color in colors:
+        add_color_button(palette_frame, color, message_label)
+
     custom_color_frame = Frame(palette_window)
     custom_color_frame.pack(pady=10)
 
-    # R 값 입력 라벨과 입력창 생성 및 추가
     Label(custom_color_frame, text="R:").grid(row=0, column=0)
     r_entry = Entry(custom_color_frame, width=3)
     r_entry.grid(row=0, column=1)
 
-    # G 값 입력 라벨과 입력창 생성 및 추가
     Label(custom_color_frame, text="G:").grid(row=0, column=2)
     g_entry = Entry(custom_color_frame, width=3)
     g_entry.grid(row=0, column=3)
 
-    # B 값 입력 라벨과 입력창 생성 및 추가
     Label(custom_color_frame, text="B:").grid(row=0, column=4)
     b_entry = Entry(custom_color_frame, width=3)
     b_entry.grid(row=0, column=5)
 
-    # 색상 설정 버튼 생성 및 사용자 정의 색상 프레임에 추가
-    Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame)).grid(row=1, columnspan=6, pady=10)
-    
-    # 색상 스펙트럼 설정
-    setup_color_spectrum(palette_frame)
+    Button(custom_color_frame, text="Set Color", command=lambda: set_custom_color(r_entry, g_entry, b_entry, palette_frame, message_label)).grid(row=1, columnspan=6, pady=10)
+
+    setup_color_spectrum(palette_frame, message_label)
     
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
