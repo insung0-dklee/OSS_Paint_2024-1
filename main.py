@@ -561,6 +561,26 @@ def horizontal_scroll(event):
     elif event.delta < 0:
         canvas.xview_scroll(1, "units")  # 오른쪽으로 스크롤
 
+def disable_all_events():
+    for seq in canvas.bind():
+        canvas.unbind(seq)
+
+def start_canvas_drag(event):
+    global last_x, last_y
+    last_x, last_y = event.x, event.y
+
+def canvas_drag(event):
+    global last_x, last_y
+    dx = event.x - last_x
+    dy = event.y - last_y
+    canvas.move("all", dx, dy)
+    last_x, last_y = event.x, event.y
+
+def enable_drag_mode():
+    disable_all_events()
+    canvas.bind("<Button-1>", start_canvas_drag)
+    canvas.bind("<B1-Motion>", canvas_drag)
+
 def on_button_press(event):
     canvas.scan_mark(event.x, event.y)
 
@@ -924,10 +944,16 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
+    # Drag Mode Button
+    drag_mode_button = Button(window, text="Drag Mode", command=enable_drag_mode)
+    drag_mode_button.pack(side=LEFT)
+
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
+
+
 
     #timer 카테고리
     # 타이머 멈춤 버튼
@@ -1114,6 +1140,7 @@ def setup_paint_app(window):
     tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas)) # Tools 메뉴에 Toggle Grid 기능 버튼 추가
     tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
     tool_menu.add_command(label="dark mode", command=toggle_dark_mode) # 다크 모드를 Tools 메뉴로 이동
+    tool_menu.add_command(label="Drag mode", command=enable_drag_mode)  # 드래그 모드를 Tools 메뉴로 이동
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
