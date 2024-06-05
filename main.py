@@ -77,10 +77,6 @@ def draw_line_graph():
         x_values.append(x_entry)
         y_values.append(y_entry)
 
-    # x, y값 입력 창 추가 버튼 생성
-    add_point_button = Button(input_window, text="Add target (Name, Number)", command=add_point_entry)
-    add_point_button.pack()
-
     # 그래프 제목 입력 받기
     title_label = Label(input_window, text="Title of the graph")
     title_label.pack()
@@ -98,6 +94,10 @@ def draw_line_graph():
     ylabel_label.pack()
     ylabel_entry = Entry(input_window)
     ylabel_entry.pack()
+
+    # 대상 추가 버튼 생성
+    add_point_button = Button(input_window, text="Add target (Name, Number)", command=add_point_entry)
+    add_point_button.pack()
 
     def create_line_graph(): # 꺽은선 그래프를 생성 하는 기능
         y_values_str = [entry.get() for entry in y_values]
@@ -163,7 +163,10 @@ def draw_line_graph():
                 current_graph.append(canvas.create_text(x[i], start_y + int(height) - 20, font=("Arial", font_size), text= x_list_name[i], tags="temp_shape"))
 
         # 그래프 제목 설정
-        current_graph.append(canvas.create_text( start_x, start_y, font=("Arial", font_size), text=title, tags="temp_shape"))
+        if height > 0:
+            current_graph.append(canvas.create_text( start_x, start_y - 10, font=("Arial", font_size), text=title, tags="temp_shape"))
+        else:
+            current_graph.append(canvas.create_text( start_x, start_y + 10, font=("Arial", font_size), text=title, tags="temp_shape"))
 
         # x축 레이블 설정
         if height > 0:
