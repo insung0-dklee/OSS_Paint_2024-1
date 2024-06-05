@@ -539,8 +539,6 @@ def change_brush_size(new_size):
     spray_brush.set_brush_size(brush_size)
 
 def zoom_scroll(event):
-    # Ctrl 키가 눌려있는지 확인
-    if event.state & 0x0004:
         scale = 1.0
         if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
             scale = 1.1
@@ -548,14 +546,15 @@ def zoom_scroll(event):
             scale = 0.9
         canvas.scale("all", event.x, event.y, scale, scale)
         canvas.configure(scrollregion=canvas.bbox("all"))
-    else:
-        # Ctrl 키가 눌려있지 않으면 스크롤
-        if event.delta > 0:
-            canvas.yview_scroll(-1, "units")  # 위로 스크롤
-        elif event.delta < 0:
-            canvas.yview_scroll(1, "units")  # 아래로 스크롤
 
-def horizontal_scroll(event):
+
+def y_scroll(event):
+    if event.delta > 0:
+        canvas.yview_scroll(-1, "units")  # 위로 스크롤
+    elif event.delta < 0:
+        canvas.yview_scroll(1, "units")  # 아래로 스크롤
+
+def x_scroll(event):
     if event.delta > 0:
         canvas.xview_scroll(-1, "units")  # 왼쪽으로 스크롤
     elif event.delta < 0:
@@ -1067,8 +1066,9 @@ def setup_paint_app(window):
     canvas.bind("<Leave>", default_cursor)
     canvas.bind("<Button-3>", show_coordinates)
     canvas.bind("<ButtonRelease-3>", hide_coordinates)
-    canvas.bind("<MouseWheel>", zoom_scroll)
-    canvas.bind("<Shift-MouseWheel>", horizontal_scroll)
+    canvas.bind("<Control-MouseWheel>", zoom_scroll)
+    canvas.bind("<MouseWheel>", y_scroll)
+    canvas.bind("<Shift-MouseWheel>", x_scroll)
     bind_shortcuts()
 
     
