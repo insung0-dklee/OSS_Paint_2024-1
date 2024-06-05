@@ -923,6 +923,10 @@ def setup_paint_app(window):
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
 
+    # 색상 히스토리를 보여주는 함수 호출 (추가)
+    show_color_history()
+
+
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
     button_honeycomb.pack(side=LEFT)
