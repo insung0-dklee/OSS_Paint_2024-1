@@ -2030,15 +2030,14 @@ def start_stopwatch(duration):
     if current_timer:
         window.after_cancel(current_timer)
 
-    def update_stopwatch():
-        nonlocal duration
-        if duration > 0:
-            mins, secs = divmod(duration, 60)
+    def update_stopwatch(remaining_time=duration):
+        if remaining_time > 0:
+            mins, secs = divmod(remaining_time, 60)
             timeformat = '{:02d}:{:02d}'.format(mins, secs)
             stopwatch_label.config(text=timeformat)
-            duration -= 1
+            remaining_time -= 1
             global current_timer
-            current_timer = canvas.after(1000, update_stopwatch)
+            current_timer = window.after(1000, update_stopwatch, remaining_time)
         else:
             messagebox.showinfo("종료", "종료되었습니다!")
             stopwatch_label.config(text="00:00")
