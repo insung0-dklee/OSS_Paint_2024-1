@@ -44,7 +44,69 @@ previous_time = None
 previous_x, previous_y = None, None
 
 
+class SelectionTool:
+    def __init__(self, window, canvas):
+        # 초기화 메서드: 기존의 window와 canvas를 사용
+        self.window = window
+        self.canvas = canvas
 
+        # "선택 영역 생성" 버튼 생성 및 배치
+        self.select_btn = tk.Button(window, text="선택 영역 생성", command=self.start_selection)
+        self.select_btn.pack(side=tk.LEFT)
+
+        # "선택 영역 해제" 버튼 생성 및 배치
+        self.deselect_btn = tk.Button(window, text="선택 영역 해제", command=self.deselect)
+        self.deselect_btn.pack(side=tk.LEFT)
+
+        # 선택 영역을 관리하기 위한 변수 초기화
+        self.rect_id = None
+        self.start_x = None
+        self.start_y = None
+        self.selection_active = False
+
+    def start_selection(self):
+        # 선택 영역 생성을 시작하는 메서드
+        if self.selection_active:
+            # 만약 이미 선택 영역이 활성화되어 있으면 해제
+            self.deselect()
+        
+        # 마우스 이벤트를 바인딩하여 선택 영역 생성
+        self.canvas.bind("<Button-1>", self.on_button_press)
+        self.canvas.bind("<B1-Motion>", self.on_mouse_drag)
+        self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
+        
+        self.selection_active = True
+
+    def deselect(self):
+        # 선택 영역을 해제하는 메서드
+        if self.rect_id:
+            # 선택 영역이 존재하면 삭제
+            self.canvas.delete(self.rect_id)
+            self.rect_id = None
+        self.selection_active = False
+
+    def on_button_press(self, event):
+        # 마우스 버튼을 눌렀을 때 호출되는 메서드
+        self.start_x = event.x
+        self.start_y = event.y
+        # 기존 선택 영역이 있으면 삭제
+        if self.rect_id:
+            self.canvas.delete(self.rect_id)
+        # 새로운 선택 영역 생성 (검은색 실선 스타일)
+        self.rect_id = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline="black", dash=(2, 2))
+
+    def on_mouse_drag(self, event):
+        # 마우스를 드래그할 때 호출되는 메서드
+        cur_x, cur_y = (event.x, event.y)
+        # 선택 영역의 크기와 위치 업데이트
+        self.canvas.coords(self.rect_id, self.start_x, self.start_y, cur_x, cur_y)
+
+    def on_button_release(self, event):
+        # 마우스 버튼을 놓을 때 호출되는 메서드
+        # 선택 영역 생성 이벤트 언바인딩
+        self.canvas.unbind("<Button-1>")
+        self.canvas.unbind("<B1-Motion>")
+        self.canvas.unbind("<ButtonRelease-1>")
 
 # 만화 컷 테두리 그리기 함수
 def draw_comic_cut(cut_number):
@@ -1933,6 +1995,9 @@ window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
 editor = ImageEditor(canvas)
+
+#선택영역 생성 및 해제 버튼 생성
+selectionTool = SelectionTool(window, canvas)
 
 # 타이머 라벨
 timer_label = Label(labelframe_timer, text="Time: 0 s")
