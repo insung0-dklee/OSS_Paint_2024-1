@@ -44,6 +44,34 @@ previous_time = None
 previous_x, previous_y = None, None
 
 
+# 초기 설정
+show_guidelines = False  # 가이드라인 표시 여부 초기 설정
+
+def toggle_guidelines():
+    """
+    수평 및 수직 가이드라인을 토글하는 함수
+    """
+    global show_guidelines
+    show_guidelines = not show_guidelines
+    draw_guidelines()
+
+def draw_guidelines():
+    """
+    가이드라인을 그리거나 지우는 함수
+    """
+    canvas.delete("guidelines")  # 기존 가이드라인 삭제
+
+    if show_guidelines:
+        width = canvas.winfo_width()
+        height = canvas.winfo_height()
+
+        # 수평 가이드라인
+        for y in range(0, height, 20):
+            canvas.create_line(0, y, width, y, fill="lightgray", tags="guidelines")
+
+        # 수직 가이드라인
+        for x in range(0, width, 20):
+            canvas.create_line(x, 0, x, height, fill="lightgray", tags="guidelines")
 
 
 # 만화 컷 테두리 그리기 함수
