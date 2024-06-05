@@ -252,6 +252,9 @@ def close_program(): #프로그램을 종료하는 기능
 
 def show_info_window(): #정보를 표시하는 기능
     messagebox.showinfo("Info", "OSS_Paint_2024\n 그림판 v1.0.0")
+
+def show_shortcut_window(): #단축키를 표시하는 기능
+    messagebox.showinfo("Shortcut", "Clear  (C)\nUndo  (Crtl+Z)\nRedo  (Ctrl+Y)\nSave  (Crtl+S)\nDark mode  (D)\nSolid Brush  (Q)\nDotted Brush  (W)\nDouble Line Brush  (E)")
 #+=================================================================================
 
 is_dark_mode = False  # 기본 모드는 라이트 모드
@@ -1116,6 +1119,7 @@ def setup_paint_app(window):
     tool_menu.add_command(label="dark mode", command=toggle_dark_mode) # 다크 모드를 Tools 메뉴로 이동
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
+    help_menu.add_command(label="Shortcut", command=show_shortcut_window) # Help 메뉴에 Shortcut 표시하는 기능 버튼 추가
 #+=================================================================================
     
     
