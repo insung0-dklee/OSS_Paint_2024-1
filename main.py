@@ -1673,9 +1673,11 @@ def end_draw_shape(event):
     current_shape = None
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
- """
+    
+"""
 안이 비어있는 마름모를 생성하는 코드입니다.
- """
+"""
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(labelframe_additional, tearoff=0)
