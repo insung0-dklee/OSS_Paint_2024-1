@@ -43,7 +43,8 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
-
+#도형의 색 속성
+shape_outline_color, shape_fill_color = None, None
 
 
 # 만화 컷 테두리 그리기 함수
@@ -1155,10 +1156,82 @@ shape_outline_color : 도형의 윤곽선 색
 shape_fill_color : 도형의 내부 색
 """
 
+#+===========================================================================================
 def select_shape_color():
     global shape_outline_color, shape_fill_color
-    shape_outline_color = askcolor()[1]  # 윤곽선 색상 선택
-    shape_fill_color = askcolor()[1]  # 내부 색상 선택
+    is_select_outline_color = False
+
+    def select_outline_color(): # 클릭한 버튼이 외각선의 색이란고 판별하는 변수의 값을 참으로 변경하는 기능
+        global is_select_outline_color
+        is_select_outline_color = True
+
+    def select_fill_color(): # 클릭한 버튼이 외각선의 색이란고 판별하는 변수의 값을 거짓으로 변경하는 기능
+        global is_select_outline_color
+        is_select_outline_color = False
+
+    def select_button_update(button_outline, button_fill,r, g, b): # 선택한 버튼 색상과 해당하는 색을 업데이트 하는 기능
+        global shape_outline_color, shape_fill_color, is_select_outline_color
+        color='#%02x%02x%02x' % (r.get(), g.get(), b.get())
+        if is_select_outline_color:
+            button_outline.config(bg=color) 
+            shape_outline_color = color
+        else:
+            button_fill.config(bg=color) 
+            shape_fill_color = color
+
+    def setup_color(window): # 색상 조절 창을 생성하는 기능
+        global shape_outline_color, shape_fill_color
+        select_outline_color(); # 초기에 선택한 색상 버튼을 외각선으로 지정
+
+        # 새로운 창 생성
+        color_setup_window = Toplevel(window)
+        color_setup_window.title("팔레트 설정")
+
+        # 버튼 프레임 생성
+        button_frame = Frame(color_setup_window)
+        button_frame.pack(pady=10)
+
+        # 외각선/채워질 색상 버튼과 프레임 생성
+        outline_frame = Frame(color_setup_window)
+        outline_frame.pack(side=LEFT, padx=2, pady=2)
+        
+        button_outline = Button(outline_frame, bg=shape_outline_color, width=2, height=1, command=select_outline_color)
+        button_outline.pack()
+        
+        label_outline = Label(outline_frame, text="Outline Color")
+        label_outline.pack()
+
+        fill_frame = Frame(color_setup_window)
+        fill_frame.pack(side=LEFT, padx=2, pady=2)
+        
+        button_fill = Button(fill_frame, bg=shape_fill_color, width=2, height=1, command=select_fill_color)
+        button_fill.pack()
+        #button_fill.bind("<Button-3>", open_color_picker(1)) 
+        
+        label_fill = Label(fill_frame, text="Fill Color")
+        label_fill.pack()
+
+        # 사용자 정의 색상 슬라이더 생성
+        color_slider_frame = Frame(color_setup_window)
+        color_slider_frame.pack(pady=10)
+
+        select_button = Button(color_slider_frame, text="Exit",bg='white', command=color_setup_window.destroy)
+        select_button.grid(row=4, columnspan=6, pady=10)
+
+        r_slider = Scale(color_slider_frame, from_=0, to=255,bg='red', orient='horizontal',
+        length=200, command=lambda  value,button=select_button: select_button_update(button_outline, button_fill, r_slider, g_slider, b_slider))
+        r_slider.grid(row=1,column=0,padx=5,pady=10) 
+
+        g_slider = Scale(color_slider_frame, from_=0, to=255,bg='green', orient='horizontal',
+        length=200, command=lambda  value,button=select_button: select_button_update(button_outline, button_fill,r_slider, g_slider, b_slider))
+        g_slider.grid(row=2,column=0,pady=10) 
+
+        b_slider = Scale(color_slider_frame, from_=0, to=255,bg='blue', orient='horizontal',
+        length=200, command=lambda  value,button=select_button: select_button_update(button_outline, button_fill,r_slider, g_slider, b_slider))
+        b_slider.grid(row=3,column=0,pady=10)
+        
+    setup_color(window)
+#+===========================================================================================
 
 # 사각형 그리기
 def create_rectangle(event=None):
