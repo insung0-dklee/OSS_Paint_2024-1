@@ -1040,6 +1040,10 @@ def setup_paint_app(window):
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
+    
+    # 평행사변형 패턴 버튼 추가
+    button_pattern = Button(window, text="Draw Parallelogram Pattern", command=draw_parallelogram_pattern)
+    button_pattern.pack()
 
     #spray 인스턴스 생성 
     global spray_brush
@@ -1922,6 +1926,33 @@ def set_modified():
     global is_modified
     is_modified = True
 
+# 평행사변형 패턴을 그리는 함수 추가
+def draw_parallelogram_pattern():
+    clear_paint(canvas)  
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+    size = 40  
+
+    for y in range(0, height, size):
+        for x in range(0, width, size):
+            if (y // size) % 2 == 0:
+             
+                points = [
+                    x, y,
+                    x + size, y,
+                    x + int(size * 1.5), y + size,
+                    x + int(size * 0.5), y + size
+                ]
+                canvas.create_polygon(points, outline='black', fill='lightgreen')
+            else:
+              
+                points = [
+                    x, y + size,
+                    x + int(size * 0.5), y,
+                    x + int(size * 1.5), y,
+                    x + size, y + size
+                ]
+                canvas.create_polygon(points, outline='black', fill='green')
 
 
 window = Tk()
@@ -2022,5 +2053,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
