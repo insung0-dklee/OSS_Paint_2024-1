@@ -68,7 +68,13 @@ def draw_comic_cut(cut_number):
 # 강조 효과 그리는 함수
 def create_emphasis_effect(event=None):
     # 마우스 왼쪽 버튼 클릭 시 start_emphasis 함수를 호출하도록 설정
+    select_emphasis_line_color()
     canvas.bind("<Button-1>", start_emphasis)
+
+#강조 효과 색상 선택 함수
+def select_emphasis_line_color():
+    global emphasis_fill_color
+    emphasis_fill_color = askcolor()[1]  # 윤곽선 색상 선택   
 
 def start_emphasis(event):
     global start_x, start_y, current_shape
@@ -77,10 +83,10 @@ def start_emphasis(event):
     current_shape = None
     # 마우스 움직임에 따라 draw_emphasis 함수를 호출하고, 버튼이 놓여지면 finish_emphasis 함수 호출
     canvas.bind("<B1-Motion>", draw_emphasis)
-    canvas.bind("<ButtonRelease-1>", finish_emphasis)
+    canvas.bind("<ButtonRelease-1>", finish_emphasis) 
 
 def draw_emphasis(event):
-    global start_x, start_y, current_shape
+    global start_x, start_y, current_shape, emphasis_fill_color
     # 이전에 그려진 임시 도형 삭제
     canvas.delete("temp_shape")
     # 마우스 위치를 끝점으로 설정
@@ -123,7 +129,7 @@ def draw_emphasis(event):
         line_width = random.randint(1, 3)
 
         # 계산된 위치와 굵기로 선 그리기
-        canvas.create_line(center_x, center_y, x, y, fill="black", width=line_width, tags="temp_shape")
+        canvas.create_line(center_x, center_y, x, y, fill=emphasis_fill_color, width=line_width, tags="temp_shape")
         angle += angle_step
 
     # 중심에 흰색 타원 그리기 (사각형 영역에 대한 비율로 크기 조정)
@@ -135,6 +141,7 @@ def create_rectangle_emphasis_effect(event=None):
     # 마우스 왼쪽 버튼 클릭 시 start_rectangle_emphasis 함수를 호출하도록 설정
     global radius_factor # 원의 반지름을 결정하는 변수
     radius_factor = 3
+    select_emphasis_line_color()
     canvas.bind("<Button-1>", start_rectangle_emphasis)
     canvas.bind("<MouseWheel>", adjust_radius)  # 마우스 휠 이벤트 바인딩
 
@@ -149,7 +156,7 @@ def start_rectangle_emphasis(event):
 
 # 기존의 draw_emphasis 함수를 수정하여 정사각형 비율로 투명한 배경의 강조 효과를 그리는 함수
 def draw_rectangle_emphasis(event):
-    global start_x, start_y
+    global start_x, start_y, emphasis_fill_color
     canvas.delete("temp_shape")
     end_x, end_y = event.x, event.y
     
@@ -182,7 +189,7 @@ def draw_rectangle_emphasis(event):
         line_start_y = center_y + scale * math.sin(radian_angle)
 
         # 선 그리기
-        canvas.create_line(line_start_x, line_start_y, circle_x, circle_y, fill="black", width=random.randint(1, 3), tags="temp_shape")
+        canvas.create_line(line_start_x, line_start_y, circle_x, circle_y, fill=emphasis_fill_color, width=random.randint(1, 3), tags="temp_shape")
 
         angle += random.randint(1, 5)  # 각도 증가
 
