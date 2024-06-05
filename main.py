@@ -78,13 +78,13 @@ def draw_pie_chart():
         y_values.append(y_entry)
 
     # 그래프 제목 입력 받기
-    title_label = Label(input_window, text="Enter the title of the graph")
+    title_label = Label(input_window, text="Title of the graph")
     title_label.pack()
     title_entry = Entry(input_window)
     title_entry.pack()
 
     # x, y값 입력 창 추가 버튼 생성
-    add_point_button = Button(input_window, text="Add target input field", command=add_point_entry)
+    add_point_button = Button(input_window, text="Add target (Name, Number)", command=add_point_entry)
     add_point_button.pack()
 
 
@@ -106,8 +106,8 @@ def draw_pie_chart():
             messagebox.showinfo("Insufficient Data", "Please enter at least one point to draw a pie chart")
             canvas.bind("<ButtonRelease-1>", finish_pie_chart)
 
-    # 그래프를 그리는 함수
-    def draw(event, x_list, y_list, title):
+    
+    def draw(event, x_list, y_list, title): # 원형 그래프를 그리는 기능
         global start_x, start_y, current_graph
         angles = None
         current_graph.clear()
@@ -170,7 +170,7 @@ def draw_pie_chart():
         title_y = start_y + height  # 원의 맨 밑에 위치
         current_graph.append(canvas.create_text(title_x, title_y + 20, text=title, fill= "red", tags="temp_shape"))
 
-    def finish_pie_chart(event): # 원형 그래프 그리기를 종료하 기능
+    def finish_pie_chart(event): # 원형 그래프 그리기를 종료하는 기능
         global current_graph
         canvas.unbind("<B1-Motion>")
         canvas.unbind("<ButtonRelease-1>")
