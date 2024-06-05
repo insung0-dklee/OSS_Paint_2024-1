@@ -5,7 +5,6 @@ clear_paint : 그림판에 있는 그림을 다 지우는 기능
 button_delete : clear_paint의 버튼
 
 """
-
 from tkinter import *
 from tkinter import ttk
 import time #시간 계산을 위한 모듈
