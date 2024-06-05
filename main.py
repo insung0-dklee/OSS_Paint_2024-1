@@ -137,6 +137,34 @@ def finish_emphasis(event):
     canvas.unbind("<ButtonRelease-1>")
     canvas.dtag("temp_shape", "temp_shape")
 
+# Todo List 템플릿 그리기 함수
+def draw_todo_list_template():
+    canvas.delete("all")  # 기존에 그려진 것을 지움
+    margin = 20  # 항목 사이의 간격
+    full_width = canvas.winfo_width()
+    full_height = canvas.winfo_height()
+    width = full_width // 3  # 가로 길이를 3분의 1로 줄임
+    height = full_height
+    title_height = 50  # 제목 영역 높이
+    item_height = 40  # 각 항목의 높이
+    num_items = (height - title_height) // (item_height + margin)  # 항목 개수 계산
+
+    # 중앙 좌표 계산
+    center_x = full_width / 2
+    left_x = center_x - width / 2
+
+    # 제목 영역
+    canvas.create_rectangle(left_x, 20, left_x + width, title_height + 20, outline="black", width=2)
+    canvas.create_text(left_x + width / 2, title_height / 2 + 20, text="Todo List", font=("Arial", 24))
+
+    # 항목 영역
+    for i in range(num_items):
+        y1 = title_height + margin + i * (item_height + margin)
+        y2 = y1 + item_height
+        canvas.create_rectangle(left_x, y1, left_x + width, y2, outline="black", width=2)
+        canvas.create_text(left_x + 20, (y1 + y2) / 2, text=f"Item {i + 1}", anchor="w", font=("Arial", 16))
+
+
 # 벌집 색상 선택 함수
 def choose_hex_color():
     color = askcolor()[1]
@@ -956,6 +984,12 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    # Todo List 템플릿 버튼
+    button_todo_list = Button(button_frame, text="Todo List", command=draw_todo_list_template)
+    button_todo_list.pack(side=LEFT)
+    button_todo_list.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_todo_list.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
