@@ -1041,6 +1041,10 @@ def setup_paint_app(window):
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
+    # 배경 패턴 그리기 버튼 추가
+    button_pattern = Button(window, text="draw pattern", command=draw_pattern)
+    button_pattern.pack()
+
     #spray 인스턴스 생성 
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
@@ -1922,6 +1926,20 @@ def set_modified():
     global is_modified
     is_modified = True
 
+# 배경을 네모세모 패턴으로 변경하는 기능 추가
+def draw_pattern():
+    clear_paint(canvas)  
+    width = canvas.winfo_width()
+    height = canvas.winfo_height()
+    size = 40  
+    for x in range(0, width, size):
+        for y in range(0, height, size):
+            if random.choice([True, False]):
+               
+                canvas.create_rectangle(x, y, x+size, y+size, fill="lightblue", outline="lightblue")
+            else:
+                
+                canvas.create_polygon(x, y, x+size, y, x+(size/2), y-(size * (3**0.5) / 2), fill="pink", outline="pink")
 
 
 window = Tk()
@@ -2022,5 +2040,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
