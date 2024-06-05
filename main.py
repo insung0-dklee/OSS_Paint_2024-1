@@ -124,6 +124,45 @@ def draw_calendar(canvas):
                     color = "blue"
                 canvas.create_text(x + day_width / 2, y + day_height / 2, text=str(day), fill=color, font=("Arial", 13))
 
+# 메모장 그리는 함수
+def draw_notepad(canvas):
+    # 상단 제목과 날짜를 표시할 영역 설정
+    title_x = 50
+    title_y = 10
+    title_width = 400
+    title_height = 30
+
+    # 날짜 영역 설정
+    date_x = 50
+    date_y = title_y + title_height + 10
+    date_width = 400
+    date_height = 30
+
+    # 본문 영역 설정
+    body_x = 50
+    body_y = date_y + date_height + 10
+    body_width = 400
+    body_height = 300
+
+    # 제목과 날짜 영역 그리기
+    canvas.create_rectangle(title_x, title_y, title_x + title_width, title_y + title_height, outline="black")
+    canvas.create_text(title_x + 5, title_y + title_height / 2, text="제목: ", anchor="w", font=("Arial", 12))
+    
+    canvas.create_rectangle(date_x, date_y, date_x + date_width, date_y + date_height, outline="black")
+    now = datetime.now()
+    canvas.create_text(date_x + 5, date_y + date_height / 2, text=f"날짜: {now.strftime('%Y-%m-%d')}", anchor="w", font=("Arial", 12))
+
+    # 본문 영역 그리기
+    canvas.create_rectangle(body_x, body_y, body_x + body_width, body_y + body_height, outline="black")
+    canvas.create_text(body_x + 5, body_y + 5, text="본문: ", anchor="nw", font=("Arial", 12))
+
+    # 본문 영역에 줄 추가
+    num_lines = 10
+    line_spacing = body_height / num_lines
+    for i in range(1, num_lines + 1):
+        y = body_y + i * line_spacing
+        canvas.create_line(body_x + 5, y, body_x + body_width - 5, y, fill="gray")
+
 # 만화 컷 테두리 그리기 함수
 def draw_comic_cut(cut_number):
     canvas.delete("all")  # 기존에 그려진 것을 지움
@@ -995,6 +1034,12 @@ def setup_paint_app(window):
     button_calendar.pack(side=LEFT)  
     button_calendar.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_calendar.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 메모장을 그리는 버튼
+    button_notepad = tk.Button(window, text="Draw notepad", command=lambda: draw_notepad(canvas))
+    button_notepad.pack(side=LEFT)  
+    button_notepad.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_notepad.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 연필 브러시 버튼 추가
     button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
