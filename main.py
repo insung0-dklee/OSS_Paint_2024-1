@@ -24,6 +24,10 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import numpy as np
+import pycuda.driver as cuda
+import pycuda.autoinit
+from pycuda.compiler import SourceModule
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1760,6 +1764,46 @@ def change_grid_spacing(value):
 
 def change_grid_spacing(value):
     draw_grid(canvas, value)
+
+class VectorAddGPU:
+    def __init__(self):
+        # CUDA 커널 코드
+        cuda_kernel_code = """
+        __global__ void vector_add(float *a, float *b, float *result, int n)
+        {
+            int tid = blockIdx.x * blockDim.x + threadIdx.x;
+            if (tid < n)
+                result[tid] = a[tid] + b[tid];
+        }
+        """
+        # CUDA 커널 함수 컴파일
+        self.mod = SourceModule(cuda_kernel_code)
+        # CUDA 커널 함수 가져오기
+        self.cuda_kernel = self.mod.get_function("vector_add")
+
+    def add(self, a, b):
+        # 벡터의 길이
+        n = len(a)
+        # CUDA에서 사용할 메모리 할당
+        a_gpu = cuda.mem_alloc(a.nbytes)
+        b_gpu = cuda.mem_alloc(b.nbytes)
+        result_gpu = cuda.mem_alloc(b.nbytes)
+        # 호스트 메모리에서 CUDA 메모리로 데이터 복사
+        cuda.memcpy_htod(a_gpu, a)
+        cuda.memcpy_htod(b_gpu, b)
+        # CUDA 커널 실행
+        block_size = 256
+        grid_size = (n + block_size - 1) // block_size
+        self.cuda_kernel(a_gpu, b_gpu, result_gpu, np.int32(n), block=(block_size, 1, 1), grid=(grid_size, 1))
+        # CUDA 결과를 호스트로 복사
+        result = np.empty_like(a)
+        cuda.memcpy_dtoh(result, result_gpu)
+        return result
+
+# 벡터 덧셈을 수행하는 함수
+def vector_add(a, b):
+    gpu = VectorAddGPU()
+    return gpu.add(a, b)
 
 class GridDialog:
     def __init__(self, window):
