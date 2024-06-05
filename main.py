@@ -24,6 +24,8 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+# 상단에 필요한 모듈 임포트
+from PIL import Image, ImageFilter
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -859,6 +861,24 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+# 필터를 적용하는 함수
+def apply_filter(filter_type):
+    # 캔버스를 PostScript 파일로 저장
+    canvas.postscript(file="temp_canvas.ps", colormode='color')
+    # 저장한 PostScript 파일을 열어 이미지 객체로 변환
+    img = Image.open("temp_canvas.ps")
+    img = img.convert("RGB")
+    
+    # 필터 타입에 따라 해당 필터를 이미지에 적용
+    if filter_type == "BLUR":
+        img = img.filter(ImageFilter.BLUR)
+    elif filter_type == "CONTOUR":
+        img = img.filter(ImageFilter.CONTOUR)
+    elif filter_type == "DETAIL":
+        img = img.filter(ImageFilter.DETAIL)
+    
+    # 필터가 적용된 이미지를 표시
+    img.show()
 
 
 def setup_paint_app(window):
@@ -893,6 +913,11 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    # 필터 버튼 추가 (필터를 적용하는 버튼들)
+    Button(button_frame, text="Blur", command=lambda: apply_filter("BLUR")).pack(side=LEFT)
+    Button(button_frame, text="Contour", command=lambda: apply_filter("CONTOUR")).pack(side=LEFT)
+    Button(button_frame, text="Detail", command=lambda: apply_filter("DETAIL")).pack(side=LEFT)
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
