@@ -448,7 +448,7 @@ def bind_shortcuts():
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
     window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
-
+    window.bind("<Control-o>", shape_options_window)
 # brush_settings.initialize_globals(globals())
 
 def set_paint_mode_airbrush(canvas): #에어브러쉬 그리기 모드로 전환하는 기능
@@ -1635,6 +1635,93 @@ def choose_shape(event):
     popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
+
+"""
+도형 선택 단축키 추가
+ctrl + o로 선택창 생성
+top : 선택창
+도형이름_var : 체크박스 활성화 확인 변수
+"""
+def shape_options_window(event=None):  # 이벤트 매개변수 추가
+    global top, triangle_var, square_var, circle_var, Star_var, Six_Pointed_Star_var, Heart_var, Cross_var, Diamond_var, Arrow_var, V_var, Hexagon_var, Pentagon_var
+    if top is None or not top.winfo_exists():  # 창이 없거나 이미 닫혔을 경우에만 창을 엽니다
+        top = Toplevel(window)
+        top.title("Select Shapes")
+
+        # 체크박스 옵션
+        triangle_var = tk.BooleanVar()
+        square_var = tk.BooleanVar()
+        circle_var = tk.BooleanVar()
+        Star_var = tk.BooleanVar()
+        Six_Pointed_Star_var = tk.BooleanVar()
+        Heart_var = tk.BooleanVar()
+        Cross_var = tk.BooleanVar()
+        Diamond_var = tk.BooleanVar()
+        Arrow_var = tk.BooleanVar()
+        V_var = tk.BooleanVar()
+        Hexagon_var = tk.BooleanVar()
+        Pentagon_var = tk.BooleanVar()
+
+        # 체크박스 생성 및 배치, anchor = 'w' : 왼쪽 정렬
+        triangle_checkbutton = Checkbutton(top, text="Triangle", variable=triangle_var, command=draw_shapes_and_close, anchor='w')
+        triangle_checkbutton.pack(anchor='w')
+        square_checkbutton = Checkbutton(top, text="Square", variable=square_var, command=draw_shapes_and_close, anchor='w')
+        square_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="Circle", variable=circle_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="Star", variable=Star_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="Six Pointed Star", variable=Six_Pointed_Star_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="Heart", variable=Heart_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="Cross", variable=Cross_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="Diamond", variable=Diamond_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="Arrow", variable=Arrow_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="V", variable=V_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="Hexagon", variable=Hexagon_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+        circle_checkbutton = Checkbutton(top, text="Pentagon", variable=Pentagon_var, command=draw_shapes_and_close, anchor='w')
+        circle_checkbutton.pack(anchor='w')
+
+# 도형 그리기 함수 호출, 기존 선택창 제거
+def draw_shapes_and_close():
+    select_shapes_option()
+    top.destroy()
+
+# 체크박스 활성화 유무에 따라 도형 그리기 함수 호출
+def select_shapes_option():
+    global triangle_var, square_var, circle_var, Star_var, Six_Pointed_Star_var, Heart_var, Cross_var, Diamond_var, Arrow_var, V_var, Hexagon_var, Pentagon_var
+    if triangle_var.get():
+        create_triangle();
+    if square_var.get():
+        create_rectangle()
+    if circle_var.get():
+        create_circle()
+    if Star_var.get():
+        create_star()
+    if Six_Pointed_Star_var.get():
+        create_six_pointed_star()
+    if Heart_var.get():
+        create_heart()
+    if Cross_var.get():
+        create_cross()
+    if Diamond_var.get():
+        create_diamond()
+    if Arrow_var.get():
+        create_arrow()
+    if V_var.get():
+        create_V()
+    if Hexagon_var.get():
+        create_hexagon()
+    if Pentagon_var.get():
+        create_pentagon()
+# top 기본 설정
+top = None
 
 def get_canvas_resolution(canvas):
     # 캔버스의 해상도(너비와 높이)를 반환하는 함수
