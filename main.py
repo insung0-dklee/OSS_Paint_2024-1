@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import pickle
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -37,7 +38,8 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
-
+SAVE_FILE_PATH = ""
+AUTO_SAVE_INTERVAL = 60  # 자동저장 간격
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
 previous_time = None
@@ -709,8 +711,18 @@ def setup_palette(window):
 # 캔버스를 파일로 저장하는 함수
 def save_canvas(canvas):
     file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PostScript files", "*.png"), ("All files", "*.*")])
+    SAVE_FILE_PATH = file_path
     if file_path:
         canvas.postscript(file=file_path)
+
+# 자동으로 저장된 파일에 덮어쓰기 하는 함수
+
+def auto_save():
+    while True:
+        time.sleep(AUTO_SAVE_INTERVAL)
+        with open(SAVE_FILE_PATH, 'wb') as f:
+            pickle.dump(canvas, f)
+
 
 def reset_brush(canvas):
     global brush_size, brush_color
