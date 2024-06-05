@@ -1618,6 +1618,33 @@ def finish_hexagon(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
+def create_oval(event=None):
+    select_shape_color()
+    canvas.bind("<Button-1>", start_draw_oval)
+
+def start_draw_oval(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", draw_oval)
+    canvas.bind("<ButtonRelease-1>", end_draw_oval)
+
+def draw_oval(event):
+    global current_shape
+    if current_shape:
+        canvas.delete(current_shape)
+    current_shape = canvas.create_oval(start_x, start_y, event.x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+
+def end_draw_oval(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+"""
+타원을 그리는 코드입니다. 도형창에 들어가 타원을 클릭하면 마우스를 눌렀을때 그려지고 버튼에서 손을 떼게 되면 그림이 끝납니다.
+"""
+
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(labelframe_additional, tearoff=0)
@@ -1633,6 +1660,7 @@ def choose_shape(event):
     popup.add_command(label="V", command=lambda: create_V(event))
     popup.add_command(label="Hexagon", command=lambda: create_hexagon(event))
     popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
+    popup.add_command(label="Oval", command=lambda: create_oval(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
