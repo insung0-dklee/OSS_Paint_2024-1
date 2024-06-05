@@ -25,6 +25,19 @@ from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
 from PIL import Image, ImageTk, ImageGrab
+import subprocess
+import sys
+
+#현재 실행중인 인터프리터 경로에 인자로 받은 패키지를 설치하는 함수
+def install(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+#pillow 모듈의 Image, ImageTk, ImageGrab 을 import / pillow 가 설치되어있지 않다면 install 함수를 통해 설치
+try:
+    from PIL import Image, ImageTk, ImageGrab
+except ImportError:
+    install("Pillow")
+    from PIL import Image, ImageTk, ImageGrab
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
