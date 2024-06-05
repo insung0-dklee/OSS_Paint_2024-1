@@ -121,10 +121,12 @@ def draw_line_graph():
         global start_x, start_y, current_graph
         current_graph.clear()
         canvas.delete("temp_shape")
-
         end_x, end_y = event.x, event.y  # 끝점 설정
         width = end_x - start_x  # 너비 계산
         height = end_y - start_y  # 높이 계산
+
+        font_size = int(min(width, height) * 0.025) #폰트 사이즈 계산
+        circle_size = int(min(width, height) * 0.025) #원 사이즈 계산
 
         # 입력 받은 데이터를 리스트로 변환
         original_y = y_list  # 원래의 y값을 저장
@@ -152,18 +154,21 @@ def draw_line_graph():
 
         # 각 y값에 대한 빨간색 점과 대상의 이름 그리고 값을 그리기
         for i in range(len(x)):
-            current_graph.append(canvas.create_oval(x[i]-5, y[i]-5, x[i]+5, y[i]+5, fill='red', tags="temp_shape"))
-            current_graph.append(canvas.create_text(x[i], y[i]-10, text=str(original_y[i]), fill='black', tags="temp_shape"))
-            current_graph.append(canvas.create_text(x[i], start_y + int(height) + 20, text= x_list_name[i], tags="temp_shape"))
+            current_graph.append(canvas.create_oval(x[i]-circle_size, y[i]-circle_size, x[i]+circle_size, y[i]+circle_size, fill='red', tags="temp_shape"))
+            current_graph.append(canvas.create_text(x[i], y[i]-10, text=str(original_y[i]), fill='black', font=("Arial", font_size), tags="temp_shape"))
+            current_graph.append(canvas.create_text(x[i], start_y + int(height) + 20, font=("Arial", font_size), text= x_list_name[i], tags="temp_shape"))
 
         # 그래프 제목 설정
-        current_graph.append(canvas.create_text( start_x, start_y, text=title, tags="temp_shape"))
+        current_graph.append(canvas.create_text( start_x, start_y, font=("Arial", font_size), text=title, tags="temp_shape"))
 
         # x축 레이블 설정
-        current_graph.append(canvas.create_text( start_x, start_y + int(height) + 20, text=xlabel , fill='red', tags="temp_shape"))
+        current_graph.append(canvas.create_text( start_x, start_y + int(height) + 20, text=xlabel, font=("Arial", font_size), fill='red', tags="temp_shape"))
 
         # y축 레이블 설정c
-        current_graph.append(canvas.create_text(start_x , start_y + int(height), text=ylabel, angle=90, fill='red', tags="temp_shape"))
+        if width > 0:
+            current_graph.append(canvas.create_text(start_x - 20, start_y + int(height), text=ylabel, angle=90, font=("Arial", font_size), fill='red', tags="temp_shape"))
+        else:
+            current_graph.append(canvas.create_text(start_x + 20, start_y + int(height), text=ylabel, angle=90, font=("Arial", font_size), fill='red', tags="temp_shape"))
 
 
     def finish_line_graph(event): # 꺽은선 그래프 그리기를 종료하 기능
