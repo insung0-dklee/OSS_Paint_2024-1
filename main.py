@@ -2037,6 +2037,26 @@ button_add_hexagon_pattern = Button(window, text="Choose Hexagon Pattern", comma
 button_add_hexagon_pattern.pack()
 
 
+# 다이아몬드 패턴 함수 추가
+def choose_diamond_pattern():
+    canvas.delete("all")  
+    width = canvas.winfo_width()  
+    height = canvas.winfo_height()  
+    diamond_size = 50  
+
+    for x in range(0, width, diamond_size):  
+        flip = False  
+        for y in range(0, height, diamond_size):  
+            if flip:
+                canvas.create_polygon(x, y + diamond_size / 2, x + diamond_size / 2, y, x + diamond_size, y + diamond_size / 2, x + diamond_size / 2, y + diamond_size, outline="black", fill="lightyellow")
+            else:
+                canvas.create_polygon(x, y + diamond_size / 2, x + diamond_size / 2, y, x + diamond_size, y + diamond_size / 2, x + diamond_size / 2, y + diamond_size, outline="black", fill="yellow")
+            flip = not flip
+
+button_add_diamond_pattern = Button(window, text="Choose Diamond Pattern", command=choose_diamond_pattern)
+button_add_diamond_pattern.pack()
+
+
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
