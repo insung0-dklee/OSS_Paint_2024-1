@@ -37,6 +37,7 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+locked = False
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -304,6 +305,25 @@ def upload_image():
         image = PhotoImage(file=path)
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
+
+
+def set_paint_mode_normal(canvas):  # canvas를 매개변수로 받도록 수정
+    canvas.bind("<B1-Motion>", paint)
+
+def toggle_lock_mode():
+    global locked
+    locked = not locked
+    if locked:
+        messagebox.showinfo("Locked", "Lock Mode Activated")
+        canvas.unbind("<B1-Motion>")
+        canvas.unbind("<B3-Motion>")
+        canvas.unbind("<Button-1>")
+        canvas.unbind("<Button-3>")
+    else:
+        messagebox.showinfo("Unlocked", "Unlock Mode Activated")
+        set_paint_mode_normal(canvas)  # 언락 모드일 때는 그림을 그릴 수 있도록 canvas 인자 제공
+
+
 
 # 문자열 드래그 시작
 def start_drag(event):
@@ -912,6 +932,8 @@ def setup_paint_app(window):
     button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
+    
+
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
     button_brick_pattern.pack(side=LEFT)
@@ -923,6 +945,11 @@ def setup_paint_app(window):
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+
+    button_lock = Button(window, text="Lock Mode", command=toggle_lock_mode)
+    button_lock.pack(side=LEFT)
+
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
