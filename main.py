@@ -859,6 +859,32 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+# 그라데이션 페인트 함수
+def gradient_paint(event):
+    global last_x, last_y
+    # 이전 좌표가 존재하면 그라데이션 색상으로 선을 그림
+    if last_x is not None and last_y is not None:
+        # 현재 좌표와 이전 좌표를 이용해 그라데이션 색상 계산
+        gradient_color = calculate_gradient(last_x, last_y, event.x, event.y)
+        # 계산된 그라데이션 색상으로 선을 그림
+        canvas.create_line(last_x, last_y, event.x, event.y, fill=gradient_color, width=brush_size)
+    # 현재 좌표를 이전 좌표로 업데이트
+    last_x, last_y = event.x, event.y
+
+# 그라데이션 색상 계산 함수
+def calculate_gradient(x1, y1, x2, y2):
+    # 시작 색상 (빨강)
+    r1, g1, b1 = 255, 0, 0
+    # 끝 색상 (파랑)
+    r2, g2, b2 = 0, 0, 255
+    # 두 점 사이의 거리를 이용해 그라데이션 비율 계산
+    ratio = min(1.0, max(0.0, ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5 / 100))
+    # 비율에 따라 색상 값을 보간
+    r = int(r1 + (r2 - r1) * ratio)
+    g = int(g1 + (g2 - g1) * ratio)
+    b = int(b1 + (b2 - b1) * ratio)
+    # 계산된 색상을 16진수 색상 코드로 변환하여 반환
+    return f'#{r:02x}{g:02x}{b:02x}'
 
 
 def setup_paint_app(window):
@@ -879,6 +905,7 @@ def setup_paint_app(window):
     button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
 
+
     labelframe_brush = LabelFrame(button_frame, text="brush mode") #브러시 설정을 정리한 프레임
     labelframe_brush.pack(side = LEFT,fill=Y)
 
@@ -893,6 +920,10 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+# 그라데이션 페인트 모드를 설정하는 버튼 추가
+    Button(button_frame, text="Gradient", command=lambda: set_brush_mode(canvas, "gradient")).pack(side=LEFT)
+
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
