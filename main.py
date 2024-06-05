@@ -43,6 +43,7 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+current_brush_mode_index = 0
 
 
 
@@ -998,13 +999,19 @@ def setup_paint_app(window):
     button_flip_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_flip_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+    def change_brush_mode_on_double_click(event):
+        global current_brush_mode_index
+        current_brush_mode_index = (current_brush_mode_index + 1) % len(brush_modes)
+        brush_combobox.current(current_brush_mode_index)
+        set_brush_mode(canvas, brush_modes[current_brush_mode_index])
+
     #브러시  모드를 선택하는 콤보박스
     brush_combobox = ttk.Combobox(labelframe_brush, values=brush_modes, state="readonly")
     brush_combobox.current(0)
     brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
     brush_combobox.pack(side=LEFT)
-    
+
+    canvas.bind("<Double-Button-3>", change_brush_mode_on_double_click)
 
     # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
