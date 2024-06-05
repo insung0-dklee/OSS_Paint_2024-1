@@ -26,6 +26,7 @@ import os
 from tkinter import Scale
 import subprocess
 import sys
+from tkinter import Toplevel
 #cmd에서 pip install pygame 다운 필수! 사용자가 사전에 설치하도록 안내하는 것이 좋음.
 # 패키지 설치 함수
 def install(package):
@@ -53,10 +54,32 @@ last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 �
 x1, y1 = None, None
 songs = ["edm.mp3", "country.mp3", "pop.mp3"]  # 노래 목록
 
+
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
+
+# 스플래시 스크린을 표시하는 함수
+def show_splash(window):
+    splash = Toplevel()
+    splash.title("로딩 중...")
+    splash.geometry("600x400")  # 스플래시 스크린의 크기
+    # 스플래시 스크린을 화면 중앙에 위치시키기
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x_coordinate = (screen_width // 2) - (600 // 2)
+    y_coordinate = (screen_height // 2) - (400 // 2)
+    splash.geometry(f"600x400+{x_coordinate}+{y_coordinate}")
+    splash_label = tk.Label(splash, text="오픈소스sw의 이해 그림판", font=("Arial", 24))
+    splash_label.pack(expand=True)
+    splash_label_2 = tk.Label(splash, text="프로그램 시작 중입니다. 잠시만 기다려주세요....", font=("Arial", 12))
+    splash_label_2.pack(expand=True)
+
+    # 스플래시 스크린을 3초 동안 표시
+    splash.update()
+    time.sleep(3)
+    splash.destroy()
 
 def update_analog_clock(canvas):
     canvas.delete("all")
@@ -2024,7 +2047,9 @@ window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
 editor = ImageEditor(canvas)
-
+window.withdraw()
+show_splash(window)
+window.deiconify()
 
 
 # 타이머 라벨
@@ -2115,5 +2140,3 @@ timer.start()
 update_timer()
 play_background_music(songs[0])
 window.mainloop()
-
-
