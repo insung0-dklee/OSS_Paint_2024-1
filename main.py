@@ -37,6 +37,7 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+mirror_mode = None
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -241,14 +242,16 @@ def decrease_brightness(event=None):
 
 
 
-#드래그로 그림 움직이기
-#오른쪽 마우스 눌렀을 때 드래그 시작하는 지점 좌표 기록
+# 드래그로 그림 움직이기
+# 오른쪽 마우스 눌렀을 때 드래그 시작하는 지점 좌표 기록
 def start_move(event):
     global last_x, last_y, is_moving
     if event.num == 3:  # 오른쪽 버튼 클릭 여부 확인
         last_x, last_y = event.x, event.y
         is_moving = True
-#오른쪽 마우스 누르면 그려진 모든 요소들 이동
+        canvas.config(cursor="fleur")  # 커서를 손바닥 모양으로 변경
+
+# 오른쪽 마우스 누르면 그려진 모든 요소들 이동
 def move(event):
     global last_x, last_y, is_moving
     if is_moving:
@@ -256,10 +259,12 @@ def move(event):
         y_delta = event.y - last_y
         canvas.move("all", x_delta, y_delta)  # 그려진 모든 요소를 이동시킴
         last_x, last_y = event.x, event.y
-#오른쪽 마우스 떼면 움직임 종료
+
+# 오른쪽 마우스 떼면 움직임 종료
 def end_move(event):
     global is_moving
     is_moving = False
+    canvas.config(cursor="")  # 커서를 기본 모양으로 변경
 
 
 
@@ -889,6 +894,38 @@ def set_alarm():
 def show_alarm():
     messagebox.showinfo("Alarm", "Time is up!")
 
+# 미러 드로잉 설정 함수
+def set_mirror_mode(mode):
+    global mirror_mode
+    mirror_mode = mode
+
+# 미러 드로잉을 수행하는 함수
+def mirror_draw(event):
+    global last_x, last_y, mirror_mode
+    x, y = event.x, event.y
+
+    if last_x is not None and last_y is not None:
+        canvas.create_line(last_x, last_y, x, y, fill=brush_color, width=brush_size)
+
+        if mirror_mode == "horizontal":
+            mirror_x = canvas.winfo_width() - x
+            canvas.create_line(canvas.winfo_width() - last_x, last_y, mirror_x, y, fill=brush_color, width=brush_size)
+        elif mirror_mode == "vertical":
+            mirror_y = canvas.winfo_height() - y
+            canvas.create_line(last_x, canvas.winfo_height() - last_y, x, mirror_y, fill=brush_color, width=brush_size)
+
+    last_x, last_y = x, y
+
+# 미러 드로잉 시작 지점 설정
+def start_mirror_draw(event):
+    global last_x, last_y
+    last_x, last_y = event.x, event.y
+
+# 미러 드로잉 끝내기
+def end_mirror_draw(event):
+    global last_x, last_y
+    last_x, last_y = None, None
+
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
@@ -1090,6 +1127,23 @@ def setup_paint_app(window):
     button_line.pack(side=RIGHT)
     button_line.bind("<Enter>", on_enter)  
     button_line.bind("<Leave>", on_leave)
+
+    # 미러 드로잉 버튼 추가
+    button_mirror_horizontal = tk.Button(labelframe_additional, text="Mirror Horizontal", command=lambda: set_mirror_mode("horizontal"))
+    button_mirror_horizontal.grid(row=1, column=1)
+    button_mirror_horizontal.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_mirror_horizontal.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_mirror_vertical = tk.Button(labelframe_additional, text="Mirror Vertical", command=lambda: set_mirror_mode("vertical"))
+    button_mirror_vertical.grid(row=1, column=2)
+    button_mirror_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_mirror_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_mirror_off = tk.Button(labelframe_additional, text="Mirror Off", command=lambda: set_mirror_mode(None))
+    button_mirror_off.grid(row=1, column=3)
+    button_mirror_off.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_mirror_off.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
 
 
     window.bind("<F11>", toggle_fullscreen)
