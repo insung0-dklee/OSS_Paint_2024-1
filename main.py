@@ -305,6 +305,11 @@ def upload_image():
         canvas.create_image(0, 0, anchor=NW, image=image)
         canvas.image = image
 
+def delete_images():
+    for item in canvas.find_all():
+        if canvas.type(item) == "image":  # 이미지 객체인지 확인
+            canvas.delete(item)
+
 # 문자열 드래그 시작
 def start_drag(event):
     drag_data["item"] = canvas.find_closest(event.x, event.y)[0]
@@ -911,6 +916,9 @@ def setup_paint_app(window):
     button_pencil_brush.pack(side=LEFT)
     button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    button_delete = Button(window, text="Delete Images", command=delete_images)
+    button_delete.pack(side=LEFT)
 
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
