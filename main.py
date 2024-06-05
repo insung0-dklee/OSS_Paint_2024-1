@@ -878,6 +878,16 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+# 알람 설정 함수
+def set_alarm():
+    # 사용자로부터 시간을 입력받음 (초 단위)
+    time_in_seconds = simpledialog.askinteger("Set Alarm", "Enter time in seconds:")
+    if time_in_seconds:
+        window.after(time_in_seconds * 1000, show_alarm)  # 지정된 시간이 지나면 show_alarm 함수 호출
+
+# 알람을 보여주는 함수
+def show_alarm():
+    messagebox.showinfo("Alarm", "Time is up!")
 
 
 def setup_paint_app(window):
@@ -912,6 +922,12 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    # 알람 설정 버튼 추가
+    button_set_alarm = tk.Button(labelframe_timer, text="Set Alarm", command=set_alarm)
+    button_set_alarm.pack(side=tk.LEFT)
+    button_set_alarm.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_set_alarm.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
