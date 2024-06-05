@@ -2023,4 +2023,41 @@ update_timer()
 
 window.mainloop()
 
+class PaintApp:
+    def __init__(self, root):
+        self.root = root
+        
+        # 기본 설정
+        self.is_fullscreen = False  # 전체 화면 상태를 저장하는 변수 추가
+        
+        # 캔버스 설정
+        self.canvas = tk.Canvas(root, bg="white")
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        
+        # 마우스 이벤트 바인딩
+        self.canvas.bind("<B1-Motion>", self.paint)
+        
+        # 단축키 바인딩
+        self.root.bind("<F11>", self.toggle_fullscreen)  # 전체 화면 단축키 추가
+        self.root.bind("<Escape>", self.exit_fullscreen)  # 전체 화면 종료 단축키 추가
 
+    def paint(self, event):
+        # 그리기 기능 구현
+        x1, y1 = (event.x - 1), (event.y - 1)
+        x2, y2 = (event.x + 1), (event.y + 1)
+        self.canvas.create_oval(x1, y1, x2, y2, fill='black', outline='black')
+
+    def toggle_fullscreen(self, event=None):
+        self.is_fullscreen = not self.is_fullscreen  # 상태 토글
+        self.root.attributes("-fullscreen", self.is_fullscreen)  # 전체 화면 상태 반영
+
+    def exit_fullscreen(self, event=None):
+        if self.is_fullscreen:
+            self.is_fullscreen = False
+            self.root.attributes("-fullscreen", False)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PaintApp(root)
+    root.title("그림판")  
+    root.mainloop()
