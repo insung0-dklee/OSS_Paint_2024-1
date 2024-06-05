@@ -254,7 +254,7 @@ def show_info_window(): #정보를 표시하는 기능
     messagebox.showinfo("Info", "OSS_Paint_2024\n 그림판 v1.0.0")
 
 def show_shortcut_window(): #단축키를 표시하는 기능
-    messagebox.showinfo("Shortcut", "Clear  (C)\nUndo  (Crtl+Z)\nRedo  (Ctrl+Y)\nSave  (Crtl+S)\nDark mode  (D)\nSolid Brush  (Q)\nDotted Brush  (W)\nDouble Line Brush  (E)")
+    messagebox.showinfo("Shortcut", "Clear  (C)\nUndo  (Crtl+Z)\nRedo  (Ctrl+Y)\n\nSave  (Crtl+S)\nDark mode  (D)\n\nSolid Brush  (Q)\nDotted Brush  (W)\nDouble Line Brush  (E)\nPressure  (R)\nMarker  (T)\nAirbrush  (A)\nSpray  (S)")
 #+=================================================================================
 
 is_dark_mode = False  # 기본 모드는 라이트 모드
@@ -441,7 +441,19 @@ def set_dotted_brush_mode(event):
 def set_double_line_brush_mode(event):
     set_brush_mode(canvas, "double_line")
 
-    # 맞춤형 단축키 기능 추가
+def set_pressure_brush_mode(event):
+    set_brush_mode(canvas, "pressure")
+
+def set_marker_brush_mode(event):
+    set_brush_mode(canvas, "marker")
+    
+def set_airbrush_brush_mode(event):
+    set_brush_mode(canvas, "airbrush")
+
+def set_spray_brush_mode(event):
+    set_brush_mode(canvas, "spray")
+
+# 맞춤형 단축키 기능 추가
 def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas)) #clear 단축키 c
     window.bind("<Control-s>", save_canvas) #save 단축키 crtl+s
@@ -450,6 +462,10 @@ def bind_shortcuts():
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
+    window.bind("<r>", set_pressure_brush_mode)
+    window.bind("<t>", set_marker_brush_mode)
+    window.bind("<a>", set_airbrush_brush_mode)
+    window.bind("<s>", set_spray_brush_mode)
     window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
 
 # brush_settings.initialize_globals(globals())
