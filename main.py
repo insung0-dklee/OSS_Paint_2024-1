@@ -220,6 +220,48 @@ def decrease_brightness(event=None):
         set_brightness(current_value - 5)
 
 
+# 초기 색상 설정
+shape_fill_color = "yellow"
+
+
+# 랜덤한 크기의 별 그리기 함수
+def draw_stars_pattern(canvas, star_count=50):
+    canvas.delete("all")  # 기존 그림을 모두 삭제
+    canvas.configure(bg="black")  # 배경색을 검정색으로 설정
+
+    for _ in range(star_count):
+        x = random.randint(0, canvas.winfo_width())
+        y = random.randint(0, canvas.winfo_height())
+        size = random.randint(5, 20)  # 별 크기를 랜덤하게 설정
+        draw_star_at(canvas, x, y, size, shape_fill_color)
+
+
+def draw_star_at(canvas, x, y, size, color):
+    points = []
+    for i in range(5):
+        angle_outer = math.radians(i * 72 - 90)
+        angle_inner = math.radians(i * 72 + 36 - 90)
+
+        x_outer = x + size * math.cos(angle_outer)
+        y_outer = y + size * math.sin(angle_outer)
+        x_inner = x + size / 2.5 * math.cos(angle_inner)
+        y_inner = y + size / 2.5 * math.sin(angle_inner)
+
+        points.append(x_outer)
+        points.append(y_outer)
+        points.append(x_inner)
+        points.append(y_inner)
+
+    canvas.create_polygon(points, outline=color, fill=color)
+
+
+# 별 패턴 색상 선택 함수
+def choose_star_color():
+    global shape_fill_color
+    color = askcolor()[1]
+    if color:
+        shape_fill_color = color
+        draw_stars_pattern(canvas)
 
 
 #드래그로 그림 움직이기
@@ -572,6 +614,7 @@ def clear_paint(canvas):
     canvas.delete("all")
     global last_x, last_y
     last_x, last_y = None, None # 마지막 좌표 초기화
+    canvas.configure(bg="white")  # 캔버스 배경색을 흰색으로 설정
 
 def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와서 클릭한 위치에 텍스트를 추가합니다.
 
@@ -923,6 +966,18 @@ def setup_paint_app(window):
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 버튼 프레임에 별 패턴 그리기 버튼 추가
+    button_star_pattern = Button(button_frame, text="Stars Pattern", command=lambda: draw_stars_pattern(canvas))
+    button_star_pattern.pack(side=LEFT)
+    button_star_pattern.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_star_pattern.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 버튼 프레임에 별 패턴 색상 선택 버튼 추가
+    button_star_color = Button(button_frame, text="Choose Stars Color", command=choose_star_color)
+    button_star_color.pack(side=LEFT)
+    button_star_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_star_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
