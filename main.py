@@ -448,6 +448,7 @@ def bind_shortcuts():
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
     window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
+    window.bind("<Control-e>", lambda event: print_canvas_resolution(canvas)) # 해상도 출력 단축키 ctrl+e
 
 # brush_settings.initialize_globals(globals())
 
