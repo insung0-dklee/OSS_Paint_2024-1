@@ -483,3 +483,101 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = MosaicBlurApp(root)
     root.mainloop()
+
+
+# 선택 영역 색상 반전 기능
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk, ImageOps
+
+class InvertColorApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("색 반전 앱")
+
+        self.canvas = tk.Canvas(root, bg="white", width=800, height=600)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.image = None
+        self.tk_image = None
+        self.image_on_canvas = None
+        self.selection_start = None
+        self.selection_rect = None
+
+        self.canvas.bind("<Button-1>", self.start_selection)
+        self.canvas.bind("<B1-Motion>", self.update_selection)
+        self.canvas.bind("<ButtonRelease-1>", self.invert_colors)
+
+        menu = tk.Menu(root)
+        root.config(menu=menu)
+        file_menu = tk.Menu(menu)
+        menu.add_cascade(label="파일", menu=file_menu)
+        file_menu.add_command(label="이미지 열기", command=self.open_image)
+        file_menu.add_command(label="저장", command=self.save_image)
+
+    def open_image(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")])
+        if file_path:
+            try:
+                self.image = Image.open(file_path).convert("RGBA")
+                self.display_image()
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to open image: {e}")
+
+    def display_image(self):
+        self.tk_image = ImageTk.PhotoImage(self.image)
+        if self.image_on_canvas:
+            self.canvas.delete(self.image_on_canvas)
+        self.image_on_canvas = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
+
+    def start_selection(self, event):
+        if self.image:
+            self.selection_start = (event.x, event.y)
+            if self.selection_rect:
+                self.canvas.delete(self.selection_rect)
+            self.selection_rect = self.canvas.create_rectangle(event.x, event.y, event.x, event.y, outline="red", dash=(2, 2))
+
+    def update_selection(self, event):
+        if self.selection_start:
+            self.canvas.coords(self.selection_rect, self.selection_start[0], self.selection_start[1], event.x, event.y)
+
+    def invert_colors(self, event):
+        if self.selection_start and self.image:
+            x0, y0 = self.selection_start
+            x1, y1 = event.x, event.y
+
+            # Ensure coordinates are within image bounds
+            x0 = max(0, min(x0, self.image.width))
+            x1 = max(0, min(x1, self.image.width))
+            y0 = max(0, min(y0, self.image.height))
+            y1 = max(0, min(y1, self.image.height))
+
+            if x0 > x1:
+                x0, x1 = x1, x0
+            if y0 > y1:
+                y0, y1 = y1, y0
+
+            bbox = (x0, y0, x1, y1)
+            region = self.image.crop(bbox)
+            inverted_region = ImageOps.invert(region.convert("RGB")).convert("RGBA")
+            self.image.paste(inverted_region, bbox)
+            self.display_image()
+
+            if self.selection_rect:
+                self.canvas.delete(self.selection_rect)
+            self.selection_start = None
+
+    def save_image(self):
+        if self.image:
+            file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
+            if file_path:
+                try:
+                    self.image.save(file_path)
+                    print(f"이미지를 저장했습니다: {file_path}")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to save image: {e}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = InvertColorApp(root)
+    root.mainloop()
