@@ -2024,3 +2024,70 @@ update_timer()
 window.mainloop()
 
 
+import tkinter as tk
+from PIL import Image, ImageTk
+
+class ImageCropper(tk.Tk):
+    def __init__(self, image_path):
+        super().__init__()
+        self.title("Image Cropper")
+        self.geometry("800x600")
+
+        # 이미지 로드 및 PhotoImage 객체 생성
+        self.original_image = Image.open(image_path)
+        self.photo_image = ImageTk.PhotoImage(self.original_image, master=self)
+
+        # 캔버스 생성
+        self.canvas = tk.Canvas(self, width=self.original_image.width, height=self.original_image.height)
+        self.canvas.pack(fill="both", expand=True)
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.photo_image, tags="original_image")
+
+        # 마우스 이벤트 바인딩
+        self.canvas.bind("<ButtonPress-1>", self.start_crop)
+        self.canvas.bind("<B1-Motion>", self.draw_rectangle)
+        self.canvas.bind("<ButtonRelease-1>", self.end_crop)
+
+        # 자르기 버튼
+        self.crop_button = tk.Button(self, text="Crop", command=self.crop_image)
+        self.crop_button.pack(pady=10)
+
+        # 저장 버튼
+        self.save_button = tk.Button(self, text="Save", command=self.save_image)
+        self.save_button.pack(pady=10)
+
+        self.x1, self.y1, self.x2, self.y2 = 0, 0, 0, 0
+        self.crop_rectangle = None
+        self.cropped_photo_image = None
+
+    # 마우스 클릭 시 자르기 시작 위치 저장
+    def start_crop(self, event):
+        self.x1, self.y1 = event.x, event.y
+
+    # 마우스 드래그 중 자르기 영역 표시
+    def draw_rectangle(self, event):
+        self.x2, self.y2 = event.x, event.y
+        if self.crop_rectangle:
+            self.canvas.delete(self.crop_rectangle)
+        self.crop_rectangle = self.canvas.create_rectangle(self.x1, self.y1, self.x2, self.y2, outline="red", width=2)
+
+    # 마우스 버튼 릴리즈 시 자르기 종료 위치 저장
+    def end_crop(self, event):
+        self.x2, self.y2 = event.x, event.y
+
+    # 자르기 버튼 클릭 시 이미지 자르기
+    def crop_image(self):
+        cropped_image = self.original_image.crop((self.x1, self.y1, self.x2, self.y2))
+        self.cropped_photo_image = ImageTk.PhotoImage(cropped_image, master=self)
+        self.canvas.delete("original_image")
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.cropped_photo_image, tags="cropped_image")
+
+    # 저장 버튼 클릭 시 자른 이미지 저장
+    def save_image(self):
+        cropped_image = self.original_image.crop((self.x1, self.y1, self.x2, self.y2))
+        cropped_image.save("cropped_image.png")
+        print("Image saved as 'cropped_image.png'.")
+""" 실행
+if __name__ == "__main__":
+    app = ImageCropper("example_image.jpg")
+    app.mainloop()
+"""
