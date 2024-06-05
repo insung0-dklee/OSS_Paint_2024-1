@@ -159,7 +159,7 @@ def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
             for dx in [0, hex_size * 3 // 2]:
                 for dy in [0, hex_height // 2]:
                     hexagon = [hex_corner(x + dx, y + dy, hex_size, i) for i in range(6)]
-                    canvas.create_polygon(hexagon, outline=hex_color, fill='')
+                    canvas.create_polygon(hexagon, outline=hex_color, fill='', tags="honeycomb")
 
 # 연필 브러시 함수
 def pencil_brush(event, canvas):
@@ -191,10 +191,64 @@ def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="blac
     for y in range(0, canvas_height, brick_height):
         for x in range(0, canvas_width, brick_width):
             if (y // brick_height) % 2 == 0:
-                canvas.create_rectangle(x, y, x + brick_width, y + brick_height, outline=line_color, fill="")
+                canvas.create_rectangle(x, y, x + brick_width, y + brick_height, outline=line_color, fill="", tags="brick")
             else:
                 canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
-                                        outline=line_color, fill="")
+                                        outline=line_color, fill="", tags="brick")
+
+"""
+단축키 control + p로 패턴 선택창 호출
+top : 패턴을 선택하는 체크박스를 포함하는 창 생성
+honeycomb_var : 벌집 패턴의 체크 여부 확인 변수
+brick_var : 벽돌 패턴의 체크 여부 확인 변수
+기본적으로 패턴 옵션에 체크할 시 해당 패턴 미리보기
+ok버튼 클릭시 창 닫기 + 미리보기 패턴 제거 + 그리기 함수 호출
+"""
+def pattern_options_window(event=None):
+    global top, honeycomb_var, brick_var
+    if top is None or not top.winfo_exists(): # 창 중복 생성 방지
+        top = Toplevel(window)
+        top.title("Select Pattern")
+
+        honeycomb_var = BooleanVar()
+        brick_var = BooleanVar()
+
+        honeycomb_checkbutton = Checkbutton(top, text="Honeycomb", variable=honeycomb_var, command=preview_pattern)
+        honeycomb_checkbutton.pack()
+        brick_checkbutton = Checkbutton(top, text="brick", variable=brick_var, command=preview_pattern)
+        brick_checkbutton.pack()
+        ok_checkbutton = Checkbutton(top, text = "Ok", command=check_and_close)
+        ok_checkbutton.pack()
+
+# 패턴 미리보기 함수
+def preview_pattern():
+    global top, honeycomb_var, brick_var
+    if honeycomb_var.get():
+        draw_honeycomb_pattern(canvas)
+    else:
+        canvas.delete("honeycomb")
+    if brick_var.get():
+        draw_brick_pattern(canvas)
+    else:
+        canvas.delete("brick")
+
+# 창 닫기 및 미리보기 제거, 패턴 그리기 함수 호출
+def check_and_close():
+    global top, honeycomb_var, brick_var
+    top.destroy()
+    if honeycomb_var:
+        canvas.delete("honeycomb")
+    if brick_var:
+        canvas.delete("brick")
+    draw_pattern()
+
+# 선택된 패턴 그리기 함수
+def draw_pattern():
+    global honeycomb_var, brick_var
+    if honeycomb_var.get():
+        choose_hex_color()
+    if brick_var.get():
+        choose_brick_line_color()
 
 def start_pencil(event):
     global last_x, last_y
@@ -448,6 +502,7 @@ def bind_shortcuts():
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
     window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
+    window.bind("<Control-p>", pattern_options_window)
 
 # brush_settings.initialize_globals(globals())
 
@@ -2020,6 +2075,8 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
+
+top=None
 
 window.mainloop()
 
