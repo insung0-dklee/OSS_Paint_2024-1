@@ -161,6 +161,81 @@ def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
                     hexagon = [hex_corner(x + dx, y + dy, hex_size, i) for i in range(6)]
                     canvas.create_polygon(hexagon, outline=hex_color, fill='')
 
+# 선형 함수 그리기 기능 추가
+def open_linear_function_window():
+    # 새로운 창을 생성하여 기울기와 y절편을 입력받도록 함
+    linear_window = Toplevel(window)
+    linear_window.title("Linear Function")
+
+    # 기울기 입력을 위한 레이블과 입력창 생성
+    Label(linear_window, text="기울기 (m):").pack()
+    m_entry = Entry(linear_window)
+    m_entry.pack()
+
+    # y절편 입력을 위한 레이블과 입력창 생성
+    Label(linear_window, text="y절편 (b):").pack()
+    b_entry = Entry(linear_window)
+    b_entry.pack()
+
+    # 확인 버튼 생성 및 클릭 이벤트 핸들러 설정
+    confirm_button = Button(linear_window, text="확인", command=lambda: draw_linear_function(m_entry.get(), b_entry.get()))
+    confirm_button.pack()
+
+def draw_linear_function(m, b):
+    try:
+        # 입력받은 기울기와 y절편을 실수로 변환
+        m = float(m)
+        b = float(b)
+    except ValueError:
+        # 변환에 실패하면 에러 메시지 출력
+        messagebox.showerror("Invalid input", "Please enter valid numbers.")
+        return
+
+    # 캔버스의 너비와 높이를 가져옴
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+    center_x = canvas_width // 2
+    center_y = canvas_height // 2
+
+    # 일차함수의 시작점 (x1, y1)과 끝점 (x2, y2)을 계산 (x 범위를 전체 y 범위로 조정)
+    x_range = center_y  # y축의 전체 길이를 기준으로 x 범위 설정
+    x1 = -x_range
+    y1 = m * x1 + b
+    x2 = x_range
+    y2 = m * x2 + b
+
+    # 캔버스 좌표계로 변환 (y축이 아래로 증가하기 때문)
+    y1_canvas = center_y - y1
+    y2_canvas = center_y - y2
+
+    # 기존 선 제거 (필요한 경우)
+    canvas.delete("linear_function")
+    canvas.delete("axes")
+    canvas.delete("ticks")
+
+    # 일차함수를 나타내는 선을 그리기
+    canvas.create_line(center_x + x1, y1_canvas, center_x + x2, y2_canvas, fill=brush_color, width=brush_size, tags="linear_function")
+
+    # x축 그리기 (캔버스 중앙을 기준으로, y축과 같은 길이로 설정)
+    canvas.create_line(center_x - center_y, center_y, center_x + center_y, center_y, fill="black", tags="axes")
+
+    # y축 그리기 (캔버스 중앙을 기준으로)
+    canvas.create_line(center_x, 0, center_x, canvas_height, fill="black", tags="axes")
+
+    # x축 눈금 표시
+    for x in range(center_x - center_y, center_x + center_y + 1, 50):  # 50 픽셀마다 눈금 표시
+        canvas.create_line(x, center_y - 5, x, center_y + 5, fill="black", tags="ticks")
+        if x != center_x:  # 중심 눈금 제외
+            canvas.create_text(x, center_y + 15, text=str(x - center_x), anchor=N, tags="ticks")
+
+    # y축 눈금 표시
+    for y in range(0, canvas_height, 50):  # 50 픽셀마다 눈금 표시
+        canvas.create_line(center_x - 5, y, center_x + 5, y, fill="black", tags="ticks")
+        if y != center_y:  # 중심 눈금 제외
+            canvas.create_text(center_x + 15, y, text=str(center_y - y), anchor=W, tags="ticks")
+
+
+
 # 연필 브러시 함수
 def pencil_brush(event, canvas):
     global last_x, last_y, brush_size
@@ -923,6 +998,12 @@ def setup_paint_app(window):
     button_brick_line_color.pack(side=LEFT)
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 선형 함수 그리기 버튼 추가
+    button_linear_function = Button(labelframe_additional, text="Linear Function", command=open_linear_function_window)
+    button_linear_function.grid(row=3, column=3)
+    button_linear_function.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록 (버튼 색상 변경)
+    button_linear_function.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록 (버튼 색상 원래대로 변경)
 
     # 밝기 슬라이더
     brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
