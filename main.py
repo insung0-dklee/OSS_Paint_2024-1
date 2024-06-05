@@ -71,10 +71,11 @@ def create_emphasis_effect(event=None):
     canvas.bind("<Button-1>", start_emphasis)
 
 def start_emphasis(event):
-    global start_x, start_y, current_shape
+    global start_x, start_y, current_shape, current_arrow
     # 마우스 클릭 지점을 시작점으로 설정
     start_x, start_y = event.x, event.y
     current_shape = None
+    current_arrow = None
     # 마우스 움직임에 따라 draw_emphasis 함수를 호출하고, 버튼이 놓여지면 finish_emphasis 함수 호출
     canvas.bind("<B1-Motion>", draw_emphasis)
     canvas.bind("<ButtonRelease-1>", finish_emphasis)
@@ -1155,24 +1156,31 @@ shape_outline_color : 도형의 윤곽선 색
 shape_fill_color : 도형의 내부 색
 """
 
-def select_shape_color():
-    global shape_outline_color, shape_fill_color
-    shape_outline_color = askcolor()[1]  # 윤곽선 색상 선택
-    shape_fill_color = askcolor()[1]  # 내부 색상 선택
+def select_shape_color():# 내부 색상 선택
+    global shape_fill_color 
+    shape_fill_color = askcolor()[1]  
+
+def select_outline_color():# 윤곽선 색상 선택
+    global outline_color
+    outline_color = askcolor()[1]
+
 
 # 사각형 그리기
 def create_rectangle(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_rectangle)
 
 # 삼각형 그리기
 def create_triangle(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_triangle)
 
 # 원형 그리기
 def create_circle(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_circle)
 
 # 사각형 그릴 위치 정하고 생성하는 함수 호출
@@ -1187,7 +1195,7 @@ def start_rectangle(event):
 def draw_rectangle(event):
     global start_x, start_y, current_shape
     canvas.delete("temp_shape")
-    current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_rectangle(start_x, start_y, event.x, event.y, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
     paint_start(event)
 
 # 사각형 그리기 종료
@@ -1224,7 +1232,7 @@ def draw_triangle(event):
     x4 = start_x + side_length * math.cos(angle)
     y4 = start_y + side_length * math.sin(angle)
 
-    current_shape = canvas.create_polygon(start_x, start_y, x2, y2, x3, y3, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(start_x, start_y, x2, y2, x3, y3, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 삼각형 그리기 종료
 def finish_triangle(event):
@@ -1247,7 +1255,7 @@ def draw_circle(event):
     global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     r = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
-    current_shape = canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_oval(start_x - r, start_y - r, start_x + r, start_y + r, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 원형 그리기 종료
 def finish_circle(event):
@@ -1260,6 +1268,7 @@ def finish_circle(event):
 # 별 모양 그리기
 def create_star(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_star)
 
 # 별 모양 그릴 위치 정하고 생성하는 함수 호출
@@ -1292,7 +1301,7 @@ def draw_star(event):
         points.append(x_inner)
         points.append(y_inner)
     
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(points, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 별 모양 그리기 종료
 def finish_star(event):
@@ -1305,6 +1314,7 @@ def finish_star(event):
 # 육각별 모양 그리기
 def create_six_pointed_star(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_six_pointed_star)
 
 # 육각별 모양 그릴 위치 정하고 생성하는 함수 호출
@@ -1337,7 +1347,7 @@ def draw_six_pointed_star(event):
         points.append(x_inner)
         points.append(y_inner)
 
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(points, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 육각별 모양 그리기 종료
 def finish_six_pointed_star(event):
@@ -1350,6 +1360,7 @@ def finish_six_pointed_star(event):
 # 하트 모양 그리기
 def create_heart(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_heart)
 
 # 하트 모양 그릴 위치 정하고 생성하는 함수 호출
@@ -1378,7 +1389,7 @@ def draw_heart(event):
         points.append(x_scaled)
         points.append(y_scaled)
 
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(points, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 # 하트 모양 그리기 종료
 def finish_heart(event):
     global current_shape
@@ -1390,6 +1401,7 @@ def finish_heart(event):
 # 십자형 도형 그리기 
 def create_cross(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_cross)
 
 # 십자형 도형 그릴 위치 정하고 생성하는 함수 호출
@@ -1424,7 +1436,7 @@ def draw_cross(event):
         start_x - cross_width, start_y - cross_width
     ]
 
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(points, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 십자형 도형 그리기 종료
 def finish_cross(event):
@@ -1436,6 +1448,7 @@ def finish_cross(event):
 
 def create_diamond(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_diamond)
 
 def start_diamond(event):
@@ -1462,7 +1475,7 @@ def draw_diamond(event):
         start_x - width, start_y  # 왼쪽 꼭짓점
     ]
 
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(points, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 
 def finish_diamond(event):
     global current_shape
@@ -1477,37 +1490,39 @@ def create_arrow(event=None):
     canvas.bind("<Button-1>", start_arrow)
 # 화살표 그릴 위치 정하고 생성하는 함수 호출
 def start_arrow(event):
-    global start_x, start_y, current_shape
+    global start_x, start_y, current_shape,current_arrow
     start_x, start_y = event.x, event.y
-    current_shape = None
     canvas.bind("<B1-Motion>", draw_arrow)
     canvas.bind("<ButtonRelease-1>", finish_arrow)
 #화살표 생성하기
 def draw_arrow(event):
-    global start_x, start_y, current_shape
+    global start_x, start_y, current_shape,current_arrow
     canvas.delete("temp_shape")
     end_x, end_y = event.x, event.y
     # 화살표의 선 부분
-    current_shape = canvas.create_line(start_x, start_y, end_x, end_y, fill=shape_outline_color, tags="temp_shape")
+    current_shape = canvas.create_line(start_x, start_y, end_x, end_y, fill = shape_fill_color, tags="temp_shape")
     # 화살표 머리 부분 계산
-    arrow_size = 10
+    arrow_size = 20
     angle = math.atan2(end_y - start_y, end_x - start_x)
     left_x = end_x - arrow_size * math.cos(angle - math.pi / 6)
     left_y = end_y - arrow_size * math.sin(angle - math.pi / 6)
     right_x = end_x - arrow_size * math.cos(angle + math.pi / 6)
     right_y = end_y - arrow_size * math.sin(angle + math.pi / 6)
-    canvas.create_polygon(end_x, end_y, left_x, left_y, right_x, right_y, fill=shape_outline_color, outline=shape_outline_color, tags="temp_shape")
+    # 화살표의 머리부분
+    current_arrow= canvas.create_polygon(end_x, end_y, left_x, left_y, right_x, right_y, fill = shape_fill_color, tags="temp_shape")
 #화살표 그리기 종료
 def finish_arrow(event):
-    global current_shape
+    global current_shape,current_arrow
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
-    if current_shape:
+    if current_shape and current_arrow:
         canvas.itemconfig(current_shape, tags="")
+        canvas.itemconfig(current_arrow, tags="")
 
 # 정오각형 그리기
 def create_pentagon(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_pentagon)
 
 # 정오각형 시작 지점 설정 및 함수 호출
@@ -1533,7 +1548,7 @@ def draw_pentagon(event):
         x = start_x + radius * math.cos(angle)
         y = start_y + radius * math.sin(angle)
         points.extend([x, y])
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(points, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 정오각형 그리기 종료
 def finish_pentagon(event):
@@ -1545,6 +1560,7 @@ def finish_pentagon(event):
 
 def create_V(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_V)
 
 # 체크 도형 그릴 위치 정하고 생성하는 함수 호출
@@ -1573,11 +1589,12 @@ def draw_V(event):
         start_x + width/2, event.y,  
         ]
 
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(points, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 
     # 육각형 도형 그리기
 def create_hexagon(event=None):
     select_shape_color()
+    select_outline_color()
     canvas.bind("<Button-1>", start_hexagon)
 
 # 육각형 도형 시작점 지정 및 그리기 함수 호출
@@ -1608,10 +1625,42 @@ def draw_hexagon(event):
         x = mid_x + math.cos(angle) * (event.x - start_x) / 2
         y = mid_y + math.sin(angle) * (event.y - start_y) / 2
         points.extend([x, y])
-    current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
+    current_shape = canvas.create_polygon(points, outline=outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 육각형 그리기 종료
 def finish_hexagon(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
+
+# 수평 S자 곡선 그리기
+def create_H_s_curve(event=None):
+    select_outline_color()
+    canvas.bind("<Button-1>", start_H_s_curve)
+# 위치 정하고 생성하는 함수 호출
+def start_H_s_curve(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", draw_H_s_curve)
+    canvas.bind("<ButtonRelease-1>", finish_H_s_curve)
+# 수평 S자 곡선 생성하기 
+def draw_H_s_curve(event):
+    global start_x, start_y, current_shape
+    canvas.delete("H_s_curve")
+    end_x, end_y = event.x, event.y
+    # 곡선부분 좌표계산
+    control_x = (2*start_x + end_x) / 3  # x 좌표 제어점 계산
+    control_y = start_y  # y 좌표 제어점 계산
+    control2_x = (start_x + 2*end_x) / 3  # x 좌표 제어점 계산
+    control2_y = end_y  # y 좌표 제어점 계산
+
+    current_shape = canvas.create_line(start_x, start_y, control_x, control_y,control2_x,control2_y, end_x, end_y, fill=shape_fill_color, tags="H_s_curve", smooth=True)
+    
+# 수평 S자 곡선 그리기 종료
+def finish_H_s_curve(event):
     global current_shape
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
@@ -1633,6 +1682,7 @@ def choose_shape(event):
     popup.add_command(label="V", command=lambda: create_V(event))
     popup.add_command(label="Hexagon", command=lambda: create_hexagon(event))
     popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
+    popup.add_command(label="Horizontal S curve", command=lambda: create_H_s_curve(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
