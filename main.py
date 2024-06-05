@@ -45,6 +45,30 @@ previous_x, previous_y = None, None
 
 
 
+# 시간 계획표 테마 그리기 함수
+def draw_time_schedule(canvas):
+    # 시계 테두리 그리기
+    center_x = 250
+    center_y = 250
+    radius = 200
+    canvas.create_oval(center_x - radius, center_y - radius, center_x + radius, center_y + radius, outline="black")
+
+    # 시간 눈금 그리기
+    for hour in range(24):
+        angle = math.pi / 12 * (hour - 6)  # 24시가 위로 오도록 각도 조정
+        x_outer = center_x + radius * math.cos(angle)
+        y_outer = center_y + radius * math.sin(angle)
+        x_inner = center_x + (radius - 10) * math.cos(angle)
+        y_inner = center_y + (radius - 10) * math.sin(angle)
+        canvas.create_line(x_inner, y_inner, x_outer, y_outer, fill="black")
+        
+        # 시간 숫자 그리기
+        x_text = center_x + (radius - 30) * math.cos(angle)
+        y_text = center_y + (radius - 30) * math.sin(angle)
+        canvas.create_text(x_text, y_text, text=str(hour if hour != 0 else 24), font=("Arial", 12))
+
+    # 중심점 그리기
+    canvas.create_oval(center_x - 2, center_y - 2, center_x + 2, center_y + 2, fill="black")
 
 # 만화 컷 테두리 그리기 함수
 def draw_comic_cut(cut_number):
@@ -905,6 +929,12 @@ def setup_paint_app(window):
     button_honeycomb_color.pack(side=LEFT)
     button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 시간 계획표 테마 그리기 버튼
+    button_schedule_theme = Button(window, text="Draw Schedule Theme", command=lambda: draw_time_schedule(canvas))
+    button_schedule_theme.pack(side=LEFT)
+    button_schedule_theme.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_schedule_theme.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 연필 브러시 버튼 추가
     button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
