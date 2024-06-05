@@ -44,6 +44,99 @@ previous_time = None
 previous_x, previous_y = None, None
 
 
+
+
+# 만화 컷 테두리 그리기 함수
+def draw_comic_cut(cut_number):
+    canvas.delete("all")  # 기존에 그려진 것을 지움
+    margin = 20  # 컷 사이의 간격
+    if cut_number == 1: # 1컷
+        canvas.create_rectangle(50, 50, 750, 550, outline="black", width=2)
+    elif cut_number == 2: # 2컷
+        canvas.create_rectangle(50, 50, 375 - margin//2, 550, outline="black", width=2)
+        canvas.create_rectangle(375 + margin//2, 50, 750, 550, outline="black", width=2)
+    elif cut_number == 3: # 3컷
+        canvas.create_rectangle(50, 50, 275 - margin//2, 550, outline="black", width=2)
+        canvas.create_rectangle(275 + margin//2, 50, 525 - margin//2, 550, outline="black", width=2)
+        canvas.create_rectangle(525 + margin//2, 50, 750, 550, outline="black", width=2)
+    elif cut_number == 4: # 4컷
+        canvas.create_rectangle(50, 50, 375 - margin//2, 300 - margin//2, outline="black", width=2)
+        canvas.create_rectangle(375 + margin//2, 50, 750, 300 - margin//2, outline="black", width=2)
+        canvas.create_rectangle(50, 300 + margin//2, 375 - margin//2, 550, outline="black", width=2)
+        canvas.create_rectangle(375 + margin//2, 300 + margin//2, 750, 550, outline="black", width=2)
+
+# 강조 효과 그리는 함수
+def create_emphasis_effect(event=None):
+    # 마우스 왼쪽 버튼 클릭 시 start_emphasis 함수를 호출하도록 설정
+    canvas.bind("<Button-1>", start_emphasis)
+
+def start_emphasis(event):
+    global start_x, start_y, current_shape
+    # 마우스 클릭 지점을 시작점으로 설정
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    # 마우스 움직임에 따라 draw_emphasis 함수를 호출하고, 버튼이 놓여지면 finish_emphasis 함수 호출
+    canvas.bind("<B1-Motion>", draw_emphasis)
+    canvas.bind("<ButtonRelease-1>", finish_emphasis)
+
+def draw_emphasis(event):
+    global start_x, start_y, current_shape
+    # 이전에 그려진 임시 도형 삭제
+    canvas.delete("temp_shape")
+    # 마우스 위치를 끝점으로 설정
+    end_x, end_y = event.x, event.y
+
+    # 시작점과 끝점을 이용해 사각형 영역 그리기
+    canvas.create_rectangle(start_x, start_y, end_x, end_y, outline="white", tags="temp_shape", fill="white")
+
+    # 사각형 영역의 중심 좌표 계산
+    center_x = (start_x + end_x) / 2
+    center_y = (start_y + end_y) / 2
+
+    # 사각형 중심에서 방사형으로 선을 그림
+    rect_width = abs(end_x - start_x) / 2
+    rect_height = abs(end_y - start_y) / 2
+    angle = 0
+    while angle < 360:
+        angle_step = random.randint(1, 5)  # 각도의 증가량을 랜덤으로 설정
+        radian_angle = math.radians(angle)  # 각도를 라디안으로 변환
+        # 삼각함수를 이용해 선의 끝점 계산
+        if abs(math.cos(radian_angle)) > abs(math.sin(radian_angle)):
+            x = center_x + rect_width * (1 if math.cos(radian_angle) > 0 else -1)
+            y = center_y + rect_width * math.tan(radian_angle) * (1 if math.cos(radian_angle) > 0 else -1)
+        else:
+            y = center_y + rect_height * (1 if math.sin(radian_angle) > 0 else -1)
+            x = center_x + rect_height / math.tan(radian_angle) * (1 if math.sin(radian_angle) > 0 else -1)
+
+        # 선의 끝점이 사각형 영역을 벗어나지 않도록 조정
+        if start_x < end_x:
+            x = max(min(x, end_x), start_x)
+        else:
+            x = max(min(x, start_x), end_x)
+
+        if start_y < end_y:
+            y = max(min(y, end_y), start_y)
+        else:
+            y = max(min(y, start_y), end_y)
+
+        # 선의 굵기를 랜덤으로 설정
+        line_width = random.randint(1, 3)
+
+        # 계산된 위치와 굵기로 선 그리기
+        canvas.create_line(center_x, center_y, x, y, fill="black", width=line_width, tags="temp_shape")
+        angle += angle_step
+
+    # 중심에 흰색 타원 그리기 (사각형 영역에 대한 비율로 크기 조정)
+    x_radius = rect_width * 0.8
+    y_radius = rect_height * 0.8
+    canvas.create_oval(center_x - x_radius, center_y - y_radius, center_x + x_radius, center_y + y_radius, fill="white", outline="white", tags="temp_shape")
+
+def finish_emphasis(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    canvas.dtag("temp_shape", "temp_shape")
+
 # 벌집 색상 선택 함수
 def choose_hex_color():
     color = askcolor()[1]
@@ -253,12 +346,23 @@ def open_text_input_window():
     confirm_button = Button(text_input_window, text="확인", command=lambda: add_text_to_canvas(text_input.get("1.0", "end-1c")))
     confirm_button.pack()
 
-def add_text_to_canvas(text):
-    if text.strip():  # 입력된 텍스트가 공백이 아닌 경우에만 캔버스에 추가
-        text_item = canvas.create_text(100, 100, text=text, fill="black", font=('Arial', 12))
-        canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
-        canvas.tag_bind(text_item, "<B1-Motion>", drag)
-        canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
+def add_text_to_canvas(text_input, canvas, text_input_window):
+    text = text_input.get("1.0", "end-1c")
+    if text.strip():  # 입력된 텍스트가 공백이 아닌 경우에만
+        # 캔버스 클릭 시 텍스트를 그리는 이벤트 바인딩
+        canvas.bind("<Button-1>", lambda event: create_text_at_click(event, canvas, text))
+        text_input.delete("1.0", END)  # 텍스트 입력 창 초기화
+        text_input_window.destroy() # 텍스트 입력 창 닫기
+
+def create_text_at_click(event, canvas, text):
+    x, y = event.x, event.y
+    text_item = canvas.create_text(x, y, text=text, fill="black", font=('Arial', 12))
+    # 드래그를 위한 바인딩
+    canvas.tag_bind(text_item, "<ButtonPress-1>", start_drag)
+    canvas.tag_bind(text_item, "<B1-Motion>", drag)
+    canvas.tag_bind(text_item, "<ButtonRelease-1>", end_drag)
+    # 추가 후 다시 바인딩하지 않도록 바인딩 해제
+    canvas.unbind("<Button-1>")
 
 
 
@@ -269,12 +373,17 @@ def set_brush_mode_line(canvas):
 def line_start(event, canvas):
     global x1, y1
     x1, y1 = event.x, event.y
-    canvas.bind("<Button-1>", lambda event: draw_line(event, canvas))
+    canvas.bind("<B1-Motion>", lambda event: draw_line(event, canvas))
+    # 마우스 버튼을 놓을 때 reset_line 함수를 호출하여 드래그 이벤트를 해제
+    canvas.bind("<ButtonRelease-1>", lambda event: reset_line(canvas))
 
 def draw_line(event, canvas):
     global x1, y1
-    canvas.create_line(x1, y1, x1, y1, event.x, event.y, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, event.x, event.y, fill=brush_color, width=2)
     x1, y1 = event.x, event.y
+
+def reset_line(canvas): # 마우스 드래그 이벤트를 해제하여 선 그리기를 멈춤
+    canvas.unbind("<B1-Motion>")
 
 #타이머 기능 추가
 timer = Timer()
@@ -351,6 +460,7 @@ def set_paint_mode_normal(canvas, set_origin_mode=False):
     if set_origin_mode:
         # 추가적인 원점 모드 설정 코드
         pass
+
 
 
 def start_paint_pressure(event, canvas):
@@ -970,11 +1080,25 @@ def setup_paint_app(window):
     color_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 색 관련 메뉴를 추가
     tool_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도구 관련 메뉴를 추가
     help_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 도움 관련 메뉴를 추가
+    cartoon_menu = Menu(menu_bar, tearoff=0) # 메뉴 바에 만화 관련 메뉴를 추가
 
     menu_bar.add_cascade(label="File", menu=file_menu) # 'File' 메뉴를 매뉴바에 생성
     menu_bar.add_cascade(label="Color", menu=color_menu) # 'Color' 메뉴를 매뉴바에 생성
     menu_bar.add_cascade(label="Tools", menu=tool_menu) # 'Tools' 메뉴를 매뉴바에 생성
     menu_bar.add_cascade(label="Help", menu=help_menu) # 'Help' 메뉴를 매뉴바에 생성
+    menu_bar.add_cascade(label="Cartoon", menu=cartoon_menu) # 'Cartoon' 메뉴를 메뉴바에 생성
+
+    # 컷 그리기 서브메뉴 생성
+    cut_menu = Menu(cartoon_menu, tearoff=0)
+    cartoon_menu.add_cascade(label="Draw Cut Borders", menu=cut_menu)
+
+    # 서브메뉴에 1, 2, 3, 4컷 옵션 추가
+    cut_menu.add_command(label="1 cut", command=lambda: draw_comic_cut(1))
+    cut_menu.add_command(label="2 cut", command=lambda: draw_comic_cut(2))
+    cut_menu.add_command(label="3 cut", command=lambda: draw_comic_cut(3))
+    cut_menu.add_command(label="4 cut", command=lambda: draw_comic_cut(4))
+    # 컷 강조 효과 서브메뉴 생성
+    cartoon_menu.add_command(label="Emphasis Effect", command=create_emphasis_effect)
 
     file_menu.add_command(label="Open New Window", command=create_new_window) # File 메뉴에 Open New Window 기능 버튼 추가
     file_menu.add_command(label="Add Image", command=upload_image) # File 메뉴에 Add Image 기능 버튼 추가
@@ -1857,6 +1981,35 @@ interval_label.pack()
 interval_entry = Entry(labelframe_additional2)
 interval_entry.pack()
 interval_entry.insert(0, "10")  # 기본값 설정
+
+# 멀티 선택 및 이동 기능
+selected_items = []
+
+def select_item(event):
+    item = canvas.find_closest(event.x, event.y)
+    if item not in selected_items:
+        selected_items.append(item)
+
+def move_selected_items(event):
+    for item in selected_items:
+        canvas.move(item, event.x - x1, event.y - y1)
+
+# canvas.bind("<Button-1>", select_item)
+# canvas.bind("<B1-Motion>", move_selected_items)
+
+# 커스텀 필터
+def apply_custom_filter(filter_function):
+    canvas.postscript(file="canvas.ps", colormode='color')
+    img = Image.open("canvas.ps")
+    img = img.convert("RGB")
+    filtered_img = filter_function(img)
+    filtered_img.show()
+
+def custom_filter(img):
+    return img.convert("L")  # 예시: 흑백 필터
+
+apply_filter_button = Button(window, text="Apply Filter", command=lambda: apply_custom_filter(custom_filter))
+apply_filter_button.pack(side=LEFT)
 
 canvas.bind("<Configure>", on_resize)
 
