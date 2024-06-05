@@ -133,7 +133,10 @@ def draw_emphasis(event):
 
 def create_rectangle_emphasis_effect(event=None):
     # 마우스 왼쪽 버튼 클릭 시 start_rectangle_emphasis 함수를 호출하도록 설정
+    global radius_factor # 원의 반지름을 결정하는 변수
+    radius_factor = 3
     canvas.bind("<Button-1>", start_rectangle_emphasis)
+    canvas.bind("<MouseWheel>", adjust_radius)  # 마우스 휠 이벤트 바인딩
 
 def start_rectangle_emphasis(event):
     global start_x, start_y, current_shape
@@ -159,7 +162,7 @@ def draw_rectangle_emphasis(event):
     end_y = start_y + math.copysign(side_length, end_y - start_y)
 
     # 사각형의 대각선을 기준으로 원의 반지름을 결정
-    radius = min(abs(end_x - start_x), abs(end_y - start_y)) / 3
+    radius = min(abs(end_x - start_x), abs(end_y - start_y)) / radius_factor
 
     angle = 0
     while angle < 360:
@@ -182,6 +185,15 @@ def draw_rectangle_emphasis(event):
         canvas.create_line(line_start_x, line_start_y, circle_x, circle_y, fill="black", width=random.randint(1, 3), tags="temp_shape")
 
         angle += random.randint(1, 5)  # 각도 증가
+
+def adjust_radius(event):    
+    global radius_factor
+    # 이벤트 delta를 사용하여 반지름 조절
+    radius_factor -= event.delta / 120  # 대부분의 OS에서 한 휠 단계는 delta 120입니다.
+    if radius_factor > 6:  # 최소 반지름 제한
+        radius_factor = 6
+    if radius_factor < 2:  # 최대 반지름 제한
+        radius_factor = 2
 
 def finish_emphasis(event):
     global current_shape
