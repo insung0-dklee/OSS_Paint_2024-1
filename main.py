@@ -2021,6 +2021,49 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 timer.start()
 update_timer()
 
-window.mainloop()
 
+def draw_star(canvas, x, y, size=20):
+    """ 캔버스에 별 모양을 그림 """
+    points = []
+    for i in range(10):
+        angle = (2 * math.pi / 10) * i
+        radius = size if i % 2 == 0 else size / 2
+        points.append(x + radius * math.cos(angle))
+        points.append(y + radius * math.sin(angle))
+    canvas.create_polygon(points, fill="yellow", outline="black")
+
+def draw_oval(canvas, x, y, size=20):
+    """ 캔버스에 타원형 모양을 그림 """
+    points = [
+        (x, y - size // 2),
+        (x + size // 2, y + size // 3),
+        (x, y + size),
+        (x - size // 2, y + size // 3)
+    ]
+    canvas.create_polygon(points, smooth=True, fill="red", outline="black")
+
+def draw_smiley(canvas, x, y, size=20):
+    """ 캔버스에 웃는 얼굴을 그림 """
+    canvas.create_oval(x - size, y - size, x + size, y + size, fill="yellow", outline="black")
+    canvas.create_oval(x - size//3, y - size//3, x - size//6, y - size//6, fill="black")
+    canvas.create_oval(x + size//6, y - size//3, x + size//3, y - size//6, fill="black")
+    canvas.create_arc(x - size//2, y - size//6, x + size//2, y + size//2, start=0, extent=-180, style=ARC)
+
+def add_stamp(stamp_func, event):
+    """ 선택한 스탬프 함수를 이용해 캔버스에 스탬프를 추가 """
+    stamp_func(canvas, event.x, event.y)
+
+def setup_stamp_buttons(window):
+    """ 스탬프 선택 버튼을 설정 """
+    frame = Frame(window)
+    frame.pack(side=TOP, pady=10)
+
+    stamps = {"Star": draw_star, "oval": draw_oval, "Smiley": draw_smiley}
+    for name, func in stamps.items():
+        btn = Button(frame, text=name, command=lambda f=func: canvas.bind("<Button-1>", lambda e: add_stamp(f, e)))
+        btn.pack(side=LEFT, padx=5)
+
+setup_stamp_buttons(window)
+
+window.mainloop()
 
