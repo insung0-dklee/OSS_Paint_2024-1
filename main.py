@@ -24,6 +24,8 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import numpy as np
+from numba import jit
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -160,6 +162,18 @@ def draw_honeycomb_pattern(canvas, hex_size=30, hex_color="black"):
                 for dy in [0, hex_height // 2]:
                     hexagon = [hex_corner(x + dx, y + dy, hex_size, i) for i in range(6)]
                     canvas.create_polygon(hexagon, outline=hex_color, fill='')
+
+# Numba JIT 데코레이터를 사용하여 함수를 네이티브 코드로 컴파일
+@jit
+def vector_add(a, b):
+    # 벡터의 길이
+    n = len(a)
+    # 결과를 저장할 배열 생성
+    result = np.empty_like(a)
+    # 벡터 덧셈 수행
+    for i in range(n):
+        result[i] = a[i] + b[i]
+    return result
 
 # 연필 브러시 함수
 def pencil_brush(event, canvas):
