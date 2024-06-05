@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from PIL import ImageGrab, Image, ImageTK
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1996,6 +1997,102 @@ def move_selected_items(event):
 
 # canvas.bind("<Button-1>", select_item)
 # canvas.bind("<B1-Motion>", move_selected_items)
+
+def setup_paint_app(window):
+    """
+    setup_paint_app: 주 윈도우와 캔버스 및 버튼을 설정하는 함수
+    """
+    global canvas, screenshot_rectangle, screenshot_start_x, screenshot_start_y
+    screenshot_rectangle = None  # 스크린샷 영역을 나타내는 사각형 변수 초기화
+
+    # 캔버스 설정
+    canvas = Canvas(window, bg="white")
+    canvas.pack(fill=BOTH, expand=True)
+
+    # 버튼 프레임 설정
+    button_frame = Frame(window)
+    button_frame.pack(fill=X)
+
+    # 스크린샷 버튼 추가
+    button_screenshot = Button(button_frame, text="Take Screenshot", command=enable_screenshot_mode)
+    button_screenshot.pack(side=LEFT)
+
+def start_screenshot(event):
+    """
+    start_screenshot: 스크린샷 영역 선택을 시작하는 함수
+    """
+    global screenshot_start_x, screenshot_start_y
+    # 클릭 시작 위치를 기록
+    screenshot_start_x, screenshot_start_y = event.x, event.y
+    # 드래그할 때 호출되는 함수 설정
+    canvas.bind("<B1-Motion>", draw_screenshot_rectangle)
+
+def draw_screenshot_rectangle(event):
+    """
+    draw_screenshot_rectangle: 드래그하면서 스크린샷 영역을 나타내는 사각형을 그리는 함수
+    """
+    global screenshot_rectangle
+    # 이전에 그린 사각형이 있으면 삭제
+    if screenshot_rectangle:
+        canvas.delete(screenshot_rectangle)
+    # 현재 마우스 위치를 기준으로 사각형 그리기
+    x1, y1 = screenshot_start_x, screenshot_start_y
+    x2, y2 = event.x, event.y
+    screenshot_rectangle = canvas.create_rectangle(x1, y1, x2, y2, outline="red")
+
+def end_screenshot(event):
+    """
+    end_screenshot: 스크린샷 영역 선택을 종료하는 함수
+    """
+    global screenshot_rectangle
+    # 드래그 시작 위치와 종료 위치를 기록
+    x1, y1 = screenshot_start_x, screenshot_start_y
+    x2, y2 = event.x, event.y
+    # 선택 영역의 사각형을 삭제
+    if screenshot_rectangle:
+        canvas.delete(screenshot_rectangle)
+    # 스크린샷 찍기
+    take_screenshot(x1, y1, x2, y2)
+    # 드래그 이벤트 바인딩 해제
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+def take_screenshot(x1, y1, x2, y2):
+    """
+    take_screenshot: 지정된 영역의 스크린샷을 찍어 캔버스에 표시하는 함수
+    """
+    # 캔버스 좌표를 화면의 절대 좌표로 변환
+    x1_root = canvas.winfo_rootx() + x1
+    y1_root = canvas.winfo_rooty() + y1
+    x2_root = canvas.winfo_rootx() + x2
+    y2_root = canvas.winfo_rooty() + y2
+
+    # 지정된 영역의 스크린샷 찍기
+    screenshot = ImageGrab.grab(bbox=(x1_root, y1_root, x2_root, y2_root))
+
+    # 스크린샷을 캔버스에 표시하기 위해 이미지 변환
+    screenshot_tk = ImageTk.PhotoImage(screenshot)
+    # 스크린샷 이미지를 캔버스에 표시
+    canvas.create_image(x1, y1, anchor="nw", image=screenshot_tk)
+    # 이미지가 가비지 컬렉션되지 않도록 참조 유지
+    canvas.screenshot_image = screenshot_tk
+
+def enable_screenshot_mode():
+    """
+    enable_screenshot_mode: 스크린샷 모드를 활성화하는 함수
+    """
+    # 마우스 클릭과 버튼 릴리즈 이벤트를 스크린샷 함수에 바인딩
+    canvas.bind("<Button-1>", start_screenshot)
+    canvas.bind("<ButtonRelease-1>", end_screenshot)
+
+# 메인 윈도우 설정
+window = Tk()
+window.title("Paint App with Screenshot")
+window.geometry("800x600")
+
+# 페인트 앱 설정 함수 호출
+setup_paint_app(window)
+
 
 # 커스텀 필터
 def apply_custom_filter(filter_function):
