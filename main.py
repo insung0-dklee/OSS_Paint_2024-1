@@ -1641,10 +1641,41 @@ def end_draw_oval(event):
     canvas.unbind("<ButtonRelease-1>")
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
+      
 """
 타원을 그리는 코드입니다. 도형창에 들어가 타원을 클릭하면 마우스를 눌렀을때 그려지고 버튼에서 손을 떼게 되면 그림이 끝납니다.
 """
 
+def create_Emptyrhombus(event=None):
+    global current_tool
+    current_tool = "rhombus"
+    canvas.bind("<Button-1>", start_draw_shape)
+
+def start_draw_shape(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", draw_shape)
+    canvas.bind("<ButtonRelease-1>", end_draw_shape)
+
+def draw_shape(event):
+    global current_shape
+    if current_shape:
+        canvas.delete(current_shape)
+    current_shape = canvas.create_polygon(start_x, start_y + (event.y - start_y) // 2,
+                                           start_x + (event.x - start_x) // 2, event.y,
+                                           event.x, start_y + (event.y - start_y) // 2,
+                                           start_x + (event.x - start_x) // 2, start_y,
+                                           fill='', outline='black')
+
+def end_draw_shape(event):
+    global current_shape
+    current_shape = None
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+ """
+안이 비어있는 마름모를 생성하는 코드입니다.
+ """
 #모양 선택하는 팝업 메뉴
 def choose_shape(event):
     popup = Menu(labelframe_additional, tearoff=0)
@@ -1661,6 +1692,7 @@ def choose_shape(event):
     popup.add_command(label="Hexagon", command=lambda: create_hexagon(event))
     popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
     popup.add_command(label="Oval", command=lambda: create_oval(event))
+    popup.add_command(label="EmptyRhombus", command=lambda: create_Emptyrhombus(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
 
