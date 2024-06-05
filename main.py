@@ -24,6 +24,8 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from PIL import Image
+from PIL import ImageTk
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -279,6 +281,47 @@ def apply_dark_mode(): # 다크 모드 적용
     for widget in button_frame.winfo_children():
         widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
+
+def adjust_image_opacity(image, opacity):
+    """
+    PIL 이미지 객체의 투명도 조절
+    image : PIL.image, 투명도 조절할 이미지, opacity : 투명도
+    투명도 조절된 PIL.Image를 반환함
+    """
+    img = image.convert("RGBA") # 이미지를 RGBA 타입으로 변경
+
+    # 각 픽셀에 대한 투명도 설정
+    datas = img.getdata() #이미지를 받아와, datas에 저장
+    new_data = [] # 픽셀 array
+    for item in datas:
+        if item[3] > 0:  # 투명도 값이 0이 아닌 경우
+            new_data.append((item[0], item[1], item[2], int(item[3] * opacity)))
+        else:
+            new_data.append(item) 
+
+    img.putdata(new_data) # 각각 투명도 설정된 이미지를 img에 저장
+    return img #PIL.Image 반환
+
+def open_image_with_opacity(canvas, opacity_slider):
+    """
+    이미지 파일을 열고, 초기 투명도가 슬라이더에 의해 설정된 상태로 표시
+    canvas : 이미지 표시할 캔버스, opacity_slider : 투명도 조절 슬라이더
+    """
+    file_path = filedialog.askopenfilename() #파일 경로 저장
+    if file_path:
+        # 이미지 오픈
+        image = Image.open(file_path)
+
+        #투명도 업데이터 함수        
+        def update_opacity(opacity_value):
+            adjusted_image = adjust_image_opacity(image, float(opacity_value)) #투명도 조정 이미지
+            photo_image = ImageTk.PhotoImage(adjusted_image) #PhotoImage 객체로 변환
+            canvas.create_image(0, 0, anchor=NW, image=photo_image) #이미지 표시
+            canvas.image = photo_image #이미지 참조하도록 설정, 가비지 컬렉션 X
+
+        initial_opacity = opacity_slider.get() # 초기 투명도 슬라이더 값으로 설정
+        update_opacity(initial_opacity)
+        opacity_slider.config(command=lambda value: update_opacity(value)) #슬라이더 변경 시 업데이트
 
 #이미지 파일 불러오기 
 def open_image():
@@ -1060,6 +1103,19 @@ def setup_paint_app(window):
     window.bind("<F11>", toggle_fullscreen)
 
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
+
+    # 투명도 조절 슬라이더
+    opacity_slider = Scale(button_frame, from_=0.0, to=1.0, resolution=0.01, orient=HORIZONTAL, label="Opacity") #슬라이더 기본 설정
+    opacity_slider.set(1.0) #기본 1.0으로 설정
+    opacity_slider.pack(side=LEFT) #왼쪽에 붙게
+
+    # 이미지 불러오기 및 투명도 설정 버튼
+    button_open_image_with_opacity = Button(window, text="Open Image with Opacity", command=lambda: open_image_with_opacity(canvas, opacity_slider)) #화면에 이미지 불러오기 위한 버튼 설정
+    button_open_image_with_opacity.pack(side=LEFT) # 버튼 붙는 장소 설정
+    button_open_image_with_opacity.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_open_image_with_opacity.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    
 
     set_paint_mode_normal(canvas)
     setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
