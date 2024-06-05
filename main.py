@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from PIL import Image, ImageTk, ImageGrab
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -438,6 +439,44 @@ def set_dotted_brush_mode(event):
 def set_double_line_brush_mode(event):
     set_brush_mode(canvas, "double_line")
 
+"""
+클립보드의 이미지를 붙여넣는 기능
+control + v 단축키를 통해 마우스 위치를 왼쪽 위 꼭짓점으로 하여 이미지가 붙여넣기 된다
+"""
+
+paste_images = []
+
+def paste_image_from_clipboard(canvas, event):
+    try:
+        # 클립보드에서 이미지 가져오기
+        image = ImageGrab.grabclipboard()
+        if isinstance(image, Image.Image):
+            # 이미지 크기 조정
+            width, height = image.size
+            max_width, max_height = canvas.winfo_width(), canvas.winfo_height()
+            if width > max_width or height > max_height:
+                image.thumbnail((max_width, max_height))
+
+            # PhotoImage로 변환
+            pil_image = ImageTk.PhotoImage(image)
+
+            # 이미지 붙여넣기
+            x = event.x_root - canvas.winfo_rootx()  # 캔버스 내부 상대적인 x 좌표 계산
+            y = event.y_root - canvas.winfo_rooty()  # 캔버스 내부 상대적인 y 좌표 계산
+            canvas.create_image(x, y, anchor=tk.NW, image=pil_image) #이미지를 마우스 우측하단에 붙여넣기
+
+            # 붙여넣은 이미지를 리스트에 추가 (이미지 중복을 위함)
+            paste_images.append(pil_image)
+
+        else:
+            messagebox.showerror("Error", "No image found in clipboard") #클립보드에 이미지가 없는 경우
+    
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to paste image: {e}")
+
+def handle_paste_event(event):
+    paste_image_from_clipboard(canvas, event)
+
     # 맞춤형 단축키 기능 추가
 def bind_shortcuts():
     window.bind("<c>", lambda event: clear_paint(canvas)) #clear 단축키 c
@@ -448,6 +487,7 @@ def bind_shortcuts():
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
     window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
+    window.bind("<Control-v>", handle_paste_event) # paste 단축키 Ctrl+V 
 
 # brush_settings.initialize_globals(globals())
 
