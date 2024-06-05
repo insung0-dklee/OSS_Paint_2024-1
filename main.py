@@ -739,32 +739,33 @@ def flood_fill(event):
         canvas.itemconfig(target, fill=fill_color)
 
 
-def draw_actor(event, actor_name):
+def draw_actor(event, actor_name, actor_color):
     """
     draw_actor: 액터를 그리는 함수
     캔버스의 특정 위치에 액터를 그린다.
     """
     x, y = event.x, event.y
-    canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill="white", outline="black") # 머리
-    canvas.create_line(x, y + 15, x, y + 40) # 몸통
-    canvas.create_line(x, y + 20, x - 10, y + 30) # 왼팔
-    canvas.create_line(x, y + 20, x + 10, y + 30) # 오른팔
-    canvas.create_line(x, y + 40, x - 10, y + 50) # 왼다리
-    canvas.create_line(x, y + 40, x + 10, y + 50) # 오른다리
+    canvas.create_oval(x - 15, y - 15, x + 15, y + 15, fill="white", outline=actor_color) # 머리
+    canvas.create_line(x, y + 15, x, y + 40, fill=actor_color) # 몸통
+    canvas.create_line(x, y + 20, x - 10, y + 30, fill=actor_color) # 왼팔
+    canvas.create_line(x, y + 20, x + 10, y + 30, fill=actor_color) # 오른팔
+    canvas.create_line(x, y + 40, x - 10, y + 50, fill=actor_color) # 왼다리
+    canvas.create_line(x, y + 40, x + 10, y + 50, fill=actor_color) # 오른다리
     canvas.create_text(x, y + 60, text=actor_name, anchor="center") # 액터 이름
     # 바인딩 해제
     canvas.unbind("<Button-1>")
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
 
-def draw_use_case(event, use_case_name):
+def draw_use_case(event, use_case_name, use_case_color):
     """
     draw_use_case: 유스케이스를 그리는 함수
     캔버스의 특정 위치에 유스케이스를 그린다.
     유스케이스는 타원으로 표시되고, 유스케이스의 이름이 타원의 중앙에 표시된다.
     """
     x, y = event.x, event.y
-    canvas.create_oval(x - 50, y - 25, x + 50, y + 25, fill="white", outline="black") # 유스케이스 모양
+
+    canvas.create_oval(x - 50, y - 25, x + 50, y + 25, fill="white", outline=use_case_color) # 유스케이스 모양
     canvas.create_text(x, y, text=use_case_name, anchor="center") # 유스케이스 이름
     # 바인딩 해제
     canvas.unbind("<Button-1>")
@@ -824,8 +825,10 @@ def add_actor():
     액터의 이름을 입력받고, 캔버스에 액터를 그리는 이벤트를 바인딩한다.
     """
     actor_name = simpledialog.askstring("Input", "액터의 이름을 입력하세요:") # 액터 이름 입력받기
+    global actor_color
+    actor_color = askcolor()[1]
     if actor_name:
-        canvas.bind("<Button-1>", lambda event: draw_actor(event, actor_name)) # 클릭 시 액터 그리기
+        canvas.bind("<Button-1>", lambda event: draw_actor(event, actor_name, actor_color)) # 클릭 시 액터 그리기
 
 def add_use_case():
     """
@@ -833,8 +836,10 @@ def add_use_case():
     유스케이스의 이름을 입력받고, 캔버스에 유스케이스를 그리는 이벤트를 바인딩한다.
     """
     use_case_name = simpledialog.askstring("Input", "유스케이스의 이름을 입력하세요:") # 유스케이스 이름 입력받기
+    global use_case_color
+    use_case_color = askcolor()[1]
     if use_case_name:
-        canvas.bind("<Button-1>", lambda event: draw_use_case(event, use_case_name)) # 클릭 시 유스케이스 그리기
+        canvas.bind("<Button-1>", lambda event: draw_use_case(event, use_case_name, use_case_color)) # 클릭 시 유스케이스 그리기
 
 def add_relationship():
     """
