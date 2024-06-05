@@ -712,17 +712,17 @@ def save_canvas(canvas):
     if file_path:
         canvas.postscript(file=file_path)
 
-def reset_brush(canvas):
+def reset_brush(canvas, slider):
     global brush_size, brush_color
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
     change_brush_size(brush_size)  # 브러시 크기 조정
+    slider.set(brush_size)  # 슬라이더 값을 1로 설정
     canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
 
-
-def setup_reset_brush_button(window, canvas):
+def setup_reset_brush_button(window, canvas, slider):
     global button_reset
-    button_reset = Button(labelframe_brush, text="Reset", command=lambda: reset_brush(canvas))
+    button_reset = Button(labelframe_brush, text="Reset", command=lambda: reset_brush(canvas, slider))
     button_reset.pack(side=BOTTOM)
     button_reset.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_reset.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
@@ -1062,7 +1062,7 @@ def setup_paint_app(window):
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
     set_paint_mode_normal(canvas)
-    setup_reset_brush_button(window, canvas)  # Reset 버튼 추가
+    setup_reset_brush_button(window, canvas, brush_size_slider)  # Reset 버튼 추가
     canvas.bind("<Enter>", change_cursor)
     canvas.bind("<Leave>", default_cursor)
     canvas.bind("<Button-3>", show_coordinates)
