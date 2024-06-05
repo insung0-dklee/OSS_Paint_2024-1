@@ -220,8 +220,6 @@ def decrease_brightness(event=None):
         set_brightness(current_value - 5)
 
 
-
-
 #드래그로 그림 움직이기
 #오른쪽 마우스 눌렀을 때 드래그 시작하는 지점 좌표 기록
 def start_move(event):
@@ -241,8 +239,6 @@ def move(event):
 def end_move(event):
     global is_moving
     is_moving = False
-
-
 
 
 #+=================================================================================
@@ -417,17 +413,22 @@ def paint_airbrush(event, canvas):
         canvas.create_oval(x - radius, y - radius, x + radius, y + radius, fill=brush_color, outline=brush_color)
 
 # 에어브러쉬 속성을 조정하는 함수
+
 def increase_dot_count():
     dot_count.set(dot_count.get() + 1)
+    show_dot_count.configure(textvariable=dot_count)
 
 def decrease_dot_count():
     dot_count.set(max(dot_count.get() - 1, 1))  # 최소값 1 설정
+    show_dot_count.configure(textvariable=dot_count)
 
 def increase_dot_distance():
     dot_distance.set(dot_distance.get() + 1)
+    show_dot_dist.configure(textvariable=dot_distance)
 
 def decrease_dot_distance():
     dot_distance.set(max(dot_distance.get() - 1, 0))  # 최소값 0 설정
+    show_dot_dist.configure(textvariable=dot_distance)
 
 def set_solid_brush_mode(event):
     set_brush_mode(canvas, "solid")
@@ -1019,17 +1020,18 @@ def setup_paint_app(window):
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
 
-
-
     # 에어브러쉬 속성 조절 버튼 추가
+    global show_dot_dist, show_dot_count
+    show_dot_dist = Label(labelframe_additional2, text=dot_count.get())# 거리 표시
     Button(labelframe_additional2, text="+", command=increase_dot_distance).pack(side=RIGHT)
     Label(labelframe_additional2, text="Distance").pack(side=RIGHT)
-    Label(labelframe_additional2, textvariable=dot_distance).pack(side=RIGHT)  # 거리 표시
+    show_dot_dist.pack(side=RIGHT) 
     Button(labelframe_additional2, text="-", command=decrease_dot_distance).pack(side=RIGHT)
 
+    show_dot_count = Label(labelframe_additional2, text=dot_count.get())# 개수 표시
     Button(labelframe_additional2, text="+", command=increase_dot_count).pack(side=RIGHT)
-    Label(labelframe_additional2, text="Count").pack(side=RIGHT)
-    Label(labelframe_additional2, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
+    Label(labelframe_additional2, text="Count").pack(side=RIGHT) 
+    show_dot_count.pack(side=RIGHT)
     Button(labelframe_additional2, text="-", command=decrease_dot_count).pack(side=RIGHT)
 
     # button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
