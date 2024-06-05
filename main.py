@@ -2056,6 +2056,25 @@ def choose_diamond_pattern():
 button_add_diamond_pattern = Button(window, text="Choose Diamond Pattern", command=choose_diamond_pattern)
 button_add_diamond_pattern.pack()
 
+# Zigzag 패턴 함수 추가
+def choose_zigzag_pattern():
+    canvas.delete("all")  
+    width = canvas.winfo_width()  
+    height = canvas.winfo_height()  
+    zigzag_size = 50  
+
+    for y in range(0, height, zigzag_size):  
+        flip = False  
+        for x in range(0, width, zigzag_size):  
+            if flip:
+                canvas.create_polygon(x, y, x + zigzag_size / 2, y + zigzag_size / 2, x, y + zigzag_size, x + zigzag_size, y + zigzag_size, x + zigzag_size / 2, y + zigzag_size / 2, outline="black", fill="lightyellow")
+            else:
+                canvas.create_polygon(x, y + zigzag_size, x + zigzag_size / 2, y + zigzag_size / 2, x + zigzag_size, y + zigzag_size, x, y, x + zigzag_size / 2, y + zigzag_size / 2, outline="black", fill="yellow")
+            flip = not flip
+
+button_add_zigzag_pattern = Button(window, text="Choose Zigzag Pattern", command=choose_zigzag_pattern)
+button_add_zigzag_pattern.pack()
+
 
 #프로그램 시작 시 타이머 시작
 timer.start()
