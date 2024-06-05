@@ -1041,6 +1041,10 @@ def setup_paint_app(window):
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
+    # 사다리꼴 패턴 버튼 추가
+    button_add_pattern = Button(window, text="Add Trapezoid Pattern", command=add_trapezoid_pattern)
+    button_add_pattern.pack()
+
     #spray 인스턴스 생성 
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
@@ -1922,6 +1926,28 @@ def set_modified():
     global is_modified
     is_modified = True
 
+# 사다리꼴 패턴 함수 추가
+def add_trapezoid_pattern():
+    canvas.delete("all")  
+    width = canvas.winfo_width()  
+    height = canvas.winfo_height()  
+    trapezoid_width = 50  
+    trapezoid_height = 30  
+
+    for x in range(0, width, trapezoid_width):  
+        flip = False  
+        for y in range(0, height, trapezoid_height):  
+            if flip:
+               
+                canvas.create_polygon(x, y + trapezoid_height, x + trapezoid_width / 4, y,
+                                      x + 3 * trapezoid_width / 4, y, x + trapezoid_width, y + trapezoid_height,
+                                      outline="black", fill="lightyellow")
+            else:
+               
+                canvas.create_polygon(x, y, x + trapezoid_width / 4, y + trapezoid_height,
+                                      x + 3 * trapezoid_width / 4, y + trapezoid_height, x + trapezoid_width, y,
+                                      outline="black", fill="yellow")
+            flip = not flip 
 
 
 window = Tk()
@@ -2022,5 +2048,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
