@@ -859,6 +859,17 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+# 도형을 클릭했을 때 내부를 채우는 함수
+def fill_shape(event):
+    # 클릭한 위치의 좌표를 얻음
+    x, y = event.x, event.y
+    # 클릭한 위치에 가장 가까운 도형을 찾음
+    target = canvas.find_closest(x, y)
+    if target:
+        # 색상 선택 대화 상자를 열어 채우기 색상을 선택
+        fill_color = askcolor()[1]
+        # 선택한 색상으로 도형 내부를 채움
+        canvas.itemconfig(target, fill=fill_color)
 
 
 def setup_paint_app(window):
