@@ -43,7 +43,44 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+class SmoothCanvas(tkinter.Canvas):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 마우스 이벤트에 대한 바인딩
+        self.bind("<B1-Motion>", self.draw_smooth)  # 마우스 이동 시
+        self.bind("<ButtonRelease-1>", self.reset)   # 마우스 버튼 놓았을 때
 
+        self.prev_x, self.prev_y = None, None  # 이전 마우스 좌표
+        self.smooth_factor = 3  # 부드러운 그리기에 사용되는 평균화 요소
+        self.points = []  # 최근 마우스 위치를 저장하는 리스트
+        self.smooth_mode = False  # 부드러운 그리기 모드 활성화 여부
+
+    def draw_smooth(self, event):
+        x, y = event.x, event.y  # 현재 마우스 좌표
+
+        if self.prev_x is not None and self.prev_y is not None:
+            self.points.append((x, y))  # 현재 좌표를 리스트에 추가
+
+            if len(self.points) > self.smooth_factor and self.smooth_mode:
+                avg_x = sum(p[0] for p in self.points) // len(self.points)  # 평균 x 계산
+                avg_y = sum(p[1] for p in self.points) // len(self.points)  # 평균 y 계산
+                # 부드러운 선 그리기
+                self.create_line(self.prev_x, self.prev_y, avg_x, avg_y, smooth=True)
+                self.prev_x, self.prev_y = avg_x, avg_y  # 이전 좌표 업데이트
+                self.points = self.points[1:]  # 리스트에서 가장 오래된 좌표 제거
+        else:
+            self.prev_x, self.prev_y = x, y  # 이전 좌표 초기화
+            self.points.append((x, y))  # 리스트에 현재 좌표 추가
+
+    def reset(self, event):
+        self.prev_x, self.prev_y = None, None  # 이전 좌표 초기화
+        self.points = []  # 리스트 초기화
+
+    def toggle_smooth_mode(self):
+        self.smooth_mode = not self.smooth_mode  # 부드러운 그리기 모드 전환
+
+def toggle_smooth(canvas):
+    canvas.toggle_smooth_mode()
 
 
 # 만화 컷 테두리 그리기 함수
@@ -2010,6 +2047,10 @@ def custom_filter(img):
 
 apply_filter_button = Button(window, text="Apply Filter", command=lambda: apply_custom_filter(custom_filter))
 apply_filter_button.pack(side=LEFT)
+
+# "smooth painting" 버튼 추가
+smooth_button = tkinter.Button(window, text="smooth painting", command=lambda: toggle_smooth(canvas))
+smooth_button.pack()
 
 canvas.bind("<Configure>", on_resize)
 
