@@ -2024,3 +2024,42 @@ update_timer()
 window.mainloop()
 
 
+"""
+레이어의 이름을 이용한 추가/삭제/수정하는 기능
+simpledialog 모듈: Tkinter에 포함되어 있는 다이얼로그 상자를 생성하는 데 사용
+create_rectangle(): 새 레이어를 표현하기 위해 빈 직사각형을 생성
+create_text(): 새 레이어의 이름을 표시
+find_withtag(): 지정된 태그를 가진 모든 아이템을 검색하여 특정 레이어를 찾음
+delete(): 레이어 삭제
+itemconfig(): 레이어의 이름을 수정
+"""
+
+def add_layer():
+    # 사용자로부터 새 레이어의 이름을 입력 받는다.
+    layer_name = simpledialog.askstring("Add Layer", "Enter layer name:")
+    if layer_name:
+        # 새로운 레이어를 생성하고 텍스트로 이름을 표시한다.
+        canvas.create_rectangle(0, 0, canvas.winfo_width(), canvas.winfo_height(), fill="white", outline="")
+        canvas.create_text(20, 20, anchor="nw", text=layer_name, fill="black", font=("Arial", 10, "bold"))
+
+def delete_layer():
+    # 삭제할 레이어의 이름을 사용자로부터 입력 받는다.
+    layer_name = simpledialog.askstring("Delete Layer", "Enter layer name to delete:")
+    if layer_name:
+        # 해당 이름을 가진 모든 레이어 아이템을 찾아 삭제한다.
+        items = canvas.find_withtag(layer_name)
+        for item in items:
+            canvas.delete(item)
+
+def modify_layer():
+    # 수정할 레이어의 이름을 사용자로부터 입력 받는다.
+    layer_name = simpledialog.askstring("Modify Layer", "Enter layer name to modify:")
+    if layer_name:
+        # 새로운 이름으로 변경하기 위한 새로운 이름 입력을 요청한다.
+        new_name = simpledialog.askstring("Modify Layer", "Enter new name for the layer:")
+        if new_name:
+            # 해당 이름을 가진 모든 레이어 아이템의 텍스트를 새 이름으로 수정한다.
+            items = canvas.find_withtag(layer_name)
+            for item in items:
+                canvas.itemconfig(item, text=new_name)
+
