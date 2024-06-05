@@ -1,6 +1,7 @@
 # image_editor.py
 from tkinter import NW, PhotoImage
 
+# 이미지 에디터 클래스: 이미지를 캔버스에 열고 배치하는 기능
 class ImageEditor:
     def __init__(self, canvas):
         self.canvas = canvas
@@ -26,5 +27,5 @@ class
       canvas_height :캔버스 높이를 가져온다. 너비가 0이면 400으로 지정 
       self.image.subsample(2): 이미지를 캔버스 크기의 4분의 1로 축소 
 self.canvas.create_image: 이미지를 캔버스에 배치 
-  
+
 """

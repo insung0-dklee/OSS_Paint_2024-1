@@ -1,6 +1,7 @@
 import time
 from tkinter.colorchooser import askcolor
 
+# 모듈 초기화 함수: main_globals에서 전역 변수들을 가져와 초기화
 def initialize_globals(main_globals):
     global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1
     brush_size = main_globals['brush_size']
@@ -16,11 +17,13 @@ def change_brush_size(new_size):
     global brush_size
     brush_size = int(new_size)
 
+# 배경색 변경 함수: 사용자로부터 색상을 선택받아 배경색 변경
 def change_bg_color(canvas):
     bg_color = askcolor()
     if bg_color[1]:  # 색상이 선택된 경우에만 변경
         canvas.config(bg=bg_color[1])
 
+# 브러시 색상 변경 함수: 사용자로부터 색상을 선택받아 브러시 색상 변경
 def change_brush_color():
     global brush_color
     color = askcolor()[1]
@@ -32,6 +35,7 @@ set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
 매개변수: mode - 브러쉬 모드를 나타내는 문자열 ("solid" 또는 "dotted")
 """
+# 브러시 모드 설정 함수: 실선 브러시와 점선 브러시로 전환
 def set_brush_mode(canvas, mode):
     global brush_mode
     brush_mode = mode
@@ -87,5 +91,3 @@ def dotted_paint(event, canvas):
             last_x, last_y = event.x, event.y
     else:
         last_x, last_y = event.x, event.y
-
-

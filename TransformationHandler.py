@@ -1,5 +1,6 @@
 from tkinter import Canvas
 
+# 트랜스포메이션 핸들러 클래스: 캔버스 객체에 대한 다양한 변환 기능을 제공
 class TransformationHandler:
     def __init__(self, canvas: Canvas):
         self.canvas = canvas

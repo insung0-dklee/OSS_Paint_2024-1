@@ -1,5 +1,6 @@
 import random #무작위 수를 추출하기 위해 import
 
+# 스프레이 브러시 클래스: 캔버스에 스프레이 효과를 구현하는 클래스
 class SprayBrush:
     def __init__(self, canvas, brush_color):
         self.canvas = canvas

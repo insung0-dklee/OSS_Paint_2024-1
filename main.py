@@ -70,6 +70,7 @@ def create_emphasis_effect(event=None):
     # 마우스 왼쪽 버튼 클릭 시 start_emphasis 함수를 호출하도록 설정
     canvas.bind("<Button-1>", start_emphasis)
 
+# 시작점을 기준으로 사각형 영역을 설정하고 강조 효과를 적용하는 함수
 def start_emphasis(event):
     global start_x, start_y, current_shape
     # 마우스 클릭 지점을 시작점으로 설정
@@ -79,6 +80,7 @@ def start_emphasis(event):
     canvas.bind("<B1-Motion>", draw_emphasis)
     canvas.bind("<ButtonRelease-1>", finish_emphasis)
 
+# 강조 효과를 그리는 함수: 마우스 이동에 따라 임시 도형을 그림
 def draw_emphasis(event):
     global start_x, start_y, current_shape
     # 이전에 그려진 임시 도형 삭제
@@ -131,6 +133,7 @@ def draw_emphasis(event):
     y_radius = rect_height * 0.8
     canvas.create_oval(center_x - x_radius, center_y - y_radius, center_x + x_radius, center_y + y_radius, fill="white", outline="white", tags="temp_shape")
 
+# 강조 효과 완료 함수: 강조 효과 그리기 완료 후 바인딩 해제
 def finish_emphasis(event):
     global current_shape
     canvas.unbind("<B1-Motion>")
@@ -473,7 +476,7 @@ def paint_pressure(event, canvas):
     radius = min(max(int(elapsed_time * 20), 1), 8) * brush_size / 4  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
-    
+
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
 
@@ -577,7 +580,7 @@ def add_text(event, canvas, text_box):# 텍스트 박스의 내용을 가져와�
 
     text = text_box.get()
     canvas.create_text(event.x, event.y, text=text, fill="black", font=('Arial', 12))
-   
+
 def bind_shortcuts_window(window):
     window.bind("<Alt-Return>", toggle_fullscreen)  # Alt + Enter (Windows/Linux)
     window.bind("<Command-Return>", toggle_fullscreen)  # Command + Enter (Mac)
@@ -874,7 +877,7 @@ def setup_paint_app(window):
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
-    
+
 
     button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
@@ -948,7 +951,7 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+
     #additionals 카테고리
     # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
     text_box_button = Button(labelframe_additional, text="TEXTBOX", command=open_text_input_window)
@@ -961,8 +964,8 @@ def setup_paint_app(window):
     button_use_case.grid(row=1, column=2) 
     button_use_case.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_use_case.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-    
-    
+
+
     #이전 획 설정
     button_erase_last_stroke = Button(labelframe_additional, text="Undo", command=erase_last_stroke)
     button_erase_last_stroke.grid(row=2, column=1)
@@ -998,13 +1001,13 @@ def setup_paint_app(window):
     button_flip_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_flip_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+
     #브러시  모드를 선택하는 콤보박스
     brush_combobox = ttk.Combobox(labelframe_brush, values=brush_modes, state="readonly")
     brush_combobox.current(0)
     brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
     brush_combobox.pack(side=LEFT)
-    
+
 
     # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
@@ -1070,7 +1073,7 @@ def setup_paint_app(window):
     canvas.bind("<MouseWheel>", zoom_scroll)
     bind_shortcuts()
 
-    
+
 
 #+=================================================================================
     menu_bar = Menu(window) # 메뉴 바 생성
@@ -1117,8 +1120,8 @@ def setup_paint_app(window):
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
-    
-    
+
+
 # 새 창 열기 생성
 def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
@@ -1277,21 +1280,21 @@ def draw_star(event):
     outer_radius = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
     inner_radius = outer_radius / 2.5  # 내각 반지름은 외각 반지름의 2.5분의 1
     points = []
-    
+
     for i in range(5):
         angle_outer = math.radians(i * 72 - 90)
         angle_inner = math.radians(i * 72 + 36 - 90)
-        
+
         x_outer = start_x + outer_radius * math.cos(angle_outer)
         y_outer = start_y + outer_radius * math.sin(angle_outer)
         x_inner = start_x + inner_radius * math.cos(angle_inner)
         y_inner = start_y + inner_radius * math.sin(angle_inner)
-        
+
         points.append(x_outer)
         points.append(y_outer)
         points.append(x_inner)
         points.append(y_inner)
-    
+
     current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 별 모양 그리기 종료
@@ -2022,5 +2025,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
