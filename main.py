@@ -392,6 +392,11 @@ def update_timer():
     elapsed_time = timer.get_elapsed_time()
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
     window.after(1000, update_timer)  # 1초마다 updatae_time 함수를 호출
+    if elapsed_time >= 3600: #1시간 뒤 텍스트 출력
+        text_alarm="사용시간이 1시간 지났습니다. 건강을 위해 스트레칭을 추천합니다."
+        canvas.create_text(200, 30, text=text_alarm, tags="text_alarm")
+    if elapsed_time >= 3610: #10초 뒤 텍스트 삭제
+        canvas.delete("text_alarm")
 #타이머 STOP
 def stop_timer():
     timer.stop()
