@@ -137,6 +137,49 @@ def finish_emphasis(event):
     canvas.unbind("<ButtonRelease-1>")
     canvas.dtag("temp_shape", "temp_shape")
 
+#워터마크 함수
+def draw_watermark(canvas):
+    def on_submit():
+        nonlocal text_entry, popup
+        text = text_entry.get()
+        text_color = "light gray" # 폰트색상
+        text_size = 15 # 폰트 크기
+        angle = 30  # 텍스트 기울기 각도
+        step = 45 # 텍스트 간격
+
+        for x in range(-canvas_height, canvas_height, step * 2): # 텍스트 가로 간격
+            for y in range(-canvas_width, canvas_width, step * 2): # 텍스트 세로 간격
+                canvas.create_text(y, x, text=text, fill=text_color, angle=angle, anchor="nw", font=("Helvetica", text_size))
+        
+        popup.destroy()
+
+    popup = tk.Toplevel() # 워터마크에 사용할 텍스트 입력받는 팝업창
+    popup.title("Watermark Text")
+    
+    popup.update()
+    window_width = popup.winfo_width()
+    window_height = popup.winfo_height()
+    screen_width = popup.winfo_screenwidth()
+    screen_height = popup.winfo_screenheight()
+    x = (screen_width - window_width) // 2
+    y = (screen_height - window_height) // 2
+    popup.geometry(f"+{x}+{y}")
+    canvas_width = canvas.winfo_width()
+    canvas_height = canvas.winfo_height()
+
+    text_label = tk.Label(popup, text="Enter watermark text:")
+    text_label.pack()
+    
+    text_entry = tk.Entry(popup)
+    text_entry.pack()
+    
+    submit_button = tk.Button(popup, text="Submit", command=on_submit)
+    text_entry.bind('<Return>', lambda event=None: on_submit())
+    submit_button.pack()
+    
+    # 팝업 창이 종료될 때까지 메인 창이 동작하지 않도록 함
+    popup.wait_window()
+
 # 벌집 색상 선택 함수
 def choose_hex_color():
     color = askcolor()[1]
@@ -913,6 +956,12 @@ def setup_paint_app(window):
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
 
+    # 워터마크 버튼
+    button_watermark = Button(window, text="Watermark", command=lambda: draw_watermark(canvas))
+    button_watermark.pack(side=LEFT)
+    button_watermark.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_watermark.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
     button_honeycomb.pack(side=LEFT)
@@ -924,6 +973,7 @@ def setup_paint_app(window):
     button_honeycomb_color.pack(side=LEFT)
     button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    
 
     # 연필 브러시 버튼 추가
     button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
