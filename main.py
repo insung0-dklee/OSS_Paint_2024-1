@@ -26,7 +26,7 @@ import os
 from tkinter import Scale
 
 # 초기 설정 값들
-global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
+global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas, brush_size_slider
 brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
@@ -212,12 +212,13 @@ def increase_brightness(event=None):
     if current_value < 100:
         brightness_slider.set(current_value + 5)  # 밝기를 5% 올리기
         set_brightness(current_value + 5)
-
+        
 def decrease_brightness(event=None):
     current_value = brightness_slider.get()
     if current_value > 0:
         brightness_slider.set(current_value - 5)  # 밝기를 5% 낮추기
         set_brightness(current_value - 5)
+
 
 
 
@@ -268,7 +269,7 @@ def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
     canvas.config(bg="white") # 캔버스 배경색
     button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
+    for widget in button_frame.winfo_children():
         widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="white", fg="black") # 타이머 라벨 배경색, 글자색
 
@@ -280,7 +281,7 @@ def apply_dark_mode(): # 다크 모드 적용
         widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
-#이미지 파일 불러오기 
+#이미지 파일 불러오기
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -366,7 +367,7 @@ def create_text_at_click(event, canvas, text):
 
 
 
-# 라인 브러쉬 기능 추가 
+# 라인 브러쉬 기능 추가
 def set_brush_mode_line(canvas):
     canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
 
@@ -387,7 +388,7 @@ def reset_line(canvas): # 마우스 드래그 이벤트를 해제하여 선 그�
 
 #타이머 기능 추가
 timer = Timer()
-#타이머의 경과시간 업데이트 
+#타이머의 경과시간 업데이트
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
@@ -537,7 +538,21 @@ def change_brush_size(new_size):
     brush_size = int(new_size)
     # spray의 크기를 변경하는 기능
     spray_brush.set_brush_size(brush_size)
+    
+    
+# 브러시 크기를 키보드 단축키로 변경하는 함수
+def increase_brush_size(event):
+    new_size = brush_size + 1
+    if new_size <= 20:
+        brush_size_slider.set(new_size)  # 슬라이더 업데이트
+        change_brush_size(new_size)
 
+def decrease_brush_size(event):
+    new_size = brush_size - 1
+    if new_size >= 1:
+        brush_size_slider.set(new_size)  # 슬라이더 업데이트
+        change_brush_size(new_size)
+        
 def zoom_scroll(event):
     # Ctrl 키가 눌려있는지 확인
     if event.state & 0x0004:
@@ -630,7 +645,7 @@ def change_brush_color(event=None):
 """
 TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
-해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다. 
+해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다.
 인자를 받지 않기 위해 None로 설정
 """
 
@@ -792,7 +807,7 @@ def draw_relationship_preview(event):
 def draw_relationship_end(event, relationship_type):
     """
     draw_relationship_end: 관계 그리기를 종료하는 함수
-    드래그 종료 지점에서 실제 선을 그린다. 
+    드래그 종료 지점에서 실제 선을 그린다.
     관계 유형에 따라 화살표와 텍스트를 추가한다.
     """
     global x1, y1, preview_line
@@ -958,7 +973,7 @@ def setup_paint_app(window):
 
     #다이어그램
     button_use_case = Button(labelframe_additional, text="Case Diagram", command=choose_use_case_element) #추가 기능에 포함됨.
-    button_use_case.grid(row=1, column=2) 
+    button_use_case.grid(row=1, column=2)
     button_use_case.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_use_case.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     
@@ -1041,11 +1056,12 @@ def setup_paint_app(window):
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
-    #spray 인스턴스 생성 
+    #spray 인스턴스 생성
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
 
     #브러시 크기 조정 슬라이더
+    global brush_size_slider
     brush_size_slider = Scale(labelframe_brush, from_=1, to=20, orient=HORIZONTAL, label="Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
@@ -1053,12 +1069,12 @@ def setup_paint_app(window):
     #브러시 line 모드(콤보 박스 통합X)
     button_line = Button(labelframe_brush, text="Line", command=lambda: set_brush_mode_line(canvas)) # 해당 기능은 브러시 모드 콤보 박스에 통합 시 기능이 작동안하는 문제가 발생함. 해결 전까지 RESET과 남겨두며, 위치만 이동 시킴.
     button_line.pack(side=RIGHT)
-    button_line.bind("<Enter>", on_enter)  
+    button_line.bind("<Enter>", on_enter)
     button_line.bind("<Leave>", on_leave)
 
 
     window.bind("<F11>", toggle_fullscreen)
-
+    
     canvas.bind("<B3-Motion>", lambda event: erase(event, canvas))
 
     set_paint_mode_normal(canvas)
@@ -1208,7 +1224,7 @@ def start_triangle(event):
 
 # 삼각형 생성하기
 def draw_triangle(event):
-    global start_x, start_y, current_shape 
+    global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     x2, y2 = event.x, event.y
 
@@ -1372,8 +1388,8 @@ def draw_heart(event):
         x = 16 * math.sin(t_rad)**3
         y = -(13 * math.cos(t_rad) - 5 * math.cos(2*t_rad) - 2 * math.cos(3*t_rad) - math.cos(4*t_rad))
 
-        x_scaled = start_x + x * size  
-        y_scaled = start_y + y * size  
+        x_scaled = start_x + x * size
+        y_scaled = start_y + y * size
 
         points.append(x_scaled)
         points.append(y_scaled)
@@ -1387,7 +1403,7 @@ def finish_heart(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
-# 십자형 도형 그리기 
+# 십자형 도형 그리기
 def create_cross(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_cross)
@@ -1410,17 +1426,17 @@ def draw_cross(event):
 
     # 중심점을 기준으로 십자형의 4개 arm 그리기
     points = [
-        start_x - cross_width, start_y - height,  
-        start_x + cross_width, start_y - height, 
-        start_x + cross_width, start_y - cross_width, 
-        start_x + width, start_y - cross_width,  
-        start_x + width, start_y + cross_width,  
+        start_x - cross_width, start_y - height,
+        start_x + cross_width, start_y - height,
+        start_x + cross_width, start_y - cross_width,
+        start_x + width, start_y - cross_width,
+        start_x + width, start_y + cross_width,
         start_x + cross_width, start_y + cross_width,
-        start_x + cross_width, start_y + height,  
-        start_x - cross_width, start_y + height, 
+        start_x + cross_width, start_y + height,
+        start_x - cross_width, start_y + height,
         start_x - cross_width, start_y + cross_width,
-        start_x - width, start_y + cross_width, 
-        start_x - width, start_y - cross_width,  
+        start_x - width, start_y + cross_width,
+        start_x - width, start_y - cross_width,
         start_x - cross_width, start_y - cross_width
     ]
 
@@ -1566,11 +1582,11 @@ def draw_V(event):
 
     points = [
         start_x,start_y,
-        start_x + width/3, start_y,  
-        start_x + width/2, start_y + height-width/3, 
-        start_x + width*2/3, start_y, 
-        event.x, start_y,  
-        start_x + width/2, event.y,  
+        start_x + width/3, start_y,
+        start_x + width/2, start_y + height-width/3,
+        start_x + width*2/3, start_y,
+        event.x, start_y,
+        start_x + width/2, event.y,
         ]
 
     current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
@@ -1944,9 +1960,9 @@ def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간
     return f"{hours:02}:{minutes:02}"
 
 
-current_time = time.localtime() 
+current_time = time.localtime()
 initial_hours = current_time.tm_hour
-initial_minutes = current_time.tm_min 
+initial_minutes = current_time.tm_min
 
 time_label = Label(labelframe_timer, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
 time_label.pack()
@@ -2014,7 +2030,9 @@ apply_filter_button.pack(side=LEFT)
 canvas.bind("<Configure>", on_resize)
 
 bind_shortcuts_window(window)
-
+# 키보드 이벤트 바인딩
+window.bind('<Shift-Up>', increase_brush_size)
+window.bind('<Shift-Down>', decrease_brush_size)
 window.protocol("WM_DELETE_WINDOW", on_closing)
 
 #프로그램 시작 시 타이머 시작
