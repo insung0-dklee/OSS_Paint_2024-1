@@ -499,6 +499,12 @@ def paint_marker(event, canvas):
     x2, y2 = (event.x + radius), (event.y + radius)
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
+#그림(선, 원, 직사각형 등)만 삭제하는 함수
+def delete_drawings():
+    for item in canvas.find_all():  # 캔버스에 있는 모든 그래픽 객체를 반복
+        if canvas.type(item) != "image":  # 해당 객체가 이미지가 아닌 경우
+            canvas.delete(item)  # 해당 객체 삭제
+
 """
 set_brush_mode: 브러쉬 모드를 변경하는 함수
 실선 브러쉬와 점선 브러쉬로 전환한다.
@@ -911,6 +917,10 @@ def setup_paint_app(window):
     button_pencil_brush.pack(side=LEFT)
     button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 브러쉬, 도형 지우는 버튼 추가
+    button_delete = Button(window, text="Delete Drawings", command=delete_drawings)
+    button_delete.pack(side=LEFT)
 
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
