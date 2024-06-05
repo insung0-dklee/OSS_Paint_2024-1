@@ -343,7 +343,7 @@ def open_text_input_window():
     text_input.pack()
 
     # 확인 버튼 생성 및 클릭 이벤트 핸들러 설정
-    confirm_button = Button(text_input_window, text="확인", command=lambda: add_text_to_canvas(text_input.get("1.0", "end-1c")))
+    confirm_button = Button(text_input_window, text="확인", command=lambda: add_text_to_canvas(text_input, canvas, text_input_window))
     confirm_button.pack()
 
 def add_text_to_canvas(text_input, canvas, text_input_window):
@@ -352,7 +352,7 @@ def add_text_to_canvas(text_input, canvas, text_input_window):
         # 캔버스 클릭 시 텍스트를 그리는 이벤트 바인딩
         canvas.bind("<Button-1>", lambda event: create_text_at_click(event, canvas, text))
         text_input.delete("1.0", END)  # 텍스트 입력 창 초기화
-        text_input_window.destroy() # 텍스트 입력 창 닫기
+        text_input_window.destroy()  # 텍스트 입력 창 닫기
 
 def create_text_at_click(event, canvas, text):
     x, y = event.x, event.y
