@@ -544,10 +544,17 @@ def zoom_scroll(event):
         scale = 1.0
         if event.delta > 0:  # 마우스 휠을 위로 스크롤하면 확대
             scale = 1.1
+
         elif event.delta < 0:  # 마우스 휠을 아래로 스크롤하면 축소
             scale = 0.9
         canvas.scale("all", event.x, event.y, scale, scale)
         canvas.configure(scrollregion=canvas.bbox("all"))
+        if ruler_on:
+            clear_ruler()  # 눈금자 지우기
+            draw_ruler()    # 눈금자 다시 그리기
+        if canvas.find_withtag("grid_line"):
+            canvas.delete("grid_line")  # 그리드 지우기
+            toggle_grid(canvas)  # 그리드 다시 그리기
     else:
         # Ctrl 키가 눌려있지 않으면 스크롤
         if event.delta > 0:
@@ -1110,6 +1117,7 @@ def setup_paint_app(window):
     color_menu.add_command(label="Change Brush Color", command=lambda: change_brush_color()) # Color 메뉴에 Change Brush Color 기능 버튼 추가
 
     tool_menu.add_command(label="Toggle FullScreen", command=toggle_fullscreen) # Tools 메뉴에 Toggle FullScreen 기능 버튼 추가
+    tool_menu.add_command(label="Toggle drawGuide", command=toggle_ruler_and_grid)  # Ruler와 Grid를 Tools 메뉴에 추가
     tool_menu.add_command(label="Toggle Ruler", command=toggle_ruler) # Tools 메뉴에 Toggle Ruler 기능 버튼 추가
     tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas)) # Tools 메뉴에 Toggle Grid 기능 버튼 추가
     tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
@@ -1755,6 +1763,10 @@ def toggle_grid(canvas):
     else:
         draw_grid(canvas, 50)
 
+def toggle_ruler_and_grid():
+    toggle_ruler()
+    toggle_grid(canvas)
+
 def change_grid_spacing(value):
     draw_grid(canvas, value)
 
@@ -1830,23 +1842,23 @@ def draw_ruler():
     # 상단 눈금자 그리기
     for x in range(0, canvas_width, interval):
         if x % (interval * 5) == 0:
-            line = canvas.create_line(x, 0, x, 15, fill="black")
-            text = canvas.create_text(x, 25, text=str(x), anchor=N)
+            line = canvas.create_line(x, 0, x, 15, fill="black", tags="ruler")
+            text = canvas.create_text(x, 25, text=str(x), anchor=N, tags="ruler")
             ruler_lines.append(line)
             ruler_texts.append(text)
         else:
-            line = canvas.create_line(x, 0, x, 10, fill="black")
+            line = canvas.create_line(x, 0, x, 10, fill="black", tags="ruler")
             ruler_lines.append(line)
 
     # 좌측 눈금자 그리기
     for y in range(0, canvas_height, interval):
         if y % (interval * 5) == 0:
-            line = canvas.create_line(0, y, 15, y, fill="black")
-            text = canvas.create_text(25, y, text=str(y), anchor=W)
+            line = canvas.create_line(0, y, 15, y, fill="black", tags="ruler")
+            text = canvas.create_text(25, y, text=str(y), anchor=W, tags="ruler")
             ruler_lines.append(line)
             ruler_texts.append(text)
         else:
-            line = canvas.create_line(0, y, 10, y, fill="black")
+            line = canvas.create_line(0, y, 10, y, fill="black", tags="ruler")
             ruler_lines.append(line)
 
 """
