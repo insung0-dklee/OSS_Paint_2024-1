@@ -24,7 +24,8 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
-
+from tkinter import Button, ROUND
+import colorsys
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
 brush_size = 1  # 초기 브러시 크기
@@ -37,7 +38,8 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
-
+rainbow_mode = False
+hue = 0.0  # 시작 색상 (Hue)
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
 previous_time = None
@@ -173,6 +175,7 @@ def pencil_brush(event, canvas):
             y = last_y + dy * i / distance
             jitter_x = x + random.randint(-brush_size, brush_size)  # 브러시 크기에 따른 진동 효과
             jitter_y = y + random.randint(-brush_size, brush_size)
+            rainbow()
             canvas.create_line(jitter_x, jitter_y, jitter_x + 1, jitter_y + 1, fill=brush_color, width=brush_size/2)
     last_x, last_y = event.x, event.y
 
@@ -268,7 +271,7 @@ def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
     canvas.config(bg="white") # 캔버스 배경색
     button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
+    for widget in button_frame.winfo_children():
         widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="white", fg="black") # 타이머 라벨 배경색, 글자색
 
@@ -280,7 +283,7 @@ def apply_dark_mode(): # 다크 모드 적용
         widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
-#이미지 파일 불러오기 
+#이미지 파일 불러오기
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -366,7 +369,7 @@ def create_text_at_click(event, canvas, text):
 
 
 
-# 라인 브러쉬 기능 추가 
+# 라인 브러쉬 기능 추가
 def set_brush_mode_line(canvas):
     canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
 
@@ -387,7 +390,7 @@ def reset_line(canvas): # 마우스 드래그 이벤트를 해제하여 선 그�
 
 #타이머 기능 추가
 timer = Timer()
-#타이머의 경과시간 업데이트 
+#타이머의 경과시간 업데이트
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
@@ -487,6 +490,7 @@ def dotted_paint(event, canvas):
         dy = event.y - last_y
         distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance >= spacing:
+            rainbow()
             canvas.create_oval(event.x-brush_size / 2, event.y-brush_size / 2, event.x+brush_size / 2, event.y+brush_size / 2, fill=brush_color, outline=brush_color)
             last_x, last_y = event.x, event.y
     else:
@@ -630,7 +634,7 @@ def change_brush_color(event=None):
 """
 TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
-해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다. 
+해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다.
 인자를 받지 않기 위해 None로 설정
 """
 
@@ -792,7 +796,7 @@ def draw_relationship_preview(event):
 def draw_relationship_end(event, relationship_type):
     """
     draw_relationship_end: 관계 그리기를 종료하는 함수
-    드래그 종료 지점에서 실제 선을 그린다. 
+    드래그 종료 지점에서 실제 선을 그린다.
     관계 유형에 따라 화살표와 텍스트를 추가한다.
     """
     global x1, y1, preview_line
@@ -874,7 +878,8 @@ def setup_paint_app(window):
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
-    
+    rainbow_button = Button(window, text="Rainbow Mode", command=toggle_rainbow_mode)
+    rainbow_button.pack()
 
     button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
@@ -958,7 +963,7 @@ def setup_paint_app(window):
 
     #다이어그램
     button_use_case = Button(labelframe_additional, text="Case Diagram", command=choose_use_case_element) #추가 기능에 포함됨.
-    button_use_case.grid(row=1, column=2) 
+    button_use_case.grid(row=1, column=2)
     button_use_case.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_use_case.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
     
@@ -1041,7 +1046,7 @@ def setup_paint_app(window):
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
-    #spray 인스턴스 생성 
+    #spray 인스턴스 생성
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
 
@@ -1053,7 +1058,7 @@ def setup_paint_app(window):
     #브러시 line 모드(콤보 박스 통합X)
     button_line = Button(labelframe_brush, text="Line", command=lambda: set_brush_mode_line(canvas)) # 해당 기능은 브러시 모드 콤보 박스에 통합 시 기능이 작동안하는 문제가 발생함. 해결 전까지 RESET과 남겨두며, 위치만 이동 시킴.
     button_line.pack(side=RIGHT)
-    button_line.bind("<Enter>", on_enter)  
+    button_line.bind("<Enter>", on_enter)
     button_line.bind("<Leave>", on_leave)
 
 
@@ -1208,7 +1213,7 @@ def start_triangle(event):
 
 # 삼각형 생성하기
 def draw_triangle(event):
-    global start_x, start_y, current_shape 
+    global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     x2, y2 = event.x, event.y
 
@@ -1372,8 +1377,8 @@ def draw_heart(event):
         x = 16 * math.sin(t_rad)**3
         y = -(13 * math.cos(t_rad) - 5 * math.cos(2*t_rad) - 2 * math.cos(3*t_rad) - math.cos(4*t_rad))
 
-        x_scaled = start_x + x * size  
-        y_scaled = start_y + y * size  
+        x_scaled = start_x + x * size
+        y_scaled = start_y + y * size
 
         points.append(x_scaled)
         points.append(y_scaled)
@@ -1387,7 +1392,7 @@ def finish_heart(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
-# 십자형 도형 그리기 
+# 십자형 도형 그리기
 def create_cross(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_cross)
@@ -1410,17 +1415,17 @@ def draw_cross(event):
 
     # 중심점을 기준으로 십자형의 4개 arm 그리기
     points = [
-        start_x - cross_width, start_y - height,  
-        start_x + cross_width, start_y - height, 
-        start_x + cross_width, start_y - cross_width, 
-        start_x + width, start_y - cross_width,  
-        start_x + width, start_y + cross_width,  
+        start_x - cross_width, start_y - height,
+        start_x + cross_width, start_y - height,
+        start_x + cross_width, start_y - cross_width,
+        start_x + width, start_y - cross_width,
+        start_x + width, start_y + cross_width,
         start_x + cross_width, start_y + cross_width,
-        start_x + cross_width, start_y + height,  
-        start_x - cross_width, start_y + height, 
+        start_x + cross_width, start_y + height,
+        start_x - cross_width, start_y + height,
         start_x - cross_width, start_y + cross_width,
-        start_x - width, start_y + cross_width, 
-        start_x - width, start_y - cross_width,  
+        start_x - width, start_y + cross_width,
+        start_x - width, start_y - cross_width,
         start_x - cross_width, start_y - cross_width
     ]
 
@@ -1566,11 +1571,11 @@ def draw_V(event):
 
     points = [
         start_x,start_y,
-        start_x + width/3, start_y,  
-        start_x + width/2, start_y + height-width/3, 
-        start_x + width*2/3, start_y, 
-        event.x, start_y,  
-        start_x + width/2, event.y,  
+        start_x + width/3, start_y,
+        start_x + width/2, start_y + height-width/3,
+        start_x + width*2/3, start_y,
+        event.x, start_y,
+        start_x + width/2, event.y,
         ]
 
     current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
@@ -1665,6 +1670,7 @@ def paint_start(event): #획 시작
 def paint_stroke(event): #획 그림
     global x1, y1, current_stroke
     x2, y2 = canvas.canvasx(event.x), canvas.canvasy(event.y)
+    rainbow()
     canvas.create_line(x1, y1, x2, y2, fill=brush_color, width=brush_size, capstyle=ROUND)
     current_stroke.append((x1, y1, x2, y2))
     x1, y1 = x2, y2
@@ -1704,7 +1710,7 @@ def double_line_paint(event, canvas):
         # 각도에 따라 선 사이의 수직 거리를 계산하여 두 선의 시작점과 끝점을 결정
         dx = math.cos(angle + math.pi / 2) * spacing
         dy = math.sin(angle + math.pi / 2) * spacing
-
+        rainbow()
         # 첫 번째 선 그리기
         canvas.create_line(last_x - dx, last_y - dy, event.x - dx, event.y - dy, width=brush_size, fill=brush_color, capstyle=ROUND)
         # 두 번째 선 그리기
@@ -1922,7 +1928,20 @@ def set_modified():
     global is_modified
     is_modified = True
 
+def rainbow(event=None):
+    global hue, brush_color
+    if rainbow_mode:
+        r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+        brush_color = f'#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}'
+        hue = (hue + 0.01) % 1.0  # 색상(Hue)을 점진적으로 증가
 
+def toggle_rainbow_mode():
+    global rainbow_mode
+    rainbow_mode = not rainbow_mode
+    if rainbow_mode:
+        canvas.bind("<Motion>", rainbow)  # rainbow 모드가 활성화된 경우에만 rainbow 함수를 호출합니다.
+    else:
+        canvas.unbind("<Motion>")  # rainbow 모드가 비활성화된 경우에는 이벤트 바인딩을 제거합니다.
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
@@ -1944,9 +1963,9 @@ def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간
     return f"{hours:02}:{minutes:02}"
 
 
-current_time = time.localtime() 
+current_time = time.localtime()
 initial_hours = current_time.tm_hour
-initial_minutes = current_time.tm_min 
+initial_minutes = current_time.tm_min
 
 time_label = Label(labelframe_timer, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
 time_label.pack()
