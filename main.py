@@ -24,6 +24,8 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import calendar
+from datetime import datetime
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -69,6 +71,58 @@ def draw_time_schedule(canvas):
 
     # 중심점 그리기
     canvas.create_oval(center_x - 2, center_y - 2, center_x + 2, center_y + 2, fill="black")
+
+# 현재 달의 달력 그리기
+def draw_calendar(canvas):
+    # 현재 달과 연도를 가져오기
+    now = datetime.now()
+    month = now.month
+    year = now.year
+
+    # Calendar 객체를 생성하고 일요일을 시작 요일로 설정
+    cal = calendar.Calendar(firstweekday=6)
+
+    # 현재 달의 날들을 가져오기
+    month_days = cal.monthdayscalendar(year, month)
+
+    # 달력을 그릴 시작 위치와 날짜 칸의 크기를 설정
+    start_x = 50  # 시작 위치 X 조정
+    start_y = 50  # 시작 위치 Y 조정 (연도와 월을 표시하기 위해 조정)
+    day_width = 50  # 날짜 칸의 너비
+    day_height = 50  # 날짜 칸의 높이
+
+    # 연도와 월을 중앙에 표시
+    # 전체 너비를 계산
+    total_width = day_width * 7
+    # 중앙 위치를 계산
+    center_x = start_x + total_width / 2
+    # 텍스트를 중앙에 표시
+    canvas.create_text(center_x, 30, text=f"{year}년 {month}월", anchor="center", font=("Arial", 15))
+
+    # 일요일부터 요일 그리기
+    days_of_week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    for i, day in enumerate(days_of_week):
+        x = start_x + i * day_width
+        y = start_y
+        color = "black"
+        if day == "Sun":
+            color = "red"
+        elif day == "Sat":
+            color = "blue"
+        canvas.create_text(x + day_width / 2, y + day_height / 2, text=day, fill=color, font=("Arial", 13))
+
+    # 달의 날짜들을 그리기
+    for week_num, week in enumerate(month_days):
+        for day_num, day in enumerate(week):
+            x = start_x + day_num * day_width
+            y = start_y + (week_num + 1) * day_height
+            if day != 0:
+                color = "black"
+                if day_num == 0:  # 일요일은 빨간색으로
+                    color = "red"
+                elif day_num == 6:  # 토요일은 파란색으로
+                    color = "blue"
+                canvas.create_text(x + day_width / 2, y + day_height / 2, text=str(day), fill=color, font=("Arial", 13))
 
 # 만화 컷 테두리 그리기 함수
 def draw_comic_cut(cut_number):
@@ -935,6 +989,12 @@ def setup_paint_app(window):
     button_schedule_theme.pack(side=LEFT)
     button_schedule_theme.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_schedule_theme.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+
+    # 현재 달의 달력을 그리는 버튼
+    button_calendar = tk.Button(window, text="Draw Calendar", command=lambda: draw_calendar(canvas))
+    button_calendar.pack(side=LEFT)  
+    button_calendar.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_calendar.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 연필 브러시 버튼 추가
     button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
