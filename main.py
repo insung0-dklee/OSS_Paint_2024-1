@@ -37,6 +37,7 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+canvas_dict = {}  # canvas_dict 초기화
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
@@ -44,7 +45,16 @@ previous_time = None
 previous_x, previous_y = None, None
 
 
+def create_canvas(canvas_name, canvas_listbox):
+    canvas = tk.Canvas(canvas_frame, width=200, height=200)
+    canvas_dict[canvas_name] = canvas
+    canvas_listbox.insert(tkinter.END, canvas_name)
+    row = len(canvas_dict)  # 현재 캔버스 개수
+    canvas.grid(row=row, column=0, sticky="w")  # 캔버스를 왼쪽에 표시합니다.
 
+def add_canvas():
+    canvas_name = canvas_entry.get()
+    create_canvas(canvas_name, canvas_listbox)
 
 # 만화 컷 테두리 그리기 함수
 def draw_comic_cut(cut_number):
@@ -859,7 +869,12 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
-
+def create_canvas(canvas_name, canvas_listbox):
+    canvas = tk.Canvas(canvas_frame, width=200, height=200)
+    canvas_dict[canvas_name] = canvas
+    canvas_listbox.insert(tk.END, canvas_name)
+    row = len(canvas_dict)  # 현재 캔버스 개수
+    canvas.grid(row=row, column=0, sticky="w")  # 캔버스를 왼쪽에 표시합니다.
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
@@ -893,6 +908,12 @@ def setup_paint_app(window):
 
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
+
+    #레이어 생성 버튼
+    button_honeycomb = Button(window, text="New Layer", command=lambda: add_canvas())
+    button_honeycomb.pack(side=LEFT)
+    button_honeycomb.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_honeycomb.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
@@ -1069,9 +1090,16 @@ def setup_paint_app(window):
     canvas.bind("<ButtonRelease-3>", hide_coordinates)
     canvas.bind("<MouseWheel>", zoom_scroll)
     bind_shortcuts()
+    """검수하지 못함
+    object_frame = tk.Frame(root)
+    object_frame.pack(pady=10, side=tk.LEFT)  # 왼쪽에 표시됩니다.
 
-    
+    canvas_listbox_label = tk.Label(object_frame, text="Canvas List:")
+    canvas_listbox_label.grid(row=0, column=0)
 
+    canvas_listbox = tk.Listbox(object_frame)
+    canvas_listbox.grid(row=0, column=1)
+    """
 #+=================================================================================
     menu_bar = Menu(window) # 메뉴 바 생성
     window.config(menu=menu_bar) # 윈도우에 매뉴바를 menu_bar로 설정
@@ -1933,6 +1961,8 @@ window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
 editor = ImageEditor(canvas)
+
+canvas_dict = {}  # canvas_dict 초기화
 
 # 타이머 라벨
 timer_label = Label(labelframe_timer, text="Time: 0 s")
