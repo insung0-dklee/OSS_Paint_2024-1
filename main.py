@@ -321,8 +321,22 @@ def toggle_lock_mode():
         canvas.unbind("<Button-3>")
     else:
         messagebox.showinfo("Unlocked", "Unlock Mode Activated")
-        set_paint_mode_normal(canvas)  # 언락 모드일 때는 그림을 그릴 수 있도록 canvas 인자 제공
-
+        if brush_mode == "solid":
+            set_paint_mode_normal(canvas)  # 언락 모드일 때는 그림을 그릴 수 있도록 canvas 인자 제공
+        elif brush_mode == "dotted":
+            set_brush_mode(canvas, "dotted")
+        elif brush_mode == "double_line":
+            set_brush_mode(canvas, "double_line")
+        elif brush_mode == "pressure":
+            set_brush_mode(canvas, "pressure")
+        elif brush_mode == "marker":
+            set_brush_mode(canvas, "marker")
+        elif brush_mode == "airbrush":
+            set_brush_mode(canvas, "airbrush")
+        elif brush_mode == "spray":
+            set_brush_mode(canvas, "spray")
+        elif brush_mode == "pencil":
+            set_brush_mode(canvas, "pensil")
 
 
 # 문자열 드래그 시작
@@ -527,29 +541,30 @@ set_brush_mode: 브러쉬 모드를 변경하는 함수
 def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
     global brush_mode
     brush_mode = mode
-    if brush_mode == "solid":  # 브러쉬 모드가 solid면
-        canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
-    elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
-        canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
-    elif brush_mode == "double_line": #브러쉬 모드가 double_line 면
-        canvas.bind("<B1-Motion>", lambda event: double_line_paint(event, canvas))#이중 실선 브러쉬로 변경
-        canvas.bind("<Button-1>", start_new_line)
-    elif brush_mode == "pressure":
-        canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
-        canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
-    elif brush_mode == "marker":
-        canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
-        canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
-    elif brush_mode == "airbrush":
-        canvas.bind("<B1-Motion>", lambda event: paint_airbrush(event, canvas))
-        canvas.bind("<Button-1>", lambda event: paint_airbrush(event, canvas))
-    elif brush_mode == "spray":
-        canvas.bind("<B1-Motion>",  spray_brush.spray_paint)
-        canvas.bind("<Button-1>",  spray_brush.spray_paint)
-    elif brush_mode == "pencil":
-        canvas.bind("<Button-1>", start_pencil)
-        canvas.bind("<B1-Motion>", lambda event: pencil_brush(event, canvas))
-        canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event))
+    if not locked:
+        if brush_mode == "solid":  # 브러쉬 모드가 solid면
+            canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
+        elif brush_mode == "dotted":  # 브러쉬 모드가 dotted면
+            canvas.bind("<B1-Motion>", lambda event: dotted_paint(event, canvas))  # 점선 브러쉬로 변경
+        elif brush_mode == "double_line": #브러쉬 모드가 double_line 면
+            canvas.bind("<B1-Motion>", lambda event: double_line_paint(event, canvas))#이중 실선 브러쉬로 변경
+            canvas.bind("<Button-1>", start_new_line)
+        elif brush_mode == "pressure":
+            canvas.bind("<Button-1>", lambda event: start_paint_pressure(event, canvas))
+            canvas.bind("<B1-Motion>", lambda event: paint_pressure(event, canvas))
+        elif brush_mode == "marker":
+            canvas.bind("<B1-Motion>", lambda event: paint_marker(event, canvas))
+            canvas.bind("<Button-1>", lambda event: paint_marker(event, canvas))
+        elif brush_mode == "airbrush":
+            canvas.bind("<B1-Motion>", lambda event: paint_airbrush(event, canvas))
+            canvas.bind("<Button-1>", lambda event: paint_airbrush(event, canvas))
+        elif brush_mode == "spray":
+            canvas.bind("<B1-Motion>",  spray_brush.spray_paint)
+            canvas.bind("<Button-1>",  spray_brush.spray_paint)
+        elif brush_mode == "pencil":
+            canvas.bind("<Button-1>", start_pencil)
+            canvas.bind("<B1-Motion>", lambda event: pencil_brush(event, canvas))
+            canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event))
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
