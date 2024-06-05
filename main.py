@@ -24,9 +24,23 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+import subprocess
+import sys
+#cmd에서 pip install pygame 다운 필수! 사용자가 사전에 설치하도록 안내하는 것이 좋음.
+# 패키지 설치 함수
+def install(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+#pygame 설치 시도(자동으로 해줌)(그러나 수동이 훨씬 프로그램 기능 면에서 권장)
+try:
+    import pygame
+except ImportError:
+    install('pygame')
+    
+import pygame  # pygame 모듈 임포트
 
 # 초기 설정 값들
-global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
+global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas,current_song
 brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
@@ -37,13 +51,26 @@ eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
 last_x, last_y = None, None  # 마지막 마우스 위치를 저장할 변수 초기화
 x1, y1 = None, None
+songs = ["edm.mp3", "country.mp3", "pop.mp3"]  # 노래 목록
 
 #동적 브러시 설정을 위한 변수 초기화
 dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+def play_background_music(song):
+    pygame.mixer.init()
+    pygame.mixer.music.load(song)  # 재생할 음악 파일 경로 설정
+    pygame.mixer.music.set_volume(0.5)  # 초기 볼륨 설정
+    pygame.mixer.music.play(-1)  # -1은 음악을 무한 반복 재생
 
+def play_selected_song(song):
+    pygame.mixer.music.stop()  # 현재 재생 중인 음악 중지
+    play_background_music(song)  # 선택한 음악 재생
+
+def set_volume(val):
+    volume = float(val)
+    pygame.mixer.music.set_volume(volume)
 
 
 # 만화 컷 테두리 그리기 함수
@@ -862,7 +889,7 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
+    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2,current_song
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
@@ -873,7 +900,7 @@ def setup_paint_app(window):
 
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-
+    current_song = tk.StringVar()
     
 
     button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
@@ -925,9 +952,22 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
-    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
+    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', label="brightness", command=set_brightness)
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
+
+    volume_slider = tk.Scale(window, from_=1, to=0, resolution=0.01, orient='vertical', label="Volume", command=set_volume)
+    volume_slider.set(0.5)  # 초기 볼륨 설정
+    volume_slider.pack(pady=0)
+     # 노래 선택 메뉴 추가
+    song_menu = tk.OptionMenu(window, current_song, *songs, command=play_selected_song)
+    current_song.set(songs[0])  # 기본값 설정
+    song_menu.pack(pady=0)
+     # pip 설치 권장 문구 추가
+    pip_install_label = tk.Label(window, text="권장: cmd에서 'pip install pygame' 명령어를 사용하여 pygame을 설치하십시오.")
+    pip_install_label.pack(pady=10)
+
+
 
     #timer 카테고리
     # 타이머 멈춤 버튼
@@ -1934,6 +1974,8 @@ window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
 editor = ImageEditor(canvas)
 
+
+
 # 타이머 라벨
 timer_label = Label(labelframe_timer, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
@@ -2020,7 +2062,7 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
-
+play_background_music(songs[0])
 window.mainloop()
 
 
