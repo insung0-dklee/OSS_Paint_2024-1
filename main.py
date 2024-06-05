@@ -68,6 +68,8 @@ def draw_comic_cut(cut_number):
 # 강조 효과 그리는 함수
 def create_emphasis_effect(event=None):
     # 마우스 왼쪽 버튼 클릭 시 start_emphasis 함수를 호출하도록 설정
+    global emphasis_color
+    emphasis_color = askcolor()[1]
     canvas.bind("<Button-1>", start_emphasis)
 
 def start_emphasis(event):
@@ -123,7 +125,7 @@ def draw_emphasis(event):
         line_width = random.randint(1, 3)
 
         # 계산된 위치와 굵기로 선 그리기
-        canvas.create_line(center_x, center_y, x, y, fill="black", width=line_width, tags="temp_shape")
+        canvas.create_line(center_x, center_y, x, y, fill=emphasis_color, width=line_width, tags="temp_shape")
         angle += angle_step
 
     # 중심에 흰색 타원 그리기 (사각형 영역에 대한 비율로 크기 조정)
