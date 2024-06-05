@@ -2017,6 +2017,26 @@ bind_shortcuts_window(window)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
 
+# 육각형 패턴 함수 추가
+def choose_hexagon_pattern():
+    canvas.delete("all")  
+    width = canvas.winfo_width()  
+    height = canvas.winfo_height()  
+    hexagon_side = 50  
+
+    for x in range(0, width, hexagon_side):  
+        flip = False  
+        for y in range(0, height, hexagon_side):  
+            if flip:
+                canvas.create_polygon(x, y + hexagon_side / 2, x + hexagon_side / 4, y, x + 3 * hexagon_side / 4, y, x + hexagon_side, y + hexagon_side / 2, x + 3 * hexagon_side / 4, y + hexagon_side, x + hexagon_side / 4, y + hexagon_side, outline="black", fill="lightyellow")
+            else:
+                canvas.create_polygon(x, y + hexagon_side / 2, x + hexagon_side / 4, y, x + 3 * hexagon_side / 4, y, x + hexagon_side, y + hexagon_side / 2, x + 3 * hexagon_side / 4, y + hexagon_side, x + hexagon_side / 4, y + hexagon_side, outline="black", fill="yellow")
+            flip = not flip
+
+button_add_hexagon_pattern = Button(window, text="Choose Hexagon Pattern", command=choose_hexagon_pattern)
+button_add_hexagon_pattern.pack()
+
+
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
