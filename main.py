@@ -43,7 +43,7 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
-
+previous_color = "black"
 
 
 # 만화 컷 테두리 그리기 함수
@@ -641,8 +641,7 @@ def change_brush_color(event=None):
     global brush_color
     selected_color = askcolor()[1]
     if selected_color:
-        brush_color = selected_color
-        set_brush_color(brush_color)
+        set_brush_color(selected_color)  # 브러시 색상 설정 함수 호출
 """
 TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
@@ -652,10 +651,12 @@ TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 
 # 브러시 색상을 설정하는 함수
 def set_brush_color(color):
-    global brush_color
+    global brush_color, previous_color
+    previous_color = brush_color  # 현재 색상을 직전 색상으로 저장
     brush_color = color
-    # spray_brush의 색상 변경을 위한 코드 추가
     spray_brush.set_brush_color(brush_color)
+    color_display_label.config(bg=brush_color)  # 색상 표시 라벨 업데이트
+    previous_color_label.config(bg=previous_color)  # 직전 색상 표시 라벨 업데이트
 
 # 사용자 정의 색상을 설정하고 팔레트에 추가하는 함수
 def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
@@ -669,6 +670,7 @@ def set_custom_color(r_entry, g_entry, b_entry, palette_frame):
         if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
             # R, G, B 값을 16진수로 변환하여 색상 코드 생성
             color = f'#{r:02x}{g:02x}{b:02x}'
+            previous_color = brush_color  # 현재 색상을 직전 색상으로 저장
             set_brush_color(color)  # 브러시 색상 설정 함수 호출
 
             # 사용자 정의 색상을 팔레트에 동적으로 추가
@@ -733,8 +735,8 @@ def reset_brush(canvas):
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
     change_brush_size(brush_size)  # 브러시 크기 조정
+    set_brush_color(brush_color)  # 브러시 색상 설정
     canvas.bind("<B1-Motion>", lambda event: set_paint_mode_normal(canvas))  # 실선(기본) 브러쉬로 변경
-
 
 def setup_reset_brush_button(window, canvas):
     global button_reset
@@ -879,36 +881,35 @@ def choose_use_case_element(event=None):
 
 def setup_paint_app(window):
     global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_rotate, labelframe_timer, labelframe_additional, labelframe_additional2
+    global color_display_label, previous_color_label
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
 
     global canvas
     canvas = Canvas(window, bg="white")
-    canvas.pack(fill=BOTH, expand=True,side= BOTTOM)
+    canvas.pack(fill=BOTH, expand=True, side=BOTTOM)
 
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
-    
-
-    button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
+    button_frame = Frame(window, bg="grey")  # 구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
 
-    labelframe_brush = LabelFrame(button_frame, text="brush mode") #브러시 설정을 정리한 프레임
-    labelframe_brush.pack(side = LEFT,fill=Y)
+    labelframe_brush = LabelFrame(button_frame, text="brush mode")  # 브러시 설정을 정리한 프레임
+    labelframe_brush.pack(side=LEFT, fill=Y)
 
-    labelframe_rotate = LabelFrame(button_frame, text="rotate") #브러시 설정을 정리한 프레임
-    labelframe_rotate.pack(side = LEFT,fill=Y)
+    labelframe_rotate = LabelFrame(button_frame, text="rotate")  # 브러시 설정을 정리한 프레임
+    labelframe_rotate.pack(side=LEFT, fill=Y)
 
-    labelframe_timer = LabelFrame(button_frame, text="timer") #타이머 설정을 정리한 프레임
-    labelframe_timer.pack(side = LEFT,fill=Y)
+    labelframe_timer = LabelFrame(button_frame, text="timer")  # 타이머 설정을 정리한 프레임
+    labelframe_timer.pack(side=LEFT, fill=Y)
 
-    labelframe_additional = LabelFrame(button_frame,text="additionals") # 추가 기능 설정을 정리한 프레임
-    labelframe_additional.pack(side = LEFT,fill=Y)
+    labelframe_additional = LabelFrame(button_frame, text="additionals")  # 추가 기능 설정을 정리한 프레임
+    labelframe_additional.pack(side=LEFT, fill=Y)
 
-    labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
-    labelframe_additional2.pack(side = LEFT,fill=Y)
+    labelframe_additional2 = LabelFrame(button_frame)  # 추가 기능 설정을 정리한 프레임2
+    labelframe_additional2.pack(side=LEFT, fill=Y)
 
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
@@ -945,41 +946,39 @@ def setup_paint_app(window):
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
 
-    #timer 카테고리
+    # timer 카테고리
     # 타이머 멈춤 버튼
     button_stop_timer = Button(labelframe_timer, text="Stop", command=stop_timer)
     button_stop_timer.pack(side=LEFT)
     button_stop_timer.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_stop_timer.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    #타이머 리셋 버튼
+    # 타이머 리셋 버튼
     button_reset_timer = Button(labelframe_timer, text="Reset", command=reset_timer)
     button_reset_timer.pack(side=LEFT)
     button_reset_timer.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_reset_timer.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    #타이머 시작
+    # 타이머 시작
     start_button = Button(labelframe_timer, text="Start", command=start_stop)
-    start_button.pack(side = LEFT)
+    start_button.pack(side=LEFT)
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
-    #additionals 카테고리
+    # additionals 카테고리
     # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
     text_box_button = Button(labelframe_additional, text="TEXTBOX", command=open_text_input_window)
     text_box_button.grid(row=1, column=1)
     text_box_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     text_box_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    #다이어그램
-    button_use_case = Button(labelframe_additional, text="Case Diagram", command=choose_use_case_element) #추가 기능에 포함됨.
-    button_use_case.grid(row=1, column=2) 
+    # 다이어그램
+    button_use_case = Button(labelframe_additional, text="Case Diagram", command=choose_use_case_element)  # 추가 기능에 포함됨.
+    button_use_case.grid(row=1, column=2)
     button_use_case.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_use_case.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-    
-    
-    #이전 획 설정
+
+    # 이전 획 설정
     button_erase_last_stroke = Button(labelframe_additional, text="Undo", command=erase_last_stroke)
     button_erase_last_stroke.grid(row=2, column=1)
     button_erase_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
@@ -990,16 +989,16 @@ def setup_paint_app(window):
     button_redo_last_stroke.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_redo_last_stroke.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    #all clear
+    # all clear
     button_clear = Button(labelframe_additional, text="All Clear", command=lambda: clear_paint(canvas))
     button_clear.grid(row=1, column=3)
     button_clear.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_clear.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    #도형 모양 선택하는 버튼 생성
+    # 도형 모양 선택하는 버튼 생성
     button_choose_shape = Button(labelframe_additional, text="shape", command=choose_shape)
     button_choose_shape.bind("<Button-1>", choose_shape)  # 버튼 클릭 시 모양 선택 팝업 메뉴 표시
-    button_choose_shape.grid(row=2,column=3)
+    button_choose_shape.grid(row=1, column=4)
     button_choose_shape.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_choose_shape.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
@@ -1014,14 +1013,26 @@ def setup_paint_app(window):
     button_rotate_right.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_rotate_right.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
-    #브러시  모드를 선택하는 콤보박스
+    # 브러시 모드를 선택하는 콤보박스
     brush_combobox = ttk.Combobox(labelframe_brush, values=brush_modes, state="readonly")
     brush_combobox.current(0)
     brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
     brush_combobox.pack(side=LEFT)
-    
 
+    # 현재 색상 표시 라벨 추가
+    current_color_frame = Frame(labelframe_brush)
+    current_color_frame.pack(side=LEFT, padx=5)
+    Label(current_color_frame, text="현재색상").pack(side=TOP)
+    color_display_label = Label(current_color_frame, bg=brush_color, width=2, height=1)
+    color_display_label.pack(side=TOP)
+
+    # 직전 색상 표시 라벨 추가
+    previous_color_frame = Frame(labelframe_brush)
+    previous_color_frame.pack(side=LEFT, padx=5)
+    Label(previous_color_frame, text="이전색상").pack(side=TOP)
+    previous_color_label = Label(previous_color_frame, bg=previous_color, width=2, height=1)
+    previous_color_label.pack(side=TOP)
+    
     # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
     dot_count.set(10)
@@ -1035,8 +1046,6 @@ def setup_paint_app(window):
     frame_count = Frame(window)
     frame_count.pack(side=RIGHT)
 
-
-
     # 에어브러쉬 속성 조절 버튼 추가
     Button(labelframe_additional2, text="+", command=increase_dot_distance).pack(side=RIGHT)
     Label(labelframe_additional2, text="Distance").pack(side=RIGHT)
@@ -1048,30 +1057,24 @@ def setup_paint_app(window):
     Label(labelframe_additional2, textvariable=dot_count).pack(side=RIGHT)  # 개수 표시
     Button(labelframe_additional2, text="-", command=decrease_dot_count).pack(side=RIGHT)
 
-    # button_paint = Button(window, text="airbrush", command=lambda: set_paint_mode_airbrush(canvas)) #에어브러쉬 그리기 모드로 전환하는 기능
-    # button_paint.pack(side=RIGHT)
-    # button_paint.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    # button_paint.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-
     canvas.bind("<Button-1>", paint_start)
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
-    #spray 인스턴스 생성 
+    # spray 인스턴스 생성
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
 
-    #브러시 크기 조정 슬라이더
+    # 브러시 크기 조정 슬라이더
     brush_size_slider = Scale(labelframe_brush, from_=1, to=20, orient=HORIZONTAL, label="Size", command=change_brush_size)
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
 
-    #브러시 line 모드(콤보 박스 통합X)
-    button_line = Button(labelframe_brush, text="Line", command=lambda: set_brush_mode_line(canvas)) # 해당 기능은 브러시 모드 콤보 박스에 통합 시 기능이 작동안하는 문제가 발생함. 해결 전까지 RESET과 남겨두며, 위치만 이동 시킴.
+    # 브러시 line 모드(콤보 박스 통합X)
+    button_line = Button(labelframe_brush, text="Line", command=lambda: set_brush_mode_line(canvas))  # 해당 기능은 브러시 모드 콤보 박스에 통합 시 기능이 작동안하는 문제가 발생함. 해결 전까지 RESET과 남겨두며, 위치만 이동 시킴.
     button_line.pack(side=RIGHT)
-    button_line.bind("<Enter>", on_enter)  
+    button_line.bind("<Enter>", on_enter)
     button_line.bind("<Leave>", on_leave)
-
 
     window.bind("<F11>", toggle_fullscreen)
 
@@ -1084,6 +1087,7 @@ def setup_paint_app(window):
     canvas.bind("<Button-3>", show_coordinates)
     canvas.bind("<ButtonRelease-3>", hide_coordinates)
     canvas.bind("<MouseWheel>", zoom_scroll)
+
     bind_shortcuts()
 
     
@@ -1944,7 +1948,7 @@ window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 version = "1.0.0"  # 프로그램 버전
 window.title(f"그림판 v{version}")
-window.geometry("1280x960+200+200")
+window.geometry("1400x1000+200+200")
 window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
