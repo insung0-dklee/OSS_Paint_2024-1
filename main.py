@@ -45,7 +45,7 @@ brush_size = 1  # 초기 브러시 크기
 selected_shape = "oval"  # 기본 도형은 타원형으로 설정
 brush_color = "black"  # 기본 색상은 검은색으로 설정
 brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
-brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush","spray"]
+brush_modes = brush_modes = ["solid", "dotted", "double_line", "pressure", "marker", "airbrush","spray","pencil","line"]
 current_color = "black"  # 기본 색상은 검은색으로 설정
 eraser_mode = False  # 기본적으로 지우개 모드는 비활성화
 spacing = 10  # 도형 사이의 최소 간격을 10으로 설정
@@ -57,6 +57,54 @@ songs = ["edm.mp3", "country.mp3", "pop.mp3"]  # 노래 목록
 dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
+
+def update_analog_clock(canvas):
+    canvas.delete("all")
+    now = time.localtime()
+    hours = now.tm_hour
+    minutes = now.tm_min
+    seconds = now.tm_sec
+
+    # 시계 중심 좌표
+    cx, cy = 50, 50
+    clock_radius = 40
+
+    # 시계 테두리 그리기
+    canvas.create_oval(cx - clock_radius, cy - clock_radius, cx + clock_radius, cy + clock_radius)
+
+    # 숫자 표시
+    for i in range(12):
+        angle = math.pi / 6 * i
+        x = cx + clock_radius * 0.8 * math.sin(angle)
+        y = cy - clock_radius * 0.8 * math.cos(angle)
+        canvas.create_text(x, y, text=str(i if i != 0 else 12), font=("calibri", 12))
+
+    # 시침, 분침, 초침 각도 계산
+    hour_angle = (hours % 12 + minutes / 60) * 30
+    minute_angle = (minutes + seconds / 60) * 6
+    second_angle = seconds * 6
+
+    # 바늘 끝 좌표 계산
+    def polar_to_cartesian(angle, length):
+        angle = math.radians(angle)
+        return cx + length * math.sin(angle), cy - length * math.cos(angle)
+
+    # 시침 그리기
+    hour_x, hour_y = polar_to_cartesian(hour_angle, clock_radius * 0.5)
+    canvas.create_line(cx, cy, hour_x, hour_y, width=6)
+
+    # 분침 그리기
+    minute_x, minute_y = polar_to_cartesian(minute_angle, clock_radius * 0.7)
+    canvas.create_line(cx, cy, minute_x, minute_y, width=4)
+
+    # 초침 그리기
+    second_x, second_y = polar_to_cartesian(second_angle, clock_radius * 0.9)
+    canvas.create_line(cx, cy, second_x, second_y, fill="red")
+
+    # 1000 밀리초(1초) 후에 다시 호출
+    canvas.after(1000, update_analog_clock, canvas)
+
+
 
 def play_background_music(song):
     pygame.mixer.init()
@@ -400,13 +448,11 @@ def set_brush_mode_line(canvas):
 def line_start(event, canvas):
     global x1, y1
     x1, y1 = event.x, event.y
-    canvas.bind("<B1-Motion>", lambda event: draw_line(event, canvas))
-    # 마우스 버튼을 놓을 때 reset_line 함수를 호출하여 드래그 이벤트를 해제
-    canvas.bind("<ButtonRelease-1>", lambda event: reset_line(canvas))
+    canvas.bind("<Button-1>", lambda event: draw_line(event, canvas))
 
 def draw_line(event, canvas):
     global x1, y1
-    canvas.create_line(x1, y1, event.x, event.y, fill=brush_color, width=2)
+    canvas.create_line(x1, y1, x1, y1, event.x, event.y, fill=brush_color, width=2)
     x1, y1 = event.x, event.y
 
 def reset_line(canvas): # 마우스 드래그 이벤트를 해제하여 선 그리기를 멈춤
@@ -557,6 +603,8 @@ def set_brush_mode(canvas, mode): # 브러쉬 모드를 변경하는 함수
         canvas.bind("<Button-1>", start_pencil)
         canvas.bind("<B1-Motion>", lambda event: pencil_brush(event, canvas))
         canvas.bind("<ButtonRelease-1>", lambda event: paint_end(event))
+    elif brush_mode == "line":
+        canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
 
 # 슬라이더를 통해 펜 굵기를 변경하는 함수
 def change_brush_size(new_size):
@@ -921,6 +969,18 @@ def setup_paint_app(window):
     labelframe_additional2 = LabelFrame(button_frame) # 추가 기능 설정을 정리한 프레임2
     labelframe_additional2.pack(side = LEFT,fill=Y)
 
+    labelframe_volume = LabelFrame(button_frame,text="volume") # 추가 기능 설정을 정리한 프레임2
+    labelframe_volume.pack(side = LEFT,fill=Y)
+
+    labelframe_brightness = LabelFrame(button_frame,text="brightness") # 추가 기능 설정을 정리한 프레임2
+    labelframe_brightness.pack(side = LEFT,fill=Y)
+
+    labelframe_clock=LabelFrame(button_frame,text="clock") # 추가 기능 설정을 정리한 프레임2
+    labelframe_clock.pack(side = LEFT,fill=Y)
+
+     
+
+
     # 벌집 모양 패턴 버튼
     button_honeycomb = Button(window, text="Honeycomb Pattern", command=lambda: draw_honeycomb_pattern(canvas))
     button_honeycomb.pack(side=LEFT)
@@ -933,11 +993,6 @@ def setup_paint_app(window):
     button_honeycomb_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_honeycomb_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    # 연필 브러시 버튼 추가
-    button_pencil_brush = Button(window, text="연필브러시", command=lambda: set_brush_mode(canvas, "pencil"))
-    button_pencil_brush.pack(side=LEFT)
-    button_pencil_brush.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_pencil_brush.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 벽돌 패턴 버튼
     button_brick_pattern = Button(window, text="Brick Pattern", command=lambda: draw_brick_pattern(canvas))
@@ -952,21 +1007,22 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     # 밝기 슬라이더
-    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', label="brightness", command=set_brightness)
+    brightness_slider = tk.Scale(labelframe_brightness, from_=0, to=100, orient='horizontal', label="brightness", command=set_brightness)
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
 
-    volume_slider = tk.Scale(window, from_=1, to=0, resolution=0.01, orient='vertical', label="Volume", command=set_volume)
+    volume_slider = tk.Scale(labelframe_volume, from_=1, to=0, resolution=0.01, orient='vertical', label="Volume", command=set_volume)
     volume_slider.set(0.5)  # 초기 볼륨 설정
     volume_slider.pack(pady=0)
      # 노래 선택 메뉴 추가
-    song_menu = tk.OptionMenu(window, current_song, *songs, command=play_selected_song)
+    song_menu = tk.OptionMenu(labelframe_volume, current_song, *songs, command=play_selected_song)
     current_song.set(songs[0])  # 기본값 설정
     song_menu.pack(pady=0)
-     # pip 설치 권장 문구 추가
-    pip_install_label = tk.Label(window, text="권장: cmd에서 'pip install pygame' 명령어를 사용하여 pygame을 설치하십시오.")
-    pip_install_label.pack(pady=10)
 
+    # 아날로그 시계 캔버스 설정
+    clock_canvas = tk.Canvas(labelframe_clock, width=100, height=100, bg="white")
+    clock_canvas.pack(pady=20)
+    update_analog_clock(clock_canvas)
 
 
     #timer 카테고리
@@ -1090,12 +1146,7 @@ def setup_paint_app(window):
     brush_size_slider.set(brush_size)
     brush_size_slider.pack(side=LEFT)
 
-    #브러시 line 모드(콤보 박스 통합X)
-    button_line = Button(labelframe_brush, text="Line", command=lambda: set_brush_mode_line(canvas)) # 해당 기능은 브러시 모드 콤보 박스에 통합 시 기능이 작동안하는 문제가 발생함. 해결 전까지 RESET과 남겨두며, 위치만 이동 시킴.
-    button_line.pack(side=RIGHT)
-    button_line.bind("<Enter>", on_enter)  
-    button_line.bind("<Leave>", on_leave)
-
+    
 
     window.bind("<F11>", toggle_fullscreen)
 
