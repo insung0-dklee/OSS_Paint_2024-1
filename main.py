@@ -24,6 +24,8 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from tkinter.colorchooser import askcolor
+
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -201,23 +203,50 @@ def start_pencil(event):
     last_x, last_y = None, None
     pencil_brush(event, canvas)
 
+# 밝기 설정 함수
 def set_brightness(value):
     brightness = int(value) / 100  # 슬라이더 값(0-100)을 0-1 범위로 변환
     rgb = (int(255 * brightness), int(255 * brightness), int(255 * brightness))  # RGB 값 계산
     color = f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'  # RGB 값을 16진수 색상 코드로 변환
     canvas.configure(bg=color)
 
+# 밝기를 증가시키는 함수
 def increase_brightness(event=None):
     current_value = brightness_slider.get()
     if current_value < 100:
-        brightness_slider.set(current_value + 5)  # 밝기를 5% 올리기
-        set_brightness(current_value + 5)
+        new_value = min(current_value + 5, 100)  # 최대 값이 100이 되도록 함
+        brightness_slider.set(new_value)  # 밝기를 5% 올리기
+        set_brightness(new_value)
 
 def decrease_brightness(event=None):
     current_value = brightness_slider.get()
     if current_value > 0:
-        brightness_slider.set(current_value - 5)  # 밝기를 5% 낮추기
-        set_brightness(current_value - 5)
+        new_value = max(current_value - 5, 0)  # 최소 값이 0이 되도록 함
+        brightness_slider.set(new_value)  # 밝기를 5% 낮추기
+        set_brightness(new_value)
+
+# Tkinter 윈도우 생성
+root = tk.Tk()
+root.title("밝기 조절기")
+
+# 캔버스 생성
+canvas = tk.Canvas(root, width=200, height=200)
+canvas.pack()
+
+# 밝기 슬라이더 생성
+brightness_slider = tk.Scale(root, from_=0, to=100, orient="horizontal", label="밝기", command=set_brightness)
+brightness_slider.pack()
+
+# 밝기 증가 버튼 생성
+increase_button = tk.Button(root, text="밝기 증가", command=increase_brightness)
+increase_button.pack()
+
+# 밝기 감소 버튼 생성
+decrease_button = tk.Button(root, text="밝기 감소", command=decrease_brightness)
+decrease_button.pack()
+
+# Tkinter 이벤트 루프 시작
+root.mainloop()
 
 
 
@@ -2022,5 +2051,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
