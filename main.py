@@ -131,6 +131,58 @@ def draw_emphasis(event):
     y_radius = rect_height * 0.8
     canvas.create_oval(center_x - x_radius, center_y - y_radius, center_x + x_radius, center_y + y_radius, fill="white", outline="white", tags="temp_shape")
 
+def create_rectangle_emphasis_effect(event=None):
+    # 마우스 왼쪽 버튼 클릭 시 start_rectangle_emphasis 함수를 호출하도록 설정
+    canvas.bind("<Button-1>", start_rectangle_emphasis)
+
+def start_rectangle_emphasis(event):
+    global start_x, start_y, current_shape
+    # 마우스 클릭 지점을 시작점으로 설정
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    # 마우스 움직임에 따라 draw_rectangle_emphasis 함수를 호출하고, 버튼이 놓여지면 finish_emphasis 함수 호출
+    canvas.bind("<B1-Motion>", draw_rectangle_emphasis)
+    canvas.bind("<ButtonRelease-1>", finish_emphasis)
+
+# 기존의 draw_emphasis 함수를 수정하여 정사각형 비율로 투명한 배경의 강조 효과를 그리는 함수
+def draw_rectangle_emphasis(event):
+    global start_x, start_y
+    canvas.delete("temp_shape")
+    end_x, end_y = event.x, event.y
+    
+    center_x = (start_x + end_x) / 2
+    center_y = (start_y + end_y) / 2
+
+    # 정사각형의 크기를 결정합니다. 가로와 세로 중 더 긴 거리를 정사각형의 한 변으로 합니다.
+    side_length = max(abs(end_x - start_x), abs(end_y - start_y))
+    end_x = start_x + math.copysign(side_length, end_x - start_x)
+    end_y = start_y + math.copysign(side_length, end_y - start_y)
+
+    # 사각형의 대각선을 기준으로 원의 반지름을 결정
+    radius = min(abs(end_x - start_x), abs(end_y - start_y)) / 3
+
+    angle = 0
+    while angle < 360:
+        radian_angle = math.radians(angle)
+
+        # 원의 경계까지의 끝점
+        circle_x = center_x + radius * math.cos(radian_angle)
+        circle_y = center_y + radius * math.sin(radian_angle)
+
+        # 사각형의 테두리에서 시작점 계산
+        if abs(math.cos(radian_angle)) > abs(math.sin(radian_angle)):
+            scale = abs((end_x - start_x) / 2 / math.cos(radian_angle))
+        else:
+            scale = abs((end_y - start_y) / 2 / math.sin(radian_angle))
+
+        line_start_x = center_x + scale * math.cos(radian_angle)
+        line_start_y = center_y + scale * math.sin(radian_angle)
+
+        # 선 그리기
+        canvas.create_line(line_start_x, line_start_y, circle_x, circle_y, fill="black", width=random.randint(1, 3), tags="temp_shape")
+
+        angle += random.randint(1, 5)  # 각도 증가
+
 def finish_emphasis(event):
     global current_shape
     canvas.unbind("<B1-Motion>")
@@ -1097,8 +1149,9 @@ def setup_paint_app(window):
     cut_menu.add_command(label="2 cut", command=lambda: draw_comic_cut(2))
     cut_menu.add_command(label="3 cut", command=lambda: draw_comic_cut(3))
     cut_menu.add_command(label="4 cut", command=lambda: draw_comic_cut(4))
-    # 컷 강조 효과 서브메뉴 생성
+    # 컷 강조 효과 서브메뉴 생성    
     cartoon_menu.add_command(label="Emphasis Effect", command=create_emphasis_effect)
+    cartoon_menu.add_command(label="Emphasis Rectangle Effect", command=create_rectangle_emphasis_effect)
 
     file_menu.add_command(label="Open New Window", command=create_new_window) # File 메뉴에 Open New Window 기능 버튼 추가
     file_menu.add_command(label="Add Image", command=upload_image) # File 메뉴에 Add Image 기능 버튼 추가
