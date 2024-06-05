@@ -328,3 +328,65 @@ if __name__ == "__main__":
     end_time = time.time()
     elapsed_time = end_time - start_time
     print("그림판 사용 시간:", elapsed_time, "초")
+
+import tkinter as tk
+from tkinter import colorchooser
+
+class PaintApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("그림판")
+
+        self.canvas_width = 800
+        self.canvas_height = 600
+        self.default_color = "black"
+        self.default_thickness = 5
+
+        self.canvas = tk.Canvas(root, bg="white", width=self.canvas_width, height=self.canvas_height)
+        self.canvas.pack()
+
+        self.color = self.default_color
+        self.thickness = self.default_thickness
+        self.old_x, self.old_y = None, None
+
+        self.canvas.bind("<B1-Motion>", self.paint)
+        self.canvas.bind("<ButtonRelease-1>", self.reset)
+        self.canvas.bind("<Button-3>", self.erase)
+
+        self.choose_color_button = tk.Button(root, text="색상 선택", command=self.choose_color)
+        self.choose_color_button.pack(side=tk.LEFT)
+
+        self.thickness_scale = tk.Scale(root, from_=1, to=10, orient=tk.HORIZONTAL, label="선 굵기", command=self.change_thickness)
+        self.thickness_scale.pack(side=tk.LEFT)
+        self.thickness_scale.set(self.default_thickness)
+
+    def choose_color(self):
+        color_code = colorchooser.askcolor(title="색상 선택")
+        if color_code[1] is not None:
+            self.color = color_code[1]
+
+    def change_thickness(self, value):
+        self.thickness = int(value)
+
+    def paint(self, event):
+        if self.old_x and self.old_y:
+            overlapping_items = self.canvas.find_overlapping(event.x - 1, event.y - 1, event.x + 1, event.y + 1)
+            if not overlapping_items:
+                self.canvas.create_line(
+                    self.old_x, self.old_y, event.x, event.y,
+                    width=self.thickness, fill=self.color, capstyle=tk.ROUND, smooth=tk.TRUE, splinesteps=100  # 여기서 splinesteps 값을 늘립니다.
+                )
+        self.old_x, self.old_y = event.x, event.y
+
+    def reset(self, event):
+        self.old_x, self.old_y = None, None
+
+    def erase(self, event):
+        overlapping_items = self.canvas.find_overlapping(event.x - 1, event.y - 1, event.x + 1, event.y + 1)
+        for item in overlapping_items:
+            self.canvas.delete(item)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PaintApp(root)
+    root.mainloop()
