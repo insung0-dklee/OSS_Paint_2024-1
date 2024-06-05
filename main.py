@@ -561,6 +561,20 @@ def horizontal_scroll(event):
     elif event.delta < 0:
         canvas.xview_scroll(1, "units")  # 오른쪽으로 스크롤
 
+def zoom_key(event):
+    scale = 1.0
+    if event.state & 0x0004 and event.keysym == 'plus': #Ctrl + +가 동시에 눌렀을때 확대
+        scale = 1.1
+        canvas.scale("all", event.x, event.y, scale, scale)
+    elif event.state & 0x0004 and event.keysym == 'minus': #Ctrl + -가 동시에 눌렀을때 축소
+        scale = 0.9
+        canvas.scale("all", event.x, event.y, scale, scale)
+        
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+    canvas.bind('<Control-plus>', key_zoom)
+    canvas.bind('<Control-minus>', key_zoom)
+
 def on_button_press(event):
     canvas.scan_mark(event.x, event.y)
 
