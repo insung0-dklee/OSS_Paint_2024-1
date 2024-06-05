@@ -2021,19 +2021,14 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 timer.start()
 update_timer()
 
-#사용하고 있는 펜의 종류를 알려주는 버튼
+def display_current_pen_info():
+    info_text = f"Brush Mode: {brush_mode}\n Brush Size: {brush_size}\nBrush Color: {brush_color}"
+    info_label.config(text=info_text)
 
-def display_brush_mode():
-    mode_test = f"pen mode: {get_brush_mode()}"
-    mode_label.config(text = mode_test)
+info_button = tk.Button(window, text="Display Pen Info", command=display_current_pen_info)
+info_button.pack(pady=10)
 
-def get_brush_mode():
-    return brush_mode
-
-mode_button = tk.Button(window, text="Pen Mode", command=display_brush_mode)
-mode_button.pack(pady=10)
-
-mode_label = tk.Label(window, text="")
-mode_label.pack()
+info_label = tk.Label(window, text="")
+info_label.pack()
 
 window.mainloop()
