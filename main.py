@@ -2023,4 +2023,23 @@ update_timer()
 
 window.mainloop()
 
+"""
+스포이드 기능
+canvas.winfo_rgb(): 해당 위치의 색상 정보를 가져옴
+canvas.winfo_rgb(canvas.get():  가져온 색상 정보를 RGB 형식으로 변환하여 반환함
+change_brush_color(): 사용자가 지정한 색상으로 브러시 색상을 변경하는 함수
+"""
 
+def spoid(event):
+    # 마우스 클릭한 위치의 색상 정보를 가져옴
+    x, y = event.x, event.y
+    color = canvas.winfo_rgb(canvas.get(x, y))
+
+    # RGB 값에서 색상 코드로 변환
+    r = int(color[0] / 256)
+    g = int(color[1] / 256)
+    b = int(color[2] / 256)
+    hex_color = "#{:02x}{:02x}{:02x}".format(r, g, b)
+
+    # 가져온 색상을 현재 브러시 색상으로 설정
+    change_brush_color(hex_color)
