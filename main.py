@@ -65,7 +65,18 @@ def draw_comic_cut(cut_number):
         canvas.create_rectangle(50, 300 + margin//2, 375 - margin//2, 550, outline="black", width=2)
         canvas.create_rectangle(375 + margin//2, 300 + margin//2, 750, 550, outline="black", width=2)
 
+
 # 강조 효과 그리는 함수
+"""
+Creates an emphasis effect on the canvas.
+
+@Param
+    event : An optional argument that represents the event of a mouse click.
+
+@Return
+    None
+"""
+
 def create_emphasis_effect(event=None):
     # 마우스 왼쪽 버튼 클릭 시 start_emphasis 함수를 호출하도록 설정
     canvas.bind("<Button-1>", start_emphasis)
