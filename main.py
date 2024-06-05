@@ -1903,7 +1903,12 @@ def on_closing():
     # 프로그램 종료 시 호출되는 함수
     global is_modified
     if is_modified:
-        if messagebox.askokcancel("Quit", "그림을 저장하시겠습니까?"):
+        end_time = time.localtime()  # 종료 시간 저장
+        end_hours = end_time.tm_hour
+        end_minutes = end_time.tm_min
+        end_seconds = end_time.tm_sec
+        end_date = time.strftime("%Y-%m-%d (%a)", end_time)
+        if messagebox.askokcancel("Quit", f"그림을 저장하시겠습니까?\n작업 시작 시간: {format_time(initial_hours, initial_minutes, initial_seconds)}, {start_date}\n작업 종료 시간: {format_time(end_hours, end_minutes, end_seconds)}, {end_date}"):
             save_canvas(canvas)  # 저장 함수 호출
     window.destroy()
 
@@ -1942,13 +1947,25 @@ def set_modified():
     global is_modified
     is_modified = True
 
+#작업 시작 시간 기능
+def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
+    return f"{hours:02}:{minutes:02}"
 
+def update_current_time():
+    # 현재 시간을 업데이트하여 라벨에 표시하는 함수
+    current_time = time.localtime()
+    current_hours = current_time.tm_hour
+    current_minutes = current_time.tm_min
+    current_seconds = current_time.tm_sec
+    current_date = time.strftime("%Y-%m-%d (%a)", current_time)
+    current_time_label.config(text=f"현재 시간: {format_time(current_hours, current_minutes, current_seconds)}, {current_date}")
+    window.after(1000, update_current_time)  # 1초마다 현재 시간 업데이트
 
 window = Tk()
 #Tk 객체를 생성하여 주 윈도우를 만들기
 version = "1.0.0"  # 프로그램 버전
 window.title(f"그림판 v{version}")
-window.geometry("1400x1000+200+200")
+window.geometry("1550x1000+200+200")
 window.resizable(True, True)
 window.configure(bg="sky blue") #구별하기 위한 버튼 영역 색 변경
 setup_paint_app(window)
@@ -1960,16 +1977,23 @@ timer_label.pack(side=RIGHT)
 
 
 #작업 시작 시간 기능
-def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간: 분 형태로 보여줌
-    return f"{hours:02}:{minutes:02}"
+def format_time(hours, minutes, seconds): # 시간, 분, 초를 매개변수로 받아 시간:분:초 형태로 보여줌
+    return f"{hours:02}:{minutes:02}:{seconds:02}"
 
 
 current_time = time.localtime() 
 initial_hours = current_time.tm_hour
 initial_minutes = current_time.tm_min 
+initial_seconds = current_time.tm_sec
+start_date = time.strftime("%Y-%m-%d (%a)", current_time)
 
-time_label = Label(labelframe_timer, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
+time_label = Label(labelframe_timer, text=f"작업 시작 시간: {format_time(initial_hours, initial_minutes, initial_seconds)}, {start_date}")
 time_label.pack()
+
+# 현재 시간 라벨
+current_time_label = Label(labelframe_timer, text="")
+current_time_label.pack()
+
 
 # 에어브러쉬 속성 변수 생성
 dot_count = IntVar()
@@ -2040,6 +2064,7 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 #프로그램 시작 시 타이머 시작
 timer.start()
 update_timer()
+update_current_time()  # 현재 시간 업데이트 시작
 
 window.mainloop()
 
