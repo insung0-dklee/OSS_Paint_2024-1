@@ -290,7 +290,7 @@ def on_enter(event):
     event.widget.config(bg="light blue")
 
 def on_leave(event):
-    event.widget.config(bg="SystemButtonFace")
+    event.widget.config(bg="light grey")
 
 def upload_image():
     path = filedialog.askopenfilename()
