@@ -47,6 +47,15 @@ previous_x, previous_y = None, None
 
 
 # 만화 컷 테두리 그리기 함수
+"""
+Draws a comic cut border on the canvas.
+
+@Param
+    cut_number : The number of cuts to be drawn on the canvas.
+
+@Return
+    None
+"""
 def draw_comic_cut(cut_number):
     canvas.delete("all")  # 기존에 그려진 것을 지움
     margin = 20  # 컷 사이의 간격
