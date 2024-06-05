@@ -128,6 +128,9 @@ def draw_pie_chart():
 
         # 각도 계산
         total = sum(y_values_int)
+
+        #폰트 사이즈 계산
+        font_size = int(min(width, height) * 0.025) 
         if len(y_values_int) == 1: # 값이 1개만 있으면, 전체 원을 그립니다.
             angles = [360]
         else:
@@ -153,7 +156,7 @@ def draw_pie_chart():
             label_y = start_y + height // 2 - label_radius * sin(center_angle * pi / 180)
 
             # 레이블 그리기
-            current_graph.append(canvas.create_text(label_x, label_y, text=x_values_str[i], tags="temp_shape"))
+            current_graph.append(canvas.create_text(label_x, label_y, text=x_values_str[i], font=("Arial", font_size),tags="temp_shape"))
 
             # 비율 계산
             percentage = y_values_int[i] / total * 100 if total != 0 else 100
@@ -161,14 +164,14 @@ def draw_pie_chart():
             # 비율 레이블 그리기
             percentage_label_x = start_x + width // 2 + radius * cos(center_angle * pi / 180) / 2
             percentage_label_y = start_y + height // 2 - radius * sin(center_angle * pi / 180) / 2
-            current_graph.append(canvas.create_text(percentage_label_x, percentage_label_y, text=f'{percentage:.1f}%', tags="temp_shape"))
+            current_graph.append(canvas.create_text(percentage_label_x, percentage_label_y, text=f'{percentage:.1f}%', font=("Arial", font_size),tags="temp_shape"))
 
             start_angle = end_angle
 
         # 그래프 제목 그리기
         title_x = start_x + width // 2
         title_y = start_y + height  # 원의 맨 밑에 위치
-        current_graph.append(canvas.create_text(title_x, title_y + 20, text=title, fill= "red", tags="temp_shape"))
+        current_graph.append(canvas.create_text(title_x, title_y + 20, text=title, font=("Arial", font_size), fill= "red", tags="temp_shape"))
 
     def finish_pie_chart(event): # 원형 그래프 그리기를 종료하는 기능
         global current_graph
