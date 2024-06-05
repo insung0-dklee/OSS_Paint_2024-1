@@ -24,6 +24,7 @@ from picture import ImageEditor #이미지 모듈을 가져옴
 from spray import SprayBrush #spray 모듈을 가지고 옴
 import os
 from tkinter import Scale
+from datetime import datetime
 
 # 초기 설정 값들
 global brush_size, brush_color, brush_mode, last_x, last_y, x1, y1, canvas
@@ -1922,6 +1923,17 @@ def set_modified():
     global is_modified
     is_modified = True
 
+# 날짜 선택 함수
+def select_date():
+    selected_date = simpledialog.askstring("날짜 선택", "원하는 날짜를 입력하세요(YYYY-MM-DD):", parent=window)
+    if selected_date:
+        try:
+            # 입력된 문자열을 날짜로 변환
+            formatted_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+            selected_date_label.config(text=f"선택된 날짜: {formatted_date}")
+        except ValueError:
+            messagebox.showerror("오류", "올바른 날짜 형식을 입력하세요(YYYY-MM-DD).")
+
 
 
 window = Tk()
@@ -1937,6 +1949,14 @@ editor = ImageEditor(canvas)
 # 타이머 라벨
 timer_label = Label(labelframe_timer, text="Time: 0 s")
 timer_label.pack(side=RIGHT)
+
+# 날짜 선택 버튼 생성
+select_date_button = ttk.Button(window, text="날짜 선택", command=select_date)
+select_date_button.pack()
+
+# 선택된 날짜를 표시할 레이블 생성
+selected_date_label = ttk.Label(window, text="선택된 날짜: ")
+selected_date_label.pack()
 
 
 #작업 시작 시간 기능
