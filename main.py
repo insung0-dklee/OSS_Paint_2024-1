@@ -184,6 +184,19 @@ def choose_brick_line_color():
 
 
 # 벽돌 모양 패턴 함수
+"""
+이 함수는 캔버스에 벽돌 패턴을 그립니다.
+
+@Param
+    canvas : 패턴을 그릴 캔버스입니다.
+    brick_width : 벽돌의 너비입니다.
+    brick_height : 벽돌의 높이입니다.
+    line_color : 선의 색상입니다.
+
+@Return
+    None
+"""
+
 def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="black"):
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
