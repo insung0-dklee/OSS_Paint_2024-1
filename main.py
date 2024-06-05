@@ -859,6 +859,35 @@ def choose_use_case_element(event=None):
     else:
         popup.post(window.winfo_pointerx(), window.winfo_pointery()) # 마우스 포인터 위치에 팝업 메뉴 표시
 
+# 색상 히스토리를 저장할 리스트
+color_history = []
+
+# 새로운 색상을 색상 히스토리에 추가하는 함수
+def add_to_color_history(color):
+    # 중복되지 않은 색상만 추가
+    if color not in color_history:
+        color_history.append(color)
+        # 색상 히스토리가 10개를 넘으면 가장 오래된 색상을 제거
+        if len(color_history) > 10:
+            color_history.pop(0)
+
+# 색상 히스토리에서 선택한 색상을 브러시 색상으로 설정하는 함수
+def select_color_from_history(index):
+    global brush_color
+    brush_color = color_history[index]
+    set_brush_color(brush_color)
+
+# 색상 히스토리를 보여주는 함수
+def show_color_history():
+    for i, color in enumerate(color_history):
+        # 색상 히스토리의 색상들을 버튼으로 생성
+        Button(button_frame, bg=color, width=2, height=1, command=lambda i=i: select_color_from_history(i)).pack(side=LEFT)
+
+# 예시: 색상 선택 후 히스토리에 추가
+brush_color = askcolor()[1]
+add_to_color_history(brush_color)
+show_color_history()
+
 
 
 def setup_paint_app(window):
