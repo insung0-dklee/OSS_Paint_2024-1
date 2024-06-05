@@ -447,7 +447,8 @@ def bind_shortcuts():
     window.bind("<q>", set_solid_brush_mode)
     window.bind("<w>", set_dotted_brush_mode)
     window.bind("<e>", set_double_line_brush_mode)
-    window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+shift+z
+    window.bind("<Control-y>", rewrite_last_stroke) # redo 단축키 ctrl+y
+    window.bind("<Control-r>", lambda event: rotate_right()) # 캔버스를 오른쪽으로 돌려주는 기능을 실행하는 단축키 ctrl + r
 
 # brush_settings.initialize_globals(globals())
 
@@ -587,29 +588,44 @@ def toggle_fullscreen(event=None):
     global window
     window.attributes("-fullscreen", not window.attributes("-fullscreen"))
 
-# 좌우 반전 기능 추가
-def flip_horizontal(canvas):
-    objects = canvas.find_all()
-    canvas.update()
-    canvas_width = canvas.winfo_width()
-    for obj in objects:
-        coords = canvas.coords(obj)
-        for i in range(len(coords)):
-            if i % 2 == 0:  # x 좌표를 반전시킵니다.
-                coords[i] = canvas_width - coords[i]
-        canvas.coords(obj, *coords)
 
-def flip_vertical(canvas):
-    objects = canvas.find_all()
-    canvas.update()
-    canvas_height = canvas.winfo_height()
-    for obj in objects:
-        coords = canvas.coords(obj)
-        for i in range(len(coords)):
-            if i % 2 != 0:  # y 좌표를 반전시킵니다.
-                coords[i] = canvas_height - coords[i]
-        canvas.coords(obj, *coords)
+def rotate_canvas(angle):
+    items = canvas.find_all()  # 캔버스의 모든 항목 찾기
+    angle_rad = math.radians(angle)  # 각도를 라디안으로 변환
+    cos_val = math.cos(angle_rad)
+    sin_val = math.sin(angle_rad)
+    center_x = canvas.winfo_width() / 2
+    center_y = canvas.winfo_height() / 2
 
+    for item in items:
+        coords = canvas.coords(item)
+        if len(coords) == 4:  # 선, 사각형 등
+            x1, y1, x2, y2 = coords
+            x1, y1 = rotate_point(x1, y1, center_x, center_y, cos_val, sin_val)
+            x2, y2 = rotate_point(x2, y2, center_x, center_y, cos_val, sin_val)
+            canvas.coords(item, x1, y1, x2, y2)
+        elif len(coords) > 4:  # 다각형 등
+            new_coords = []
+            for i in range(0, len(coords), 2):
+                x, y = coords[i], coords[i + 1]
+                x, y = rotate_point(x, y, center_x, center_y, cos_val, sin_val)
+                new_coords.extend([x, y])
+            canvas.coords(item, new_coords)
+
+def rotate_point(x, y, center_x, center_y, cos_val, sin_val):
+    # 점 (x, y)를 중심 (center_x, center_y) 주위로 회전
+    x -= center_x
+    y -= center_y
+    new_x = x * cos_val - y * sin_val + center_x
+    new_y = x * sin_val + y * cos_val + center_y
+    return new_x, new_y
+
+def rotate_left():
+    rotate_canvas(-90)
+
+def rotate_right():
+    rotate_canvas(90)
+    
 def erase(event, canvas):
     bg_color = canvas.cget("bg")
     # 그림을 지우기 편하도록 paint의 픽셀보다 더욱 크게 설정
@@ -862,7 +878,7 @@ def choose_use_case_element(event=None):
 
 
 def setup_paint_app(window):
-    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_flip, labelframe_timer, labelframe_additional, labelframe_additional2
+    global brush_size, brush_color, button_frame, labelframe_additional, labelframe_brush, labelframe_rotate, labelframe_timer, labelframe_additional, labelframe_additional2
 
     brush_size = 1  # 초기 브러시 크기
     brush_color = "black"  # 초기 브러시 색상
@@ -882,8 +898,8 @@ def setup_paint_app(window):
     labelframe_brush = LabelFrame(button_frame, text="brush mode") #브러시 설정을 정리한 프레임
     labelframe_brush.pack(side = LEFT,fill=Y)
 
-    labelframe_flip = LabelFrame(button_frame, text="flip") #브러시 설정을 정리한 프레임
-    labelframe_flip.pack(side = LEFT,fill=Y)
+    labelframe_rotate = LabelFrame(button_frame, text="rotate") #브러시 설정을 정리한 프레임
+    labelframe_rotate.pack(side = LEFT,fill=Y)
 
     labelframe_timer = LabelFrame(button_frame, text="timer") #타이머 설정을 정리한 프레임
     labelframe_timer.pack(side = LEFT,fill=Y)
@@ -987,16 +1003,16 @@ def setup_paint_app(window):
     button_choose_shape.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_choose_shape.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    #filp 카테고리
-    button_flip = Button(labelframe_flip, text="Horizontal", command=lambda: flip_horizontal(canvas))
-    button_flip.pack(side=TOP)
-    button_flip.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_flip.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    button_rotate_left = Button(labelframe_rotate, text="Rotate Left", command=rotate_left)
+    button_rotate_left.pack(side=TOP)
+    button_rotate_left.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_rotate_left.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    button_flip_vertical = Button(labelframe_flip, text="Vertical", command=lambda: flip_vertical(canvas))
-    button_flip_vertical.pack(side=TOP)
-    button_flip_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
-    button_flip_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
+    # Rotate Right 버튼
+    button_rotate_right = Button(labelframe_rotate, text="Rotate Right", command=rotate_right)
+    button_rotate_right.pack(side=TOP)
+    button_rotate_right.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
+    button_rotate_right.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
     
     #브러시  모드를 선택하는 콤보박스
