@@ -49,21 +49,23 @@ previous_x, previous_y = None, None
 # 만화 컷 테두리 그리기 함수
 def draw_comic_cut(cut_number):
     canvas.delete("all")  # 기존에 그려진 것을 지움
+    global comic_cut_color
+    comic_cut_color = askcolor()[1]
     margin = 20  # 컷 사이의 간격
     if cut_number == 1: # 1컷
-        canvas.create_rectangle(50, 50, 750, 550, outline="black", width=2)
+        canvas.create_rectangle(50, 50, 750, 550, outline=comic_cut_color, width=2)
     elif cut_number == 2: # 2컷
-        canvas.create_rectangle(50, 50, 375 - margin//2, 550, outline="black", width=2)
-        canvas.create_rectangle(375 + margin//2, 50, 750, 550, outline="black", width=2)
+        canvas.create_rectangle(50, 50, 375 - margin//2, 550, outline=comic_cut_color, width=2)
+        canvas.create_rectangle(375 + margin//2, 50, 750, 550, outline=comic_cut_color, width=2)
     elif cut_number == 3: # 3컷
-        canvas.create_rectangle(50, 50, 275 - margin//2, 550, outline="black", width=2)
-        canvas.create_rectangle(275 + margin//2, 50, 525 - margin//2, 550, outline="black", width=2)
-        canvas.create_rectangle(525 + margin//2, 50, 750, 550, outline="black", width=2)
+        canvas.create_rectangle(50, 50, 275 - margin//2, 550, outline=comic_cut_color, width=2)
+        canvas.create_rectangle(275 + margin//2, 50, 525 - margin//2, 550, outline=comic_cut_color, width=2)
+        canvas.create_rectangle(525 + margin//2, 50, 750, 550, outline=comic_cut_color, width=2)
     elif cut_number == 4: # 4컷
-        canvas.create_rectangle(50, 50, 375 - margin//2, 300 - margin//2, outline="black", width=2)
-        canvas.create_rectangle(375 + margin//2, 50, 750, 300 - margin//2, outline="black", width=2)
-        canvas.create_rectangle(50, 300 + margin//2, 375 - margin//2, 550, outline="black", width=2)
-        canvas.create_rectangle(375 + margin//2, 300 + margin//2, 750, 550, outline="black", width=2)
+        canvas.create_rectangle(50, 50, 375 - margin//2, 300 - margin//2, outline=comic_cut_color, width=2)
+        canvas.create_rectangle(375 + margin//2, 50, 750, 300 - margin//2, outline=comic_cut_color, width=2)
+        canvas.create_rectangle(50, 300 + margin//2, 375 - margin//2, 550, outline=comic_cut_color, width=2)
+        canvas.create_rectangle(375 + margin//2, 300 + margin//2, 750, 550, outline=comic_cut_color, width=2)
 
 # 강조 효과 그리는 함수
 def create_emphasis_effect(event=None):
