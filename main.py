@@ -44,10 +44,23 @@ previous_time = None
 previous_x, previous_y = None, None
 
 #+==================================================================
-# 데이터 입력 창 생성
 def draw_line_graph():
-     # 데이터 입력 창 생성
-    input_window = Toplevel(window)
+
+    def is_int(s): # 숫자인지 판별하는 기능
+        try:
+            int(s)
+            return True
+        except ValueError:
+            return False
+
+    
+    def on_closing(): # 창이 닫힐 때 실행할 함수
+        canvas.bind("<Button-1>", paint_start)
+        canvas.bind("<B1-Motion>", paint_stroke)
+        canvas.bind("<ButtonRelease-1>", paint_end)
+        input_window.destroy()
+
+    input_window = Toplevel(window) # 데이터 입력 창 생성
 
     # x, y값을 저장할 리스트 생성
     x_values = []
@@ -65,44 +78,54 @@ def draw_line_graph():
         y_values.append(y_entry)
 
     # x, y값 입력 창 추가 버튼 생성
-    add_point_button = Button(input_window, text="Add target input field", command=add_point_entry)
+    add_point_button = Button(input_window, text="Add target (Name, Number)", command=add_point_entry)
     add_point_button.pack()
 
     # 그래프 제목 입력 받기
-    title_label = Label(input_window, text="Enter the title of the graph")
+    title_label = Label(input_window, text="Title of the graph")
     title_label.pack()
     title_entry = Entry(input_window)
     title_entry.pack()
 
     # x축 레이블 입력 받기
-    xlabel_label = Label(input_window, text="Enter the x-axis label")
+    xlabel_label = Label(input_window, text="X-axis label")
     xlabel_label.pack()
     xlabel_entry = Entry(input_window)
     xlabel_entry.pack()
 
     # y축 레이블 입력 받기
-    ylabel_label = Label(input_window, text="Enter the y-axis label")
+    ylabel_label = Label(input_window, text="Y-axis label")
     ylabel_label.pack()
     ylabel_entry = Entry(input_window)
     ylabel_entry.pack()
 
-    # 너비 입력 받기
-    width_label = Label(input_window, text="Enter the width of the graph")
-    width_label.pack()
-    width_entry = Entry(input_window)
-    width_entry.pack()
+    def create_line_graph(): # 꺽은선 그래프를 생성 하는 기능
+        y_values_str = [entry.get() for entry in y_values]
+        if all(is_int(value) for value in y_values_str):  # 모든 y값이 숫자인 경우
+            canvas.bind("<Button-1>", lambda event: start_line_graph(event, [entry.get() for entry in x_values], [int(entry.get()) for entry in y_values], title_entry.get(), xlabel_entry.get(), ylabel_entry.get()))
+        else:
+            messagebox.showerror("Invalid Input", "Please enter a number for y values")
 
-    # 높이 레이블 입력 받기
-    height_label = Label(input_window, text="Enter the height of the graph")
-    height_label.pack()
-    height_entry = Entry(input_window)
-    height_entry.pack()
+    def start_line_graph(event, x_list, y_list, title, xlabel, ylabel):  # 꺽은선 그래프를 생성을 시작하 기능
+        if len(x_list) > 1 and len(y_list) > 1:
+            global start_x, start_y, current_graph
+            current_graph = []
+            start_x, start_y = event.x, event.y
+            canvas.bind("<B1-Motion>", lambda event: draw(event, x_list, y_list, title, xlabel, ylabel))  # 마우스 움직임에 따라 그리기
+            canvas.bind("<ButtonRelease-1>", finish_line_graph) # 마우스 버튼을 떼면 그래프 그리기 종료
+        else:
+            messagebox.showinfo("Insufficient Data", "Please enter at least two points to draw a graph")
+            canvas.bind("<ButtonRelease-1>", finish_line_graph)
 
-    # 그래프 그리기 버튼 생성
-    draw_button = Button(input_window, text="Draw Graph", command=lambda: draw([entry.get() for entry in x_values], [int(entry.get()) for entry in y_values], title_entry.get(), xlabel_entry.get(), ylabel_entry.get(), int(width_entry.get()), int(height_entry.get())))
-    draw_button.pack()
+    def draw(event, x_list, y_list, title, xlabel, ylabel): # 꺽은선 그래프를 캠버스에 그리는 기능
+        global start_x, start_y, current_graph
+        current_graph.clear()
+        canvas.delete("temp_shape")
 
-    def draw(x_list, y_list, title, xlabel, ylabel, width, height):
+        end_x, end_y = event.x, event.y  # 끝점 설정
+        width = end_x - start_x  # 너비 계산
+        height = end_y - start_y  # 높이 계산
+
         # 입력 받은 데이터를 리스트로 변환
         original_y = y_list  # 원래의 y값을 저장
         y = original_y.copy()  # 스케일링을 위한 y값 복사
@@ -110,33 +133,55 @@ def draw_line_graph():
         x_list_name = x_list;
 
         # x, y 데이터를 캔버스의 너비와 높이에 맞게 스케일링
-        x = [i * int(width) / max(x) for i in x]
+        x = [start_x +  (i * int(width) / max(x)) for i in x]
         y_min, y_max = min(y), max(y)
-        y = [int(height) - (i - y_min) * int(height) / (y_max - y_min) for i in y]  # y축은 아래에서 위로 그려지므로 높이에서 빼줍니다.
+        if y_max == y_min:
+            y = [start_y + int(height) for _ in y]  # or handle it differently
+        else:
+            y = [start_y + int(height) - ((i - y_min) * int(height) / (y_max - y_min)) for i in y]
 
-        canvas.create_line(0, int(height), int(width), int(height))
+        current_graph.append(canvas.create_line( start_x, start_y + int(height), start_x + int(width), start_y + int(height), tags="temp_shape"))
 
         # y축 그리기
-        canvas.create_line(0, 0, 0, int(height))
+        current_graph.append(canvas.create_line( start_x,  start_y,  start_x, start_y + int(height), tags="temp_shape"))
 
         # 꺽은선 그래프 그리기
-        for i in range(len(x) - 1):
-            canvas.create_line(x[i], y[i], x[i+1], y[i+1])
+        if len(x) > 1:
+            for i in range(len(x) - 1):
+                current_graph.append(canvas.create_line(x[i], y[i], x[i+1], y[i+1], tags="temp_shape"))
 
         # 각 y값에 대한 빨간색 점과 대상의 이름 그리고 값을 그리기
         for i in range(len(x)):
-            canvas.create_oval(x[i]-5, y[i]-5, x[i]+5, y[i]+5, fill='red')
-            canvas.create_text(x[i], y[i]-10, text=str(original_y[i]), fill='black')
-            canvas.create_text(x[i], int(height) + 20, text= x_list_name[i])
+            current_graph.append(canvas.create_oval(x[i]-5, y[i]-5, x[i]+5, y[i]+5, fill='red', tags="temp_shape"))
+            current_graph.append(canvas.create_text(x[i], y[i]-10, text=str(original_y[i]), fill='black', tags="temp_shape"))
+            current_graph.append(canvas.create_text(x[i], start_y + int(height) + 20, text= x_list_name[i], tags="temp_shape"))
 
         # 그래프 제목 설정
-        canvas.create_text(-20, 20, text=title)
+        current_graph.append(canvas.create_text( start_x, start_y, text=title, tags="temp_shape"))
 
         # x축 레이블 설정
-        canvas.create_text(0, int(height) + 20, text=xlabel , fill='red')
+        current_graph.append(canvas.create_text( start_x, start_y + int(height) + 20, text=xlabel , fill='red', tags="temp_shape"))
 
-        # y축 레이블 설정
-        canvas.create_text(-20, int(height), text=ylabel, angle=90, fill='red')
+        # y축 레이블 설정c
+        current_graph.append(canvas.create_text(start_x , start_y + int(height), text=ylabel, angle=90, fill='red', tags="temp_shape"))
+
+
+    def finish_line_graph(event): # 꺽은선 그래프 그리기를 종료하 기능
+        global current_graph
+        canvas.unbind("<B1-Motion>")
+        canvas.unbind("<ButtonRelease-1>")
+        canvas.unbind("<B1-Motion>")
+        if current_graph:
+            for i in range(len(current_graph)):
+                canvas.itemconfig(current_graph[i], tags="")
+        #마우스 이밴트 해제 및 그려진 그래프의 테그 제거
+
+     # 그래프 그리기 버튼 생성
+    draw_button = Button(input_window, text="Draw Graph", command=create_line_graph)
+    draw_button.pack()
+
+    # 창이 닫힐 때 on_closing 함수를 호출하도록 설정
+    input_window.protocol("WM_DELETE_WINDOW", on_closing)
 #+==================================================================
 
 
@@ -1018,7 +1063,7 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    # 벌집 모양 패턴 버튼
+    # 꺽은선 그래프를 그리는 버튼
     button_line_graph = Button(window, text="Draw line graph", command= draw_line_graph)
     button_line_graph.pack(side=LEFT)
     button_line_graph.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
