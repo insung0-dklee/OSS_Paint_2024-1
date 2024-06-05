@@ -2021,10 +2021,12 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 timer.start()
 update_timer()
 
+#brush의 종류, 사이즈, 색깔을 보여주는 함수
 def display_current_pen_info():
     info_text = f"Brush Mode: {brush_mode}\n Brush Size: {brush_size}\nBrush Color: {brush_color}"
     info_label.config(text=info_text)
 
+#brush의 종류를 나타내는 버튼
 info_button = tk.Button(window, text="Display Pen Info", command=display_current_pen_info)
 info_button.pack(pady=10)
 
