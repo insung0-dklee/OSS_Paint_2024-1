@@ -1006,3 +1006,61 @@ if __name__ == "__main__":
     app = ImageCropper("example_image.jpg")
     app.mainloop()
 """
+
+
+import numpy as np
+
+def create_bar_graph(canvas, data, labels, title, x_label, y_label):
+    """
+    캔버스에 막대그래프를 생성하는 함수
+    
+    Parameters:
+    canvas (tkinter.Canvas): 그래프를 그릴 캔버스 객체
+    data (list): 막대그래프의 값 리스트
+    labels (list): 막대그래프의 라벨 리스트
+    title (str): 그래프의 제목
+    x_label (str): x축 라벨
+    y_label (str): y축 라벨
+    """
+    # 캔버스 크기 설정
+    canvas_width = 600
+    canvas_height = 400
+    canvas.config(width=canvas_width, height=canvas_height)
+    
+    # 막대그래프 그리기
+    bar_width = 50
+    bar_spacing = 20
+    max_value = max(data)
+    
+    for i, value in enumerate(data):
+        bar_x1 = i * (bar_width + bar_spacing)
+        bar_y1 = canvas_height - (value / max_value) * (canvas_height - 50)
+        bar_x2 = bar_x1 + bar_width
+        bar_y2 = canvas_height - 50
+        canvas.create_rectangle(bar_x1, bar_y1, bar_x2, bar_y2, fill='blue')
+        
+        # 라벨 표시
+        label_x = bar_x1 + bar_width / 2
+        label_y = canvas_height - 30
+        canvas.create_text(label_x, label_y, text=labels[i])
+    
+    # 제목 및 축 라벨 표시
+    canvas.create_text(canvas_width / 2, 20, text=title, font=('Arial', 16, 'bold'))
+    canvas.create_text(canvas_width / 2, canvas_height - 20, text=x_label)
+    canvas.create_text(20, canvas_height / 2, text=y_label, angle=90)
+
+""" 사용 예시
+root = tk.Tk()
+canvas = tk.Canvas(root)
+canvas.pack()
+
+data = [10, 15, 8, 12, 18]
+labels = ['A', 'B', 'C', 'D', 'E']
+title = 'Bar Graph Example'
+x_label = 'Categories'
+y_label = 'Values'
+
+create_bar_graph(canvas, data, labels, title, x_label, y_label)
+
+root.mainloop()
+"""
