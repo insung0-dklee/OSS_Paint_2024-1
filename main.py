@@ -1174,6 +1174,42 @@ def create_triangle(event=None):
 def create_circle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_circle)
+# 왼쪽 화살표 그리기 함수들
+def create_larrow(event=None):
+    canvas.bind("<Button-1>", start_larrow)
+# 왼쪽 화살표 그릴 위치 정하고 생성하는 함수 호출
+def start_larrow(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", draw_larrow)
+    canvas.bind("<ButtonRelease-1>", finish_larrow)
+#왼쪽 화살표 생성
+def draw_larrow(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    x, y = event.x, event.y
+    scale_factor = 0.5
+    larrow_width = scale_factor * abs(y - start_y) / 2
+    larrow_length = scale_factor * abs(x - start_x)
+
+    points = [
+        (start_x, start_y - larrow_width),
+        (start_x, start_y + larrow_width),
+        (start_x - larrow_length, start_y + larrow_width),
+        (start_x - larrow_length, start_y + 2 * larrow_width),
+        (start_x - larrow_length - larrow_width, start_y),
+        (start_x - larrow_length, start_y - 2 * larrow_width),
+        (start_x - larrow_length, start_y - larrow_width)
+    ]
+    current_shape = canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
+#왼쪽 화살표 그리기 종료
+def finish_larrow(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
 
 # 사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
@@ -1632,6 +1668,7 @@ def choose_shape(event):
     popup.add_command(label="Arrow", command=lambda: create_arrow(event))
     popup.add_command(label="V", command=lambda: create_V(event))
     popup.add_command(label="Hexagon", command=lambda: create_hexagon(event))
+    popup.add_command(label="LeftArrow", command=lambda: create_larrow(event))
     popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
