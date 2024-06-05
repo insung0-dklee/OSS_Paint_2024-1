@@ -1068,6 +1068,7 @@ def setup_paint_app(window):
     canvas.bind("<Button-3>", show_coordinates)
     canvas.bind("<ButtonRelease-3>", hide_coordinates)
     canvas.bind("<MouseWheel>", zoom_scroll)
+    canvas.bind("<Shift-MouseWheel>", horizontal_scroll)
     bind_shortcuts()
 
     
