@@ -48,25 +48,28 @@ previous_x, previous_y = None, None
 
 # 만화 컷 테두리 그리기 함수
 def draw_comic_cut(cut_number):
+    set_modified()  # 만화 기능을 사용할 때 수정됨으로 표시
     canvas.delete("all")  # 기존에 그려진 것을 지움
     margin = 20  # 컷 사이의 간격
-    if cut_number == 1: # 1컷
+    if cut_number == 1:  # 1컷
         canvas.create_rectangle(50, 50, 750, 550, outline="black", width=2)
-    elif cut_number == 2: # 2컷
-        canvas.create_rectangle(50, 50, 375 - margin//2, 550, outline="black", width=2)
-        canvas.create_rectangle(375 + margin//2, 50, 750, 550, outline="black", width=2)
-    elif cut_number == 3: # 3컷
-        canvas.create_rectangle(50, 50, 275 - margin//2, 550, outline="black", width=2)
-        canvas.create_rectangle(275 + margin//2, 50, 525 - margin//2, 550, outline="black", width=2)
-        canvas.create_rectangle(525 + margin//2, 50, 750, 550, outline="black", width=2)
-    elif cut_number == 4: # 4컷
-        canvas.create_rectangle(50, 50, 375 - margin//2, 300 - margin//2, outline="black", width=2)
-        canvas.create_rectangle(375 + margin//2, 50, 750, 300 - margin//2, outline="black", width=2)
-        canvas.create_rectangle(50, 300 + margin//2, 375 - margin//2, 550, outline="black", width=2)
-        canvas.create_rectangle(375 + margin//2, 300 + margin//2, 750, 550, outline="black", width=2)
+    elif cut_number == 2:  # 2컷
+        canvas.create_rectangle(50, 50, 375 - margin // 2, 550, outline="black", width=2)
+        canvas.create_rectangle(375 + margin // 2, 50, 750, 550, outline="black", width=2)
+    elif cut_number == 3:  # 3컷
+        canvas.create_rectangle(50, 50, 275 - margin // 2, 550, outline="black", width=2)
+        canvas.create_rectangle(275 + margin // 2, 50, 525 - margin // 2, 550, outline="black", width=2)
+        canvas.create_rectangle(525 + margin // 2, 50, 750, 550, outline="black", width=2)
+    elif cut_number == 4:  # 4컷
+        canvas.create_rectangle(50, 50, 375 - margin // 2, 300 - margin // 2, outline="black", width=2)
+        canvas.create_rectangle(375 + margin // 2, 50, 750, 300 - margin // 2, outline="black", width=2)
+        canvas.create_rectangle(50, 300 + margin // 2, 375 - margin // 2, 550, outline="black", width=2)
+        canvas.create_rectangle(375 + margin // 2, 300 + margin // 2, 750, 550, outline="black", width=2)
 
 # 강조 효과 그리는 함수
+# 강조 효과 그리는 함수
 def create_emphasis_effect(event=None):
+    set_modified()  # 강조 효과를 사용할 때 수정됨으로 표시
     # 마우스 왼쪽 버튼 클릭 시 start_emphasis 함수를 호출하도록 설정
     canvas.bind("<Button-1>", start_emphasis)
 
@@ -81,6 +84,7 @@ def start_emphasis(event):
 
 def draw_emphasis(event):
     global start_x, start_y, current_shape
+    set_modified()  # 강조 효과를 그릴 때 수정됨으로 표시
     # 이전에 그려진 임시 도형 삭제
     canvas.delete("temp_shape")
     # 마우스 위치를 끝점으로 설정
@@ -133,9 +137,11 @@ def draw_emphasis(event):
 
 def finish_emphasis(event):
     global current_shape
+    set_modified()  # 강조 효과를 마칠 때 수정됨으로 표시
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
     canvas.dtag("temp_shape", "temp_shape")
+
 
 # 벌집 색상 선택 함수
 def choose_hex_color():
@@ -203,9 +209,22 @@ def start_pencil(event):
 
 def set_brightness(value):
     brightness = int(value) / 100  # 슬라이더 값(0-100)을 0-1 범위로 변환
-    rgb = (int(255 * brightness), int(255 * brightness), int(255 * brightness))  # RGB 값 계산
+    if is_dark_mode:
+        # 다크 모드일 때 배경색을 더 어둡게 설정
+        rgb = (int(50 * brightness), int(50 * brightness), int(50 * brightness))  # 다크 모드일 때의 RGB 값 계산
+    else:
+        # 라이트 모드일 때 배경색을 더 밝게 설정
+        rgb = (int(255 * brightness), int(255 * brightness), int(255 * brightness))  # 라이트 모드일 때의 RGB 값 계산
     color = f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'  # RGB 값을 16진수 색상 코드로 변환
     canvas.configure(bg=color)
+
+def update_brightness_slider(value):
+    set_brightness(value)
+    for item in canvas.find_all():
+        if is_dark_mode:
+            canvas.itemconfig(item, fill="white", outline="white")  # 다크 모드에서는 요소를 흰색으로 설정
+        else:
+            canvas.itemconfig(item, fill="black", outline="black")  # 라이트 모드에서는 요소를 검은색으로 설정
 
 def increase_brightness(event=None):
     current_value = brightness_slider.get()
@@ -259,16 +278,16 @@ is_dark_mode = False  # 기본 모드는 라이트 모드
 def toggle_dark_mode(): # 다크 모드를 토글하는 함수
     global is_dark_mode
     is_dark_mode = not is_dark_mode  # 토글 동작을 상태 변경 전에 수행
-    if is_dark_mode:  # 지금 라이트 모드라면 [수정된 조건 검사]
+    if is_dark_mode:    # 지금 라이트 모드라면 [수정된 조건 검사]
         apply_dark_mode()  # 다크 모드 적용
-    else: # 지금 다크 모드라면
+    else:   # 지금 다크 모드라면
         apply_light_mode()  # 라이트 모드 적용
 
 def apply_light_mode(): # 라이트 모드 적용(기본)
     window.config(bg="sky blue") # 윈도우 배경색
     canvas.config(bg="white") # 캔버스 배경색
     button_frame.config(bg="sky blue") # 버튼 프레임 배경색
-    for widget in button_frame.winfo_children(): 
+    for widget in button_frame.winfo_children():
         widget.config(bg="light grey", fg="black") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="white", fg="black") # 타이머 라벨 배경색, 글자색
 
@@ -280,7 +299,7 @@ def apply_dark_mode(): # 다크 모드 적용
         widget.config(bg="grey40", fg="white") # 버튼 프레임 안의 모든 버튼들 배경색, 글자색
     timer_label.config(bg="grey20", fg="white") # 타이머 라벨 배경색, 글자색
 
-#이미지 파일 불러오기 
+#이미지 파일 불러오기
 def open_image():
     file_path = filedialog.askopenfilename()
     if file_path:
@@ -366,7 +385,7 @@ def create_text_at_click(event, canvas, text):
 
 
 
-# 라인 브러쉬 기능 추가 
+# 라인 브러쉬 기능 추가
 def set_brush_mode_line(canvas):
     canvas.bind("<Button-1>", lambda event: line_start(event, canvas))
 
@@ -387,7 +406,7 @@ def reset_line(canvas): # 마우스 드래그 이벤트를 해제하여 선 그�
 
 #타이머 기능 추가
 timer = Timer()
-#타이머의 경과시간 업데이트 
+#타이머의 경과시간 업데이트
 def update_timer():
     elapsed_time = timer.get_elapsed_time()
     timer_label.config(text=f"Time: {int(elapsed_time)} s") #라벨에 표시
@@ -473,7 +492,7 @@ def paint_pressure(event, canvas):
     radius = min(max(int(elapsed_time * 20), 1), 8) * brush_size / 4  # 굵가는 마우스 클릭 시간에 비례하여 최대 5까지 증가
     x1, y1 = ( event.x - radius ), ( event.y - radius )
     x2, y2 = ( event.x + radius ), ( event.y + radius )
-    
+   
     canvas.create_oval(x1, y1, x2, y2, fill=brush_color, outline=brush_color)
 
 
@@ -630,7 +649,7 @@ def change_brush_color(event=None):
 """
 TypeError: change_brush_color() takes 0 positional arguments but 1 was given
 함수를 호출 할 때 전달된 인자와 함수의 파라미터 수가 다른 경우 발생
-해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다. 
+해당 함수는 호출될 때 인자를 받지 않지만 인자를 전달했기 때문에 오류가 발생했다.
 인자를 받지 않기 위해 None로 설정
 """
 
@@ -792,7 +811,7 @@ def draw_relationship_preview(event):
 def draw_relationship_end(event, relationship_type):
     """
     draw_relationship_end: 관계 그리기를 종료하는 함수
-    드래그 종료 지점에서 실제 선을 그린다. 
+    드래그 종료 지점에서 실제 선을 그린다.
     관계 유형에 따라 화살표와 텍스트를 추가한다.
     """
     global x1, y1, preview_line
@@ -874,7 +893,7 @@ def setup_paint_app(window):
     last_x, last_y = None, None  # 마지막 좌표 초기화
     brush_mode = "solid"  # 기본 브러쉬 모드를 실선으로 설정
 
-    
+   
 
     button_frame = Frame(window,bg="grey")#구별하기 위한 버튼 영역 색 변경
     button_frame.pack(fill=X)
@@ -924,8 +943,8 @@ def setup_paint_app(window):
     button_brick_line_color.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_brick_line_color.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    # 밝기 슬라이더
-    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=set_brightness)
+    # 밝기 슬라이더 초기 설정
+    brightness_slider = tk.Scale(window, from_=0, to=100, orient='horizontal', command=update_brightness_slider)
     brightness_slider.set(100)  # 초기 밝기를 100%로 설정
     brightness_slider.pack(pady=20)
 
@@ -948,7 +967,7 @@ def setup_paint_app(window):
     start_button.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     start_button.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+   
     #additionals 카테고리
     # "TEXTBOX" 버튼 생성 및 클릭 이벤트 핸들러 설정
     text_box_button = Button(labelframe_additional, text="TEXTBOX", command=open_text_input_window)
@@ -958,11 +977,11 @@ def setup_paint_app(window):
 
     #다이어그램
     button_use_case = Button(labelframe_additional, text="Case Diagram", command=choose_use_case_element) #추가 기능에 포함됨.
-    button_use_case.grid(row=1, column=2) 
+    button_use_case.grid(row=1, column=2)
     button_use_case.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_use_case.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
-    
-    
+   
+   
     #이전 획 설정
     button_erase_last_stroke = Button(labelframe_additional, text="Undo", command=erase_last_stroke)
     button_erase_last_stroke.grid(row=2, column=1)
@@ -998,13 +1017,13 @@ def setup_paint_app(window):
     button_flip_vertical.bind("<Enter>", on_enter)  # 마우스가 버튼 위에 올라갔을 때의 이벤트 핸들러 등록
     button_flip_vertical.bind("<Leave>", on_leave)  # 마우스가 버튼을 벗어났을 때의 이벤트 핸들러 등록
 
-    
+   
     #브러시  모드를 선택하는 콤보박스
     brush_combobox = ttk.Combobox(labelframe_brush, values=brush_modes, state="readonly")
     brush_combobox.current(0)
     brush_combobox.bind("<<ComboboxSelected>>", lambda event: set_brush_mode(canvas, brush_combobox.get()))
     brush_combobox.pack(side=LEFT)
-    
+   
 
     # 에어브러쉬 속성 변수 생성
     dot_count = IntVar()
@@ -1041,7 +1060,7 @@ def setup_paint_app(window):
     canvas.bind("<B1-Motion>", paint_stroke)
     canvas.bind("<ButtonRelease-1>", paint_end)
 
-    #spray 인스턴스 생성 
+    #spray 인스턴스 생성
     global spray_brush
     spray_brush = SprayBrush(canvas, brush_color)
 
@@ -1070,7 +1089,7 @@ def setup_paint_app(window):
     canvas.bind("<MouseWheel>", zoom_scroll)
     bind_shortcuts()
 
-    
+   
 
 #+=================================================================================
     menu_bar = Menu(window) # 메뉴 바 생성
@@ -1117,8 +1136,8 @@ def setup_paint_app(window):
 
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
-    
-    
+   
+   
 # 새 창 열기 생성
 def create_new_window():
     new_window = Toplevel(window)  # 새로운 Toplevel 인스턴스 생성
@@ -1208,7 +1227,7 @@ def start_triangle(event):
 
 # 삼각형 생성하기
 def draw_triangle(event):
-    global start_x, start_y, current_shape 
+    global start_x, start_y, current_shape
     canvas.delete("temp_shape")
     x2, y2 = event.x, event.y
 
@@ -1277,21 +1296,21 @@ def draw_star(event):
     outer_radius = ((start_x - event.x)**2 + (start_y - event.y)**2)**0.5
     inner_radius = outer_radius / 2.5  # 내각 반지름은 외각 반지름의 2.5분의 1
     points = []
-    
+   
     for i in range(5):
         angle_outer = math.radians(i * 72 - 90)
         angle_inner = math.radians(i * 72 + 36 - 90)
-        
+       
         x_outer = start_x + outer_radius * math.cos(angle_outer)
         y_outer = start_y + outer_radius * math.sin(angle_outer)
         x_inner = start_x + inner_radius * math.cos(angle_inner)
         y_inner = start_y + inner_radius * math.sin(angle_inner)
-        
+       
         points.append(x_outer)
         points.append(y_outer)
         points.append(x_inner)
         points.append(y_inner)
-    
+   
     current_shape = canvas.create_polygon(points, outline=shape_outline_color, fill=shape_fill_color, tags="temp_shape")
 
 # 별 모양 그리기 종료
@@ -1387,7 +1406,7 @@ def finish_heart(event):
     if current_shape:
         canvas.itemconfig(current_shape, tags="")
 
-# 십자형 도형 그리기 
+# 십자형 도형 그리기
 def create_cross(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_cross)
@@ -1411,15 +1430,15 @@ def draw_cross(event):
     # 중심점을 기준으로 십자형의 4개 arm 그리기
     points = [
         start_x - cross_width, start_y - height,  
-        start_x + cross_width, start_y - height, 
-        start_x + cross_width, start_y - cross_width, 
+        start_x + cross_width, start_y - height,
+        start_x + cross_width, start_y - cross_width,
         start_x + width, start_y - cross_width,  
         start_x + width, start_y + cross_width,  
         start_x + cross_width, start_y + cross_width,
         start_x + cross_width, start_y + height,  
-        start_x - cross_width, start_y + height, 
+        start_x - cross_width, start_y + height,
         start_x - cross_width, start_y + cross_width,
-        start_x - width, start_y + cross_width, 
+        start_x - width, start_y + cross_width,
         start_x - width, start_y - cross_width,  
         start_x - cross_width, start_y - cross_width
     ]
@@ -1488,7 +1507,7 @@ def draw_arrow(event):
     canvas.delete("temp_shape")
     end_x, end_y = event.x, event.y
     # 화살표의 선 부분
-    current_shape = canvas.create_line(start_x, start_y, end_x, end_y, fill=shape_outline_color, tags="temp_shape")
+    line = canvas.create_line(start_x, start_y, end_x, end_y, fill=shape_outline_color, tags="temp_shape")
     # 화살표 머리 부분 계산
     arrow_size = 10
     angle = math.atan2(end_y - start_y, end_x - start_x)
@@ -1496,14 +1515,17 @@ def draw_arrow(event):
     left_y = end_y - arrow_size * math.sin(angle - math.pi / 6)
     right_x = end_x - arrow_size * math.cos(angle + math.pi / 6)
     right_y = end_y - arrow_size * math.sin(angle + math.pi / 6)
-    canvas.create_polygon(end_x, end_y, left_x, left_y, right_x, right_y, fill=shape_outline_color, outline=shape_outline_color, tags="temp_shape")
+    head = canvas.create_polygon(end_x, end_y, left_x, left_y, right_x, right_y, fill=shape_outline_color, outline=shape_outline_color, tags="temp_shape")
+    current_shape = [line, head]
 #화살표 그리기 종료
 def finish_arrow(event):
     global current_shape
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
     if current_shape:
-        canvas.itemconfig(current_shape, tags="")
+        for item in current_shape:
+            canvas.itemconfig(item, tags="")
+        current_shape = None
 
 # 정오각형 그리기
 def create_pentagon(event=None):
@@ -1567,8 +1589,8 @@ def draw_V(event):
     points = [
         start_x,start_y,
         start_x + width/3, start_y,  
-        start_x + width/2, start_y + height-width/3, 
-        start_x + width*2/3, start_y, 
+        start_x + width/2, start_y + height-width/3,
+        start_x + width*2/3, start_y,
         event.x, start_y,  
         start_x + width/2, event.y,  
         ]
@@ -1944,9 +1966,9 @@ def format_time(hours, minutes): #시간과 분을 매개변수로 받아 시간
     return f"{hours:02}:{minutes:02}"
 
 
-current_time = time.localtime() 
+current_time = time.localtime()
 initial_hours = current_time.tm_hour
-initial_minutes = current_time.tm_min 
+initial_minutes = current_time.tm_min
 
 time_label = Label(labelframe_timer, text=f"작업시작 시간: {format_time(initial_hours, initial_minutes)}")
 time_label.pack()
@@ -2022,5 +2044,3 @@ timer.start()
 update_timer()
 
 window.mainloop()
-
-
