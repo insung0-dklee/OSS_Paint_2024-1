@@ -380,3 +380,106 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PaintApp(root)
     root.mainloop()
+
+
+# 이미지 모자이크 블러 처리 기능
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk, ImageOps, ImageFilter
+
+class MosaicBlurApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("모자이크 블러 앱")
+
+        self.canvas = tk.Canvas(root, bg="white", width=800, height=600)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.image = None
+        self.tk_image = None
+        self.image_on_canvas = None
+        self.selection_start = None
+        self.selection_rect = None
+
+        self.canvas.bind("<Button-1>", self.start_selection)
+        self.canvas.bind("<B1-Motion>", self.update_selection)
+        self.canvas.bind("<ButtonRelease-1>", self.apply_mosaic_blur)
+
+        menu = tk.Menu(root)
+        root.config(menu=menu)
+        file_menu = tk.Menu(menu)
+        menu.add_cascade(label="파일", menu=file_menu)
+        file_menu.add_command(label="이미지 열기", command=self.open_image)
+        file_menu.add_command(label="저장", command=self.save_image)
+
+    def open_image(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")])
+        if file_path:
+            try:
+                self.image = Image.open(file_path).convert("RGBA")
+                self.display_image()
+            except Exception as e:
+                messagebox.showerror("Error", f"이미지를 여는데 실패했습니다: {e}")
+
+    def display_image(self):
+        self.tk_image = ImageTk.PhotoImage(self.image)
+        if self.image_on_canvas:
+            self.canvas.delete(self.image_on_canvas)
+        self.image_on_canvas = self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
+
+    def start_selection(self, event):
+        if self.image:
+            self.selection_start = (event.x, event.y)
+            if self.selection_rect:
+                self.canvas.delete(self.selection_rect)
+            self.selection_rect = self.canvas.create_rectangle(event.x, event.y, event.x, event.y, outline="red", dash=(2, 2))
+
+    def update_selection(self, event):
+        if self.selection_start:
+            self.canvas.coords(self.selection_rect, self.selection_start[0], self.selection_start[1], event.x, event.y)
+
+    def apply_mosaic_blur(self, event):
+        if self.selection_start and self.image:
+            x0, y0 = self.selection_start
+            x1, y1 = event.x, event.y
+
+            # Ensure coordinates are within image bounds
+            x0 = max(0, min(x0, self.image.width))
+            x1 = max(0, min(x1, self.image.width))
+            y0 = max(0, min(y0, self.image.height))
+            y1 = max(0, min(y1, self.image.height))
+
+            if x0 > x1:
+                x0, x1 = x1, x0
+            if y0 > y1:
+                y0, y1 = y1, y0
+
+            # Ensure the selected region is not too small
+            if x0 != x1 and y0 != y1:
+                bbox = (x0, y0, x1, y1)
+                region = self.image.crop(bbox)
+
+                # Apply mosaic blur
+                small = region.resize((10, 10), resample=Image.NEAREST)
+                mosaic = small.resize(region.size, Image.NEAREST)
+                self.image.paste(mosaic, bbox)
+                self.display_image()
+
+            if self.selection_rect:
+                self.canvas.delete(self.selection_rect)
+            self.selection_start = None
+
+    def save_image(self):
+        if self.image:
+            file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
+            if file_path:
+                try:
+                    self.image.save(file_path)
+                    print(f"이미지를 저장했습니다: {file_path}")
+                except Exception as e:
+                    messagebox.showerror("Error", f"이미지를 저장하는데 실패했습니다: {e}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MosaicBlurApp(root)
+    root.mainloop()
