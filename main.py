@@ -2021,16 +2021,58 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 timer.start()
 update_timer()
 
-#brush의 종류, 사이즈, 색깔을 보여주는 함수
-def display_current_pen_info():
-    info_text = f"Brush Mode: {brush_mode}\n Brush Size: {brush_size}\nBrush Color: {brush_color}"
-    info_label.config(text=info_text)
+current_timer = None
 
-#brush의 종류를 나타내는 버튼
-info_button = tk.Button(window, text="Display Pen Info", command=display_current_pen_info)
-info_button.pack(pady=10)
+#stopwatch관련 함수
+def start_stopwatch(duration):
+    global current_timer
 
-info_label = tk.Label(window, text="")
-info_label.pack()
+    if current_timer:
+        window.after_cancel(current_timer)
+
+    def update_stopwatch():
+        nonlocal duration
+        if duration > 0:
+            mins, secs = divmod(duration, 60)
+            timeformat = '{:02d}:{:02d}'.format(mins, secs)
+            stopwatch_label.config(text=timeformat)
+            duration -= 1
+            global current_timer
+            current_timer = canvas.after(1000, update_stopwatch)
+        else:
+            messagebox.showinfo("종료", "종료되었습니다!")
+            stopwatch_label.config(text="00:00")
+
+    update_stopwatch()
+
+#stopwatch 멈추는 함수
+def stop_stopwatch():
+    global current_timer
+    if current_timer:
+        canvas.after_cancel(current_timer)
+        current_timer = None
+        stopwatch_label.config(text="00:00")
+
+# stopwatch 설정 함수
+def set_1min_timer():
+    start_stopwatch(60)
+
+def set_3min_timer():
+    start_stopwatch(180)
+
+def set_5min_timer():
+    start_stopwatch(300)
+
+# stopwatch 버튼
+stopwatch_frame = Frame(window)
+stopwatch_frame.pack()
+
+stopwatch_label = Label(stopwatch_frame, text="00:00", font=("Helvetica", 16))
+stopwatch_label.pack(side=LEFT)
+
+Button(stopwatch_frame, text="1분 타이머", command=set_1min_timer).pack(side=LEFT)
+Button(stopwatch_frame, text="3분 타이머", command=set_3min_timer).pack(side=LEFT)
+Button(stopwatch_frame, text="5분 타이머", command=set_5min_timer).pack(side=LEFT)
+Button(stopwatch_frame, text="타이머 종료", command=stop_stopwatch).pack(side=LEFT)
 
 window.mainloop()
