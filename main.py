@@ -44,9 +44,23 @@ dynamic_brush = False
 previous_time = None
 previous_x, previous_y = None, None
 
+#+=================================================================================================
 def draw_pie_chart():
-# 데이터 입력 창 생성
-    input_window = Toplevel(window)
+
+    def is_int(s): # 숫자인지 판별하는 기능
+        try:
+            int(s)
+            return True
+        except ValueError:
+            return False
+
+    def on_closing(): # 창이 닫힐 때 실행할 함수
+        canvas.bind("<Button-1>", paint_start)
+        canvas.bind("<B1-Motion>", paint_stroke)
+        canvas.bind("<ButtonRelease-1>", paint_end)
+        input_window.destroy()
+
+    input_window = Toplevel(window) # 데이터 입력 창 생성
 
     # x, y값을 저장할 리스트 생성
     x_values = []
@@ -63,72 +77,115 @@ def draw_pie_chart():
         x_values.append(x_entry)
         y_values.append(y_entry)
 
-    # x, y값 입력 창 추가 버튼 생성
-    add_point_button = Button(input_window, text="Add target input field", command=add_point_entry)
-    add_point_button.pack()
-
     # 그래프 제목 입력 받기
     title_label = Label(input_window, text="Enter the title of the graph")
     title_label.pack()
     title_entry = Entry(input_window)
     title_entry.pack()
 
-    # 너비 입력 받기
-    width_label = Label(input_window, text="Enter the width of the graph")
-    width_label.pack()
-    width_entry = Entry(input_window)
-    width_entry.pack()
+    # x, y값 입력 창 추가 버튼 생성
+    add_point_button = Button(input_window, text="Add target input field", command=add_point_entry)
+    add_point_button.pack()
 
-    # 높이 입력 받기
-    height_label = Label(input_window, text="Enter the height of the graph")
-    height_label.pack()
-    height_entry = Entry(input_window)
-    height_entry.pack()
+
+    def create_pie_chart(): # 원형 그래프를 생성 하는 기능
+        y_values_str = [entry.get() for entry in y_values]
+        if all(is_int(value) for value in y_values_str):  # 모든 y값이 숫자인 경우
+            canvas.bind("<Button-1>", lambda event: start_pie_chart(event, [entry.get() for entry in x_values], [int(entry.get()) for entry in y_values], title_entry.get()))
+        else:
+            messagebox.showerror("Invalid Input", "Please enter a number for y values")
+
+    def start_pie_chart(event, x_list, y_list, title):  # 원형 그래프를 생성을 시작하 기능
+        if len(x_list) > 0 and len(y_list) > 0:
+            global start_x, start_y, current_graph
+            current_graph = []
+            start_x, start_y = event.x, event.y
+            canvas.bind("<B1-Motion>", lambda event: draw(event, x_list, y_list, title))  # 마우스 움직임에 따라 그리기
+            canvas.bind("<ButtonRelease-1>", finish_pie_chart) # 마우스 버튼을 떼면 그래프 그리기 종료
+        else:
+            messagebox.showinfo("Insufficient Data", "Please enter at least one point to draw a pie chart")
+            canvas.bind("<ButtonRelease-1>", finish_pie_chart)
 
     # 그래프를 그리는 함수
-    def draw_graph():
-         # 값들을 숫자로 변환
+    def draw(event, x_list, y_list, title):
+        global start_x, start_y, current_graph
+        angles = None
+        current_graph.clear()
+        canvas.delete("temp_shape")
+
+         # 끝점 설정
+        raw_end_x, raw_end_y = event.x, event.y
+        # 시작점과 끝점의 좌표를 확인하여 실제 시작점과 끝점을 결정 - 반대로 그려지는걸 방지
+        end_x, start_x = max(raw_end_x, start_x), min(raw_end_x, start_x)
+        end_y, start_y = max(raw_end_y, start_y), min(raw_end_y, start_y)
+
+        width = end_x - start_x  # 너비 계산
+        height = end_y - start_y  # 높이 계산
+
+        # 값들을 숫자로 변환
         x_values_str = [value.get() for value in x_values]
         y_values_int = [int(value.get()) for value in y_values]
 
         # 각도 계산
         total = sum(y_values_int)
-        angles = [value / total * 360 for value in y_values_int]
+        if len(y_values_int) == 1: # 값이 1개만 있으면, 전체 원을 그립니다.
+            angles = [360]
+        else:
+            angles = [value / total * 360 for value in y_values_int]
 
         # 원 그리기
         start_angle = 0
         for i, angle in enumerate(angles):
-            width = int(width_entry.get())
-            height = int(height_entry.get())
             end_angle = start_angle + angle
             radius = min(width, height) // 2  # 반지름은 가로, 세로 길이 중 작은 값의 절반으로 설정
             color = '#{:06x}'.format(random.randint(0, 0xFFFFFF))  # 랜덤 색상 생성
-            canvas.create_arc(width // 2 - radius, height // 2 - radius, width // 2 + radius, height // 2 + radius, start=start_angle, extent=angle, fill=color)
+            if angle != 360:
+                current_graph.append(canvas.create_arc(start_x + width // 2 - radius, start_y + height // 2 - radius, start_x + width // 2 + radius, start_y + height // 2 + radius, start=start_angle, extent=angle, fill=color, tags="temp_shape"))
+            else:
+                current_graph.append(canvas.create_oval(start_x + width // 2 - radius, start_y + height // 2 - radius, start_x + width // 2 + radius, start_y + height // 2 + radius, fill=color, tags="temp_shape"))
 
             # 각 슬라이스의 중심 각도 계산
-            center_angle = start_angle - angle / 2
+            center_angle = start_angle + angle / 2
 
             # 레이블 위치 계산
             label_radius = radius + 20  # 레이블은 원의 바깥에 위치
-            label_x = width // 2 + label_radius * cos(center_angle * pi / 180)
-            label_y = height // 2 - label_radius * sin(center_angle * pi / 180)
+            label_x = start_x + width // 2 + label_radius * cos(center_angle * pi / 180)
+            label_y = start_y + height // 2 - label_radius * sin(center_angle * pi / 180)
 
             # 레이블 그리기
-            canvas.create_text(label_x, label_y, text=x_values_str[i])
+            current_graph.append(canvas.create_text(label_x, label_y, text=x_values_str[i], tags="temp_shape"))
 
             # 비율 계산
-            percentage = y_values_int[i] / total * 100
+            percentage = y_values_int[i] / total * 100 if total != 0 else 100
 
             # 비율 레이블 그리기
-            percentage_label_x = width // 2 + radius * cos(center_angle * pi / 180) / 2
-            percentage_label_y = height // 2 - radius * sin(center_angle * pi / 180) / 2
-            canvas.create_text(percentage_label_x, percentage_label_y, text=f'{percentage:.1f}%')
+            percentage_label_x = start_x + width // 2 + radius * cos(center_angle * pi / 180) / 2
+            percentage_label_y = start_y + height // 2 - radius * sin(center_angle * pi / 180) / 2
+            current_graph.append(canvas.create_text(percentage_label_x, percentage_label_y, text=f'{percentage:.1f}%', tags="temp_shape"))
 
             start_angle = end_angle
 
+        # 그래프 제목 그리기
+        title_x = start_x + width // 2
+        title_y = start_y + height  # 원의 맨 밑에 위치
+        current_graph.append(canvas.create_text(title_x, title_y + 20, text=title, fill= "red", tags="temp_shape"))
+
+    def finish_pie_chart(event): # 원형 그래프 그리기를 종료하 기능
+        global current_graph
+        canvas.unbind("<B1-Motion>")
+        canvas.unbind("<ButtonRelease-1>")
+        canvas.unbind("<B1-Motion>")
+        if current_graph:
+            for i in range(len(current_graph)):
+                canvas.itemconfig(current_graph[i], tags="")
+        #마우스 이밴트 해제 및 그려진 그래프의 테그 제거
+
     # 그래프 그리기 버튼 생성
-    draw_button = Button(input_window, text="Draw Pie Chart", command=draw_graph)
+    draw_button = Button(input_window, text="Draw Pie Chart", command=create_pie_chart)
     draw_button.pack()
+
+    # 창이 닫힐 때 on_closing 함수를 호출하도록 설정
+    input_window.protocol("WM_DELETE_WINDOW", on_closing)
 #+=================================================================================================
 
 # 만화 컷 테두리 그리기 함수
