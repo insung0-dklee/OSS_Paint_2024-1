@@ -1997,6 +1997,33 @@ def move_selected_items(event):
 # canvas.bind("<Button-1>", select_item)
 # canvas.bind("<B1-Motion>", move_selected_items)
 
+# 스크린샷 영역 선택
+def start_screenshot(event):
+    global screenshot_start_x, screenshot_start_y
+    screenshot_start_x, screenshot_start_y = event.x, event.y
+    canvas.bind("<B1-Motion>", draw_screenshot_rectangle)
+
+def draw_screenshot_rectangle(event):
+    global screenshot_rectangle
+    if screenshot_rectangle:
+        canvas.delete(screenshot_rectangle)
+    x1, y1 = screenshot_start_x, screenshot_start_y
+    x2, y2 = event.x, event.y
+    screenshot_rectangle = canvas.create_rectangle(x1, y1, x2, y2, outline="red")
+
+def end_screenshot(event):
+    global screenshot_rectangle
+    x1, y1 = screenshot_start_x, screenshot_start_y
+    x2, y2 = event.x, event.y
+    if screenshot_rectangle:
+        canvas.delete(screenshot_rectangle)
+    take_screenshot(x1, y1, x2, y2)
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+
+canvas.bind("<Button-1>", start_screenshot)
+canvas.bind("<ButtonRelease-1>", end_screenshot)
+
 # 커스텀 필터
 def apply_custom_filter(filter_function):
     canvas.postscript(file="canvas.ps", colormode='color')
