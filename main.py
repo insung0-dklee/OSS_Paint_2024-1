@@ -1815,10 +1815,12 @@ interval : 격자의 간격 변수
 5번째로 생성된 눈금에 숫자 표기 및 크기 증가
 눈금자을 생성할 시 각 리스트에 눈금 선과 숫자값을 저장
 """
+# alpha : 눈금자 투명도를 정하는 변수, 초기 설정 : 128
+alpha = 128
 
-
-def draw_ruler():
-    global ruler_lines, ruler_texts
+def draw_ruler(alpha_value):
+    global ruler_lines, ruler_texts, alpha
+    alpha = int(alpha_value)
     canvas_width = canvas.winfo_width()
     canvas_height = canvas.winfo_height()
 
@@ -1827,26 +1829,32 @@ def draw_ruler():
     except ValueError:
         interval = 10
 
+    clear_ruler()
+
     # 상단 눈금자 그리기
     for x in range(0, canvas_width, interval):
         if x % (interval * 5) == 0:
-            line = canvas.create_line(x, 0, x, 15, fill="black")
-            text = canvas.create_text(x, 25, text=str(x), anchor=N)
+            fill_color = f"#{alpha:02x}{alpha:02x}{alpha:02x}"
+            line = canvas.create_line(x, 0, x, 15, fill=fill_color)
+            text = canvas.create_text(x, 25, text=str(x), anchor=N, fill=fill_color)
             ruler_lines.append(line)
             ruler_texts.append(text)
         else:
-            line = canvas.create_line(x, 0, x, 10, fill="black")
+            fill_color = f"#{alpha:02x}{alpha:02x}{alpha:02x}"
+            line = canvas.create_line(x, 0, x, 10, fill=fill_color)
             ruler_lines.append(line)
 
     # 좌측 눈금자 그리기
     for y in range(0, canvas_height, interval):
         if y % (interval * 5) == 0:
-            line = canvas.create_line(0, y, 15, y, fill="black")
-            text = canvas.create_text(25, y, text=str(y), anchor=W)
+            fill_color = f"#{alpha:02x}{alpha:02x}{alpha:02x}"
+            line = canvas.create_line(0, y, 15, y, fill=fill_color)
+            text = canvas.create_text(25, y, text=str(y), anchor=W, fill=fill_color)
             ruler_lines.append(line)
             ruler_texts.append(text)
         else:
-            line = canvas.create_line(0, y, 10, y, fill="black")
+            fill_color = f"#{alpha:02x}{alpha:02x}{alpha:02x}"
+            line = canvas.create_line(0, y, 10, y, fill=fill_color)
             ruler_lines.append(line)
 
 """
@@ -1867,17 +1875,19 @@ def clear_ruler():
     ruler_texts.clear()
 
 def toggle_ruler():
-    global ruler_on
+    global ruler_on, alpha
     if ruler_on:
         clear_ruler()
+        alpha_slider.config(state=DISABLED) # 눈금자가 꺼져있으면 슬라이더 비활성화
     else:
-        draw_ruler()
+        draw_ruler(alpha)
+        alpha_slider.config(state=NORMAL) # 눈금자가 켜져있는 동안만 슬라이더 활성화
     ruler_on = not ruler_on
 
 def on_resize(event):
     if ruler_on:
         clear_ruler()
-        draw_ruler()
+        draw_ruler(alpha)
 
 def on_closing():
     # 프로그램 종료 시 호출되는 함수
@@ -1982,6 +1992,10 @@ interval_entry = Entry(labelframe_additional2)
 interval_entry.pack()
 interval_entry.insert(0, "10")  # 기본값 설정
 
+# 눈금자 투명도 조절 슬라이더
+alpha_slider = Scale(window, from_=0, to=255, orient="horizontal", label="Ruler_Trans", command=draw_ruler)
+alpha_slider.pack()
+alpha_slider.config(state=DISABLED) # 초기 상태 비활성화
 # 멀티 선택 및 이동 기능
 selected_items = []
 
