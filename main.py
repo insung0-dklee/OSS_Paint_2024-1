@@ -195,6 +195,48 @@ def draw_brick_pattern(canvas, brick_width=60, brick_height=30, line_color="blac
             else:
                 canvas.create_rectangle(x - brick_width // 2, y, x + brick_width // 2, y + brick_height,
                                         outline=line_color, fill="")
+class EditableTable:
+    def __init__(self, canvas, x, y, rows, cols):
+        self.canvas = canvas
+        self.table = []
+        self.rows = rows
+        self.cols = cols
+        self.create_table(x, y)
+
+    def create_table(self, x, y):
+        cell_width = 100
+        cell_height = 50
+
+        # 각 셀에 Entry 위젯을 생성하고 Canvas 위에 배치
+        for i in range(self.rows):
+            row = []
+            for j in range(self.cols):
+                entry = tk.Entry(self.canvas.master)
+                self.canvas.create_window(x + j * cell_width, y + i * cell_height, anchor='nw', window=entry, width=cell_width, height=cell_height)
+                row.append(entry)
+            self.table.append(row)
+
+        # 그리드 라인 그리기
+        for i in range(self.rows + 1):
+            self.canvas.create_line(x, y + i * cell_height, x + self.cols * cell_width, y + i * cell_height, fill="black")
+        for j in range(self.cols + 1):
+            self.canvas.create_line(x + j * cell_width, y, x + j * cell_width, y + self.rows * cell_height, fill="black")
+
+def create_table_at_position(event):
+    global table_creator_enabled
+    if table_creator_enabled:
+        EditableTable(canvas, event.x, event.y, 2, 2)
+        table_creator_enabled = False  # 테이블을 생성한 후 생성 모드 비활성화
+
+def enable_table_creation():
+    global table_creator_enabled
+    table_creator_enabled = True
+
+
+
+
+
+
 
 def start_pencil(event):
     global last_x, last_y
@@ -373,6 +415,7 @@ def set_brush_mode_line(canvas):
 def line_start(event, canvas):
     global x1, y1
     x1, y1 = event.x, event.y
+    
     canvas.bind("<B1-Motion>", lambda event: draw_line(event, canvas))
     # 마우스 버튼을 놓을 때 reset_line 함수를 호출하여 드래그 이벤트를 해제
     canvas.bind("<ButtonRelease-1>", lambda event: reset_line(canvas))
@@ -1114,7 +1157,7 @@ def setup_paint_app(window):
     tool_menu.add_command(label="Toggle Grid", command=lambda: toggle_grid(canvas)) # Tools 메뉴에 Toggle Grid 기능 버튼 추가
     tool_menu.add_command(label="Grid Setting", command=open_grid_dialog) # Tools 메뉴에 Grid Setting 기능 버튼 추가
     tool_menu.add_command(label="dark mode", command=toggle_dark_mode) # 다크 모드를 Tools 메뉴로 이동
-
+    tool_menu.add_command(label="Create Table", command=enable_table_creation)
     help_menu.add_command(label="Info", command=show_info_window) # Help 메뉴에 Info를 표시하는 기능 버튼 추가
 #+=================================================================================
     
@@ -1174,6 +1217,42 @@ def create_triangle(event=None):
 def create_circle(event=None):
     select_shape_color()
     canvas.bind("<Button-1>", start_circle)
+# 왼쪽 화살표 그리기 함수들
+def create_larrow(event=None):
+    canvas.bind("<Button-1>", start_larrow)
+# 왼쪽 화살표 그릴 위치 정하고 생성하는 함수 호출
+def start_larrow(event):
+    global start_x, start_y, current_shape
+    start_x, start_y = event.x, event.y
+    current_shape = None
+    canvas.bind("<B1-Motion>", draw_larrow)
+    canvas.bind("<ButtonRelease-1>", finish_larrow)
+#왼쪽 화살표 생성
+def draw_larrow(event):
+    global start_x, start_y, current_shape
+    canvas.delete("temp_shape")
+    x, y = event.x, event.y
+    scale_factor = 0.5
+    larrow_width = scale_factor * abs(y - start_y) / 2
+    larrow_length = scale_factor * abs(x - start_x)
+
+    points = [
+        (start_x, start_y - larrow_width),
+        (start_x, start_y + larrow_width),
+        (start_x - larrow_length, start_y + larrow_width),
+        (start_x - larrow_length, start_y + 2 * larrow_width),
+        (start_x - larrow_length - larrow_width, start_y),
+        (start_x - larrow_length, start_y - 2 * larrow_width),
+        (start_x - larrow_length, start_y - larrow_width)
+    ]
+    current_shape = canvas.create_polygon(points, outline="black", fill="white", tags="temp_shape")
+#왼쪽 화살표 그리기 종료
+def finish_larrow(event):
+    global current_shape
+    canvas.unbind("<B1-Motion>")
+    canvas.unbind("<ButtonRelease-1>")
+    if current_shape:
+        canvas.itemconfig(current_shape, tags="")
 
 # 사각형 그릴 위치 정하고 생성하는 함수 호출
 def start_rectangle(event):
@@ -1632,6 +1711,7 @@ def choose_shape(event):
     popup.add_command(label="Arrow", command=lambda: create_arrow(event))
     popup.add_command(label="V", command=lambda: create_V(event))
     popup.add_command(label="Hexagon", command=lambda: create_hexagon(event))
+    popup.add_command(label="LeftArrow", command=lambda: create_larrow(event))
     popup.add_command(label="Pentagon", command=lambda: create_pentagon(event))
     popup.post(event.x_root, event.y_root)  # 이벤트가 발생한 위치에 팝업 메뉴 표시
 
@@ -2012,7 +2092,7 @@ apply_filter_button = Button(window, text="Apply Filter", command=lambda: apply_
 apply_filter_button.pack(side=LEFT)
 
 canvas.bind("<Configure>", on_resize)
-
+canvas.bind("<Button-3>", create_table_at_position)
 bind_shortcuts_window(window)
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
